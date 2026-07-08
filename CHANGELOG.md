@@ -33,6 +33,7 @@
 - Added live Queueworks room-affordance cues for blocked gate, retry, sealed-check, and route-clear states, plus a repeated-interact guard after the route is repaired.
 - Integrated Agent 5's browser-smoke QA/status icon sheet into the optional `?smoke=1` / `#smoke` report without changing normal play.
 - Expanded the optional browser self-smoke so it checks rendered visibility for room status, hint, retry, route-open, action-control, and smoke-report cues.
+- Strengthened the optional browser self-smoke so it dispatches Arrow/WASD keydown movement, checks on-screen movement reaches interact range, and confirms repaired interaction cannot reopen the cleared room.
 
 ## 0.1.0 - 2026-07-08
 

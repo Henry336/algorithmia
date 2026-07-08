@@ -1009,6 +1009,21 @@ def render_game_shell() -> str:
         element.click();
         return element;
       }}
+      function playerGridPosition() {{
+        const player = document.querySelector('[data-player]');
+        record('found [data-player]', Boolean(player), 'keyboard_move');
+        return {{
+          x: player.style.getPropertyValue('--x'),
+          y: player.style.getPropertyValue('--y'),
+        }};
+      }}
+      function keyMove(key, expectedX, expectedY) {{
+        const event = new KeyboardEvent('keydown', {{ key, bubbles: true, cancelable: true }});
+        document.dispatchEvent(event);
+        record(`keyboard ${{key}} handled`, event.defaultPrevented, 'keyboard_move');
+        const position = playerGridPosition();
+        record(`keyboard ${{key}} moved player to ${{expectedX}},${{expectedY}}`, position.x === String(expectedX) && position.y === String(expectedY), 'keyboard_move');
+      }}
       function readable(selector, name, icon = 'click_interact') {{
         const element = document.querySelector(selector);
         record(`found ${{selector}}`, Boolean(element), icon);
@@ -1070,10 +1085,11 @@ def render_game_shell() -> str:
       try {{
         readable('[data-room-status]', 'room status cue is visible before movement', 'blocked_collision');
         readable('[data-room-hint]', 'room hint cue is visible before movement', 'keyboard_move');
-        click('[data-move="right"]');
-        click('[data-move="right"]');
+        keyMove('ArrowRight', 2, 4);
+        keyMove('d', 3, 4);
         click('[data-move="right"]');
         click('[data-move="up"]');
+        record('on-screen movement reaches interact range', document.querySelector('[data-room-interact]').disabled === false, 'keyboard_move');
         readable('[data-room-interact]', 'interact control is visible beside slime', 'click_interact');
         record('interact enabled beside slime', !document.querySelector('[data-room-interact]').disabled, 'click_interact');
         click('[data-room-interact]');
@@ -1097,12 +1113,14 @@ def render_game_shell() -> str:
         readable('[data-room-status]', 'route-open status cue is visible after success', 'route_open_pass');
         readable('[data-room-hint]', 'route-open hint cue is visible after success', 'route_open_pass');
         record('interact disabled after repair', document.querySelector('[data-room-interact]').disabled, 'route_open_pass');
+        click('[data-room-interact]');
+        record('repaired interaction leaves route open', document.querySelector('[data-queueworks-room]').dataset.roomState === 'cleared_intake', 'route_open_pass');
         click('[data-move="down"]');
         click('[data-move="right"]');
         click('[data-move="right"]');
         click('[data-move="right"]');
         click('[data-move="right"]');
-        record('cleared route blocker becomes passable', document.querySelector('[data-player]').style.getPropertyValue('--x') === '8', 'blocked_collision');
+        record('cleared route blocker becomes passable', playerGridPosition().x === '8', 'blocked_collision');
         renderSmokeReport('pass');
         readable('[data-smoke-report]', 'smoke report is visible after completion', 'route_open_pass');
         renderSmokeReport('pass');
