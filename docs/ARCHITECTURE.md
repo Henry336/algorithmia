@@ -18,9 +18,12 @@ Algorithimia currently uses a small Python package organized around a determinis
 4. The engine compares JSON-compatible output against expected case results.
 5. The CLI prints RPG-flavored feedback and per-case results.
 
+## Encounter Validation Policy
+
+`Sorting Slime` is a DSA teaching encounter, so the Python adapter performs a small preflight check that rejects `sorted(...)` and `.sort()` before executing player code. This is intentionally encounter-driven scaffolding for the prototype; later encounters should move helper restrictions into per-encounter metadata instead of hard-coding every rule in the adapter.
+
 ## Near-Term Extension Points
 
 - Move encounter definitions into data files when content volume grows.
 - Add trace-producing visualizers for sorting, graph traversal, and dynamic programming.
 - Add a UI client after the terminal loop proves the core interaction.
-

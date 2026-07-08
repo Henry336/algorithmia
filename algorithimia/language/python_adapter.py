@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ast
 import json
 import subprocess
 import sys
@@ -16,6 +17,8 @@ class PythonAdapter:
         self._timeout_seconds = timeout_seconds
 
     def run(self, source: str, input_values: tuple[int, ...]) -> object:
+        _reject_disallowed_sort_helpers(source)
+
         with tempfile.TemporaryDirectory(prefix="algorithimia_") as tmp:
             tmp_path = Path(tmp)
             runner = tmp_path / "runner.py"
@@ -49,6 +52,23 @@ class PythonAdapter:
         return payload.get("result")
 
 
+def _reject_disallowed_sort_helpers(source: str) -> None:
+    try:
+        tree = ast.parse(source)
+    except SyntaxError:
+        return
+
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "sorted":
+            raise PythonExecutionError(
+                "Sorting Slime requires visible sorting logic; replace sorted(...) with your own loop."
+            )
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and node.func.attr == "sort":
+            raise PythonExecutionError(
+                "Sorting Slime requires visible sorting logic; replace .sort() with your own loop."
+            )
+
+
 def _runner_source(player_source: str) -> str:
     encoded_source = json.dumps(player_source)
     return f"""
@@ -66,7 +86,6 @@ SAFE_BUILTINS = {{
     "min": min,
     "range": range,
     "reversed": reversed,
-    "sorted": sorted,
     "sum": sum,
     "tuple": tuple,
 }}

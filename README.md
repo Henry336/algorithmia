@@ -32,10 +32,19 @@ The player submits Python that defines:
 
 ```python
 def solve(values):
-    return sorted(values)
+    ordered = list(values)
+    for i in range(1, len(ordered)):
+        current = ordered[i]
+        j = i - 1
+        while j >= 0 and ordered[j] > current:
+            ordered[j + 1] = ordered[j]
+            j -= 1
+        ordered[j + 1] = current
+    return ordered
 ```
 
 The engine runs several deterministic cases and reports whether the encounter is cleared.
+The Sorting Slime encounter rejects `sorted(...)` and `.sort()` so the player demonstrates visible sorting logic.
 
 ## Security Note
 

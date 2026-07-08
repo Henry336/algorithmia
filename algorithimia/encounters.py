@@ -22,8 +22,9 @@ SORTING_SLIME = Encounter(
     slug="sorting_slime",
     title="Sorting Slime",
     prompt=(
-        "A slime blocks the archive stairs. Define solve(values) so the runes are returned "
-        "from smallest to largest."
+        "Queueworks gate gunk has mixed the intake runes out of order. Define solve(values) "
+        "with visible sorting logic so the runes return from smallest to largest. Built-in "
+        "sorting helpers are rejected in this encounter."
     ),
     cases=(
         EncounterCase("mixed_runes", (5, 1, 4, 2), (1, 2, 4, 5)),
@@ -41,4 +42,3 @@ def get_encounter(slug: str) -> Encounter:
         return ENCOUNTERS[slug]
     except KeyError as exc:
         raise ValueError(f"Unknown encounter: {slug}") from exc
-

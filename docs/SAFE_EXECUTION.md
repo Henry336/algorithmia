@@ -10,6 +10,7 @@ Current controls:
 - temporary working directory
 - minimal environment
 - restricted builtins for player code
+- preflight rejection of disallowed sorting helpers for the current DSA encounter
 - JSON-only input/output
 
 Known gaps:
@@ -20,4 +21,3 @@ Known gaps:
 - no multi-language runner contract yet
 
 Before accepting public arbitrary code, replace this adapter boundary with OS-level isolation and resource limits.
-
