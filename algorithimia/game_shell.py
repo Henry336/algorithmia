@@ -15,6 +15,8 @@ SORTING_SLIME_SPRITE = ASSET_DIR / "sorting-slime.svg"
 QUEUE_GATE_SPRITE = ASSET_DIR / "queue-intake-gate.svg"
 SORTING_SLIME_SCENE_STRIP = ASSET_DIR / "sorting-slime-scene-strip.svg"
 QUEUEWORKS_ROOM_SHEET = ASSET_DIR / "queueworks-room-sheet.svg"
+QUEUEWORKS_ROOM_FEEDBACK_SHEET = ASSET_DIR / "queueworks-room-feedback.svg"
+QUEUEWORKS_ROOM_RETRY_SHEET = ASSET_DIR / "queueworks-room-retry-strip.svg"
 
 BADGE_CELLS = {
     "sorting_slime": 0,
@@ -47,6 +49,8 @@ def render_game_shell() -> str:
     queue_gate_uri = _svg_data_uri(QUEUE_GATE_SPRITE)
     sorting_scene_uri = _svg_data_uri(SORTING_SLIME_SCENE_STRIP)
     room_sheet_uri = _svg_data_uri(QUEUEWORKS_ROOM_SHEET)
+    room_feedback_uri = _svg_data_uri(QUEUEWORKS_ROOM_FEEDBACK_SHEET)
+    room_retry_uri = _svg_data_uri(QUEUEWORKS_ROOM_RETRY_SHEET)
     encounters = tuple(ENCOUNTERS.values())
     tabs = "\n".join(_tab_button(encounter, index) for index, encounter in enumerate(encounters))
     panels = "\n".join(
@@ -172,6 +176,54 @@ def render_game_shell() -> str:
       justify-content: space-between;
       gap: 12px;
     }}
+    .room-state {{
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }}
+    .feedback-icon {{
+      width: 24px;
+      height: 24px;
+      background-image: var(--room-feedback);
+      background-repeat: no-repeat;
+      background-size: auto 24px;
+      image-rendering: pixelated;
+      flex: 0 0 auto;
+    }}
+    .feedback-icon[data-icon="move_hint"] {{ background-position: 0 0; }}
+    .feedback-icon[data-icon="interact_ready"] {{ background-position: -24px 0; }}
+    .feedback-icon[data-icon="repair_failed"] {{ background-position: -48px 0; }}
+    .feedback-icon[data-icon="sealed_check_ready"] {{ background-position: -72px 0; }}
+    .feedback-icon[data-icon="route_open"] {{ background-position: -96px 0; }}
+    .retry-panel {{
+      display: none;
+      gap: 8px;
+      align-items: center;
+      border: 1px solid rgba(239, 71, 111, 0.65);
+      background: rgba(239, 71, 111, 0.08);
+      padding: 8px 10px;
+      color: var(--muted);
+      font: 0.88rem/1.25 ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+    }}
+    .room-shell[data-room-state="diagnostic_failed"] .retry-panel {{
+      display: flex;
+    }}
+    .retry-icon {{
+      width: 24px;
+      height: 24px;
+      background-image: var(--room-retry);
+      background-repeat: no-repeat;
+      background-size: auto 24px;
+      image-rendering: pixelated;
+      flex: 0 0 auto;
+    }}
+    .retry-icon[data-retry-icon="blocked_return"] {{ background-position: 0 0; }}
+    .retry-icon[data-retry-icon="retry_prompt"] {{ background-position: -24px 0; }}
+    .retry-icon[data-retry-icon="diagnostic_scratch"] {{ background-position: -48px 0; }}
+    .retry-icon[data-retry-icon="visible_spill"] {{ background-position: -72px 0; }}
+    .retry-icon[data-retry-icon="sealed_misread"] {{ background-position: -96px 0; }}
+    .retry-icon[data-retry-icon="route_confirmed"] {{ background-position: -120px 0; }}
     .room-stage {{
       position: relative;
       min-height: 300px;
@@ -275,6 +327,13 @@ def render_game_shell() -> str:
       font: 0.9rem/1.35 ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
       overflow-wrap: anywhere;
       flex: 1 1 260px;
+    }}
+    .room-hint {{
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font: 0.88rem/1.25 ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
     }}
     .encounter-title {{
       display: flex;
@@ -441,6 +500,13 @@ def render_game_shell() -> str:
       font: 0.9rem/1.35 ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
       overflow-wrap: anywhere;
     }}
+    .cert-row {{
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      color: var(--muted);
+      font: 0.88rem/1.25 ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+    }}
     .trace {{
       display: grid;
       gap: 8px;
@@ -496,24 +562,34 @@ def render_game_shell() -> str:
   </style>
 </head>
 <body>
-  <main>
+  <main style="--room-feedback: url(&quot;{room_feedback_uri}&quot;); --room-retry: url(&quot;{room_retry_uri}&quot;)">
     <header class="topbar">
       <h1>Algorithimia</h1>
       <div class="status">Python prototype shell - code execution stays in the local CLI</div>
     </header>
-    <section class="room-shell" data-queueworks-room style="--room-sheet: url(&quot;{room_sheet_uri}&quot;)">
+    <section class="room-shell" data-queueworks-room data-room-state="jammed_intake" style="--room-sheet: url(&quot;{room_sheet_uri}&quot;)">
       <div class="room-header">
         <div>
           <h2>Tiny Queueworks Room</h2>
           <p class="muted">Move the Patchrunner to the Sorting Slime and interact to repair the jammed intake.</p>
         </div>
-        <strong class="status-chip" data-room-status>ROUTE JAMMED</strong>
+        <div class="room-state">
+          <span class="feedback-icon" data-room-state-icon data-icon="move_hint" aria-hidden="true"></span>
+          <strong class="status-chip" data-room-status>ROUTE JAMMED</strong>
+        </div>
       </div>
       <div class="room-stage" aria-label="Explorable Queueworks room">
         <div class="room-actor player-sprite" data-player style="--x: 1; --y: 4" aria-label="Patchrunner player sprite"></div>
         <img class="room-actor room-sprite room-gate" data-room-gate src="{queue_gate_uri}" alt="Queueworks intake gate" style="--x: 8; --y: 3">
         <img class="room-actor room-sprite" data-room-slime src="{sorting_slime_uri}" alt="Interactable Sorting Slime" style="--x: 5; --y: 3">
         <div class="room-marker" style="--x: 5; --y: 3"><span class="room-spark" aria-hidden="true"></span><span>Sorting Slime</span></div>
+      </div>
+      <div class="retry-panel" data-room-retry-panel>
+        <span class="retry-icon" data-retry-icon="blocked_return" aria-hidden="true"></span>
+        <span class="retry-icon" data-retry-icon="diagnostic_scratch" aria-hidden="true"></span>
+        <span class="retry-icon" data-retry-icon="visible_spill" aria-hidden="true"></span>
+        <span class="retry-icon" data-retry-icon="retry_prompt" aria-hidden="true"></span>
+        <span>one rune is still out of order - retry the visible spill</span>
       </div>
       <div class="room-controls" aria-label="Queueworks room controls">
         <div class="move-pad" aria-label="Move Patchrunner">
@@ -523,6 +599,7 @@ def render_game_shell() -> str:
           <button class="action move-right" type="button" data-move="right" aria-label="Move right">Right</button>
         </div>
         <button class="action primary" type="button" data-room-interact disabled>Interact</button>
+        <div class="room-hint"><span class="feedback-icon" data-icon="move_hint" aria-hidden="true"></span><span>move close, then test the repair</span></div>
         <div class="room-log" data-room-log>Use arrow keys, WASD, or the buttons to reach the Sorting Slime.</div>
       </div>
     </section>
@@ -546,10 +623,11 @@ def render_game_shell() -> str:
       const interact = room.querySelector('[data-room-interact]');
       const roomLog = room.querySelector('[data-room-log]');
       const roomStatus = room.querySelector('[data-room-status]');
+      const roomStateIcon = room.querySelector('[data-room-state-icon]');
       const slime = {{ x: 5, y: 3 }};
       const bounds = {{ width: 10, height: 6 }};
       let playerPosition = {{ x: 1, y: 4 }};
-      let roomCleared = false;
+      let roomState = 'jammed_intake';
 
       function isNearSlime() {{
         return Math.abs(playerPosition.x - slime.x) + Math.abs(playerPosition.y - slime.y) <= 1;
@@ -559,10 +637,19 @@ def render_game_shell() -> str:
         player.style.setProperty('--x', String(playerPosition.x));
         player.style.setProperty('--y', String(playerPosition.y));
         interact.disabled = !isNearSlime();
-        if (roomCleared) {{
+        room.dataset.roomState = roomState;
+        if (roomState === 'cleared_intake') {{
           roomStatus.textContent = 'ROUTE OPEN';
+          roomStateIcon.dataset.icon = 'route_open';
+        }} else if (roomState === 'diagnostic_failed') {{
+          roomStatus.textContent = 'RETRY REPAIR';
+          roomStateIcon.dataset.icon = 'repair_failed';
+        }} else if (roomState === 'sealed_check') {{
+          roomStatus.textContent = 'SEALED CHECK';
+          roomStateIcon.dataset.icon = 'sealed_check_ready';
         }} else {{
           roomStatus.textContent = isNearSlime() ? 'SLIME READY' : 'ROUTE JAMMED';
+          roomStateIcon.dataset.icon = isNearSlime() ? 'interact_ready' : 'move_hint';
         }}
       }}
 
@@ -571,9 +658,13 @@ def render_game_shell() -> str:
           x: Math.max(0, Math.min(bounds.width - 1, playerPosition.x + dx)),
           y: Math.max(0, Math.min(bounds.height - 1, playerPosition.y + dy)),
         }};
-        roomLog.textContent = isNearSlime()
-          ? 'Sorting Slime blocks the intake. Interact to start the repair.'
-          : 'Queueworks floor clear. Move next to the Sorting Slime.';
+        if (roomState === 'diagnostic_failed' && !isNearSlime()) {{
+          roomLog.textContent = 'The stair is still jammed. Return to the slime and retry the visible spill.';
+        }} else {{
+          roomLog.textContent = isNearSlime()
+            ? 'The slime is holding the intake shut. Sort the runes and test the repair?'
+            : 'Queueworks floor clear. Move next to the Sorting Slime.';
+        }}
         renderRoom();
       }}
 
@@ -610,15 +701,23 @@ def render_game_shell() -> str:
 
       interact.addEventListener('click', () => {{
         if (!isNearSlime()) return;
+        roomState = 'repair_in_progress';
         selectTab(document.querySelector('#tab-sorting_slime'));
         document.querySelector('#panel-sorting_slime').scrollIntoView({{ behavior: 'smooth', block: 'start' }});
         roomLog.textContent = 'Encounter opened: sort the visible spill, check it, then return to the room.';
+        renderRoom();
       }});
 
       window.algorithimiaRoom = {{
         markSortingSlimeCleared() {{
-          roomCleared = true;
+          roomState = 'cleared_intake';
           roomLog.textContent = 'The route opens. The Patchrunner returns to the Queueworks room.';
+          renderRoom();
+          room.scrollIntoView({{ behavior: 'smooth', block: 'start' }});
+        }},
+        markSortingSlimeFailed() {{
+          roomState = 'diagnostic_failed';
+          roomLog.textContent = 'The stair is still jammed. Try the visible spill again before trusting the route.';
           renderRoom();
           room.scrollIntoView({{ behavior: 'smooth', block: 'start' }});
         }},
@@ -723,6 +822,9 @@ def render_game_shell() -> str:
       sortingGame.querySelector('[data-return-room]').addEventListener('click', () => {{
         if (window.algorithimiaRoom && isOrdered()) {{
           window.algorithimiaRoom.markSortingSlimeCleared();
+        }} else if (window.algorithimiaRoom) {{
+          window.algorithimiaRoom.markSortingSlimeFailed();
+          setFeedback('Mira: The stair is still jammed. Try the visible spill again before trusting the route.');
         }} else {{
           setFeedback('Mira: Check the order before you reopen the intake.');
         }}
@@ -828,6 +930,7 @@ def _sorting_slime_playable_slice(
             <button class="action" type="button" data-reset-order>Reset spill</button>
             <button class="action" type="button" data-return-room>Return to room</button>
           </div>
+          <div class="cert-row"><span class="feedback-icon" data-icon="sealed_check_ready" aria-hidden="true"></span><span>sealed check stays hidden until the local Python adapter validates the repair</span></div>
           <p class="mira" data-feedback>Mira: Public spill loaded. Put the runes in smallest-to-largest order.</p>
           <div class="repair-log" data-repair-log>spill loaded: 5, 1, 4, 2</div>
         </div>"""

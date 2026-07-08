@@ -25,6 +25,7 @@
 - Added a browser-playable Sorting Slime swap/check slice inside the game shell with the Sorting Slime scene strip, Queueworks gate art, Sorting Slime placeholder art, visible rune tokens, Mira feedback, and reset/check controls.
 - Added visible jammed/cleared route status and adjacent inspection marks to the browser-playable Sorting Slime slice.
 - Added a tiny explorable Queueworks room to the browser game shell with player movement, an interactable Sorting Slime, Agent 5's room-sheet Patchrunner/prompt art, encounter transition, success return, and route-open room feedback.
+- Wired Agent 5's Queueworks room feedback sheet and retry strip into the browser shell, then added wrong-order return-to-room retry feedback so failed repairs keep the intake visibly jammed.
 
 ## 0.1.0 - 2026-07-08
 
