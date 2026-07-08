@@ -70,6 +70,21 @@ class EngineTests(unittest.TestCase):
         self.assertFalse(result.passed)
         self.assertIn("visible sorting logic", result.case_results[0].error or "")
 
+    def test_sorting_slime_rejects_indirect_built_in_sorted_bindings(self) -> None:
+        engine = GameEngine(PythonAdapter())
+        bypasses = {
+            "default_arg": "def solve(values, helper=sorted):\n    return helper(values)\n",
+            "lambda_arg": "def solve(values):\n    return (lambda helper: helper(values))(sorted)\n",
+            "tuple_index": "def solve(values):\n    helper = (sorted,)[0]\n    return helper(values)\n",
+        }
+
+        for name, source in bypasses.items():
+            with self.subTest(name=name):
+                result = engine.attempt(get_encounter("sorting_slime"), source)
+
+                self.assertFalse(result.passed)
+                self.assertIn("visible sorting logic", result.case_results[0].error or "")
+
     def test_sorting_slime_rejects_list_sort(self) -> None:
         engine = GameEngine(PythonAdapter())
         source = "def solve(values):\n    ordered = list(values)\n    ordered.sort()\n    return ordered\n"

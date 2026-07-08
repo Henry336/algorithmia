@@ -29,7 +29,7 @@ class PythonAdapter:
         with tempfile.TemporaryDirectory(prefix="algorithimia_") as tmp:
             tmp_path = Path(tmp)
             runner = tmp_path / "runner.py"
-            runner.write_text(_runner_source(source), encoding="utf-8")
+            runner.write_text(_runner_source(source, python_call_restrictions), encoding="utf-8")
 
             try:
                 process = subprocess.run(
@@ -70,6 +70,8 @@ def _reject_disallowed_python_calls(source: str, restrictions: tuple[PythonCallR
 
     disallowed_aliases = _find_disallowed_aliases(tree, restrictions)
     for node in ast.walk(tree):
+        if _is_restricted_builtin_load(node, restrictions):
+            raise PythonExecutionError(_restriction_message(node.id, restrictions))
         if not isinstance(node, ast.Call):
             continue
         for restriction in restrictions:
@@ -91,6 +93,22 @@ def _reject_disallowed_python_calls(source: str, restrictions: tuple[PythonCallR
                 and node.func.id in disallowed_aliases
             ):
                 raise PythonExecutionError(restriction.message)
+
+
+def _is_restricted_builtin_load(node: ast.AST, restrictions: tuple[PythonCallRestriction, ...]) -> bool:
+    if not isinstance(node, ast.Name) or not isinstance(node.ctx, ast.Load):
+        return False
+    return any(
+        restriction.target == "function" and node.id == restriction.name
+        for restriction in restrictions
+    )
+
+
+def _restriction_message(name: str, restrictions: tuple[PythonCallRestriction, ...]) -> str:
+    for restriction in restrictions:
+        if restriction.target == "function" and restriction.name == name:
+            return restriction.message
+    return "That helper is restricted for this encounter."
 
 
 def _find_disallowed_aliases(
@@ -127,8 +145,17 @@ def _is_disallowed_alias_value(
     return False
 
 
-def _runner_source(player_source: str) -> str:
+def _restricted_builtin_names(restrictions: tuple[PythonCallRestriction, ...]) -> tuple[str, ...]:
+    return tuple(
+        restriction.name
+        for restriction in restrictions
+        if restriction.target == "function"
+    )
+
+
+def _runner_source(player_source: str, restrictions: tuple[PythonCallRestriction, ...]) -> str:
     encoded_source = json.dumps(player_source)
+    restricted_builtin_names = json.dumps(_restricted_builtin_names(restrictions))
     return f"""
 import json
 
@@ -148,6 +175,9 @@ SAFE_BUILTINS = {{
     "sum": sum,
     "tuple": tuple,
 }}
+
+for blocked_name in {restricted_builtin_names}:
+    SAFE_BUILTINS.pop(blocked_name, None)
 
 namespace = {{"__builtins__": SAFE_BUILTINS}}
 try:

@@ -22,7 +22,7 @@ Algorithimia currently uses a small Python package organized around a determinis
 
 ## Encounter Validation Policy
 
-`Sorting Slime` is a DSA teaching encounter, so its encounter metadata defines Python call restrictions that reject `sorted(...)`, simple aliases of `sorted`, and `.sort()` before executing player code. The engine passes those restrictions to the Python adapter per attempt, keeping helper bans encounter-scoped for future challenges.
+`Sorting Slime` is a DSA teaching encounter, so its encounter metadata defines Python call restrictions that reject `sorted(...)`, indirect built-in `sorted` bindings, and `.sort()` before executing player code. The adapter also removes restricted built-in function names from the child runner's `SAFE_BUILTINS` for that encounter, keeping helper bans encounter-scoped for future challenges.
 
 `Triage Line Dispatcher Trial` uses the same engine path with JSON ticket objects instead of integer rune values. Its output validator checks that returned ids were issued by the fixture and that every issued ticket is served exactly once before the expected policy order is compared. If the ids are valid but the order is wrong, the validator returns a compact encounter bark tied to the failed policy case: FIFO drift, buried urgency, broken stable ties, or ordinary starvation.
 

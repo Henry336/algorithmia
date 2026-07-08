@@ -58,7 +58,7 @@ def solve(values):
 ```
 
 The engine runs several deterministic cases and reports whether the encounter is cleared.
-The Sorting Slime encounter rejects `sorted(...)` and `.sort()` so the player demonstrates visible sorting logic.
+The Sorting Slime encounter rejects `sorted(...)`, indirect built-in `sorted` bindings, and `.sort()` so the player demonstrates visible sorting logic.
 
 ### Triage Line Dispatcher Trial
 
