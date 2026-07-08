@@ -63,9 +63,12 @@ def main(argv: list[str] | None = None) -> int:
     for case_result in result.case_results:
         marker = "PASS" if case_result.passed else "FAIL"
         detail = f" error={case_result.error!r}" if case_result.error else ""
+        case_type = "CERT" if case_result.certification else "PUBLIC"
+        expected = "<sealed>" if case_result.certification else repr(case_result.expected)
+        actual = "<sealed>" if case_result.certification else repr(case_result.actual)
         print(
-            f"{marker}: {case_result.case_name} "
-            f"expected={case_result.expected!r} actual={case_result.actual!r}{detail}"
+            f"{marker} [{case_type}]: {case_result.case_name} "
+            f"expected={expected} actual={actual}{detail}"
         )
 
     return 0 if result.passed else 1

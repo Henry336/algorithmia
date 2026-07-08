@@ -59,8 +59,9 @@ def solve(values):
     return ordered
 ```
 
-The engine runs several deterministic public cases plus certification cases and reports whether the encounter is cleared.
+The engine runs several deterministic public cases plus sealed certification cases and reports whether the encounter is cleared.
 The Sorting Slime encounter rejects `sorted(...)`, indirect built-in `sorted` bindings, and `.sort()` so the player demonstrates visible sorting logic.
+Certification cases are shown as sealed pass/fail checks in the CLI so hidden inputs stay hidden while memorized public-fixture answers still fail.
 
 ### Triage Line Dispatcher Trial
 

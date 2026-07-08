@@ -37,6 +37,32 @@ class CliEdgeCaseTests(unittest.TestCase):
         self.assertIn("data:image/svg+xml;base64", html)
         self.assertIn("ordinary guard: A served after two urgent", html)
 
+    def test_certification_cases_are_sealed_in_cli_output(self) -> None:
+        source = """
+def solve(values):
+    fixtures = {
+        (5, 1, 4, 2): [1, 2, 4, 5],
+        (1, 2, 3): [1, 2, 3],
+        (3, 1, 3, 2): [1, 2, 3, 3],
+        (): [],
+    }
+    return fixtures[tuple(values)]
+"""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            solution_path = Path(temp_dir) / "oracle.py"
+            solution_path.write_text(source, encoding="utf-8")
+            stdout = io.StringIO()
+
+            with contextlib.redirect_stdout(stdout):
+                exit_code = main(["--solution", str(solution_path)])
+
+        output = stdout.getvalue()
+        self.assertNotEqual(0, exit_code)
+        self.assertIn("FAIL [CERT]: cert_reverse_runes expected=<sealed> actual=<sealed>", output)
+        self.assertIn("hidden spill proved the routine was memorized", output)
+        self.assertNotIn("(9, 7, 5, 3, 1)", output)
+        self.assertNotIn("(1, 3, 5, 7, 9)", output)
+
 
 if __name__ == "__main__":
     unittest.main()

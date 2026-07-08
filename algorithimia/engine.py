@@ -13,6 +13,7 @@ class CaseResult:
     actual: object
     passed: bool
     error: str | None = None
+    certification: bool = False
 
 
 @dataclass(frozen=True)
@@ -39,33 +40,46 @@ class GameEngine:
     def attempt(self, encounter: Encounter, source: str) -> AttemptResult:
         results: list[CaseResult] = []
 
-        for case in encounter.cases + encounter.certification_cases:
+        tagged_cases = [(case, False) for case in encounter.cases] + [
+            (case, True) for case in encounter.certification_cases
+        ]
+        for case, certification in tagged_cases:
             try:
                 actual = self._adapter.run(source, case.input_values, encounter.python_call_restrictions)
             except Exception as exc:  # noqa: BLE001 - player errors become gameplay feedback.
+                error = _certification_error() if certification else str(exc)
                 results.append(
                     CaseResult(
                         case_name=case.name,
                         expected=case.expected,
                         actual=None,
                         passed=False,
-                        error=str(exc),
+                        error=error,
+                        certification=certification,
                     )
                 )
                 continue
 
             normalized = tuple(actual) if isinstance(actual, list) else actual
             validation_error = encounter.output_validator(case, actual) if encounter.output_validator else None
+            passed = validation_error is None and normalized == case.expected
+            if certification and not passed and validation_error is None:
+                validation_error = _certification_error()
             results.append(
                 CaseResult(
                     case_name=case.name,
                     expected=case.expected,
                     actual=normalized,
-                    passed=validation_error is None and normalized == case.expected,
+                    passed=passed,
                     error=validation_error,
+                    certification=certification,
                 )
             )
 
         passed = all(result.passed for result in results)
         message = encounter.success_message if passed else encounter.failure_message
         return AttemptResult(passed=passed, message=message, case_results=tuple(results))
+
+
+def _certification_error() -> str:
+    return "The visible runes lined up, but the hidden spill proved the routine was memorized."

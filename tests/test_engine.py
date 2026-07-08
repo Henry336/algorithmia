@@ -69,8 +69,6 @@ class EngineTests(unittest.TestCase):
         result = engine.attempt(get_encounter("sorting_slime"), source)
 
         self.assertFalse(result.passed)
-        self.assertTrue(any(case.case_name.startswith("cert_") and not case.passed for case in result.case_results))
-        self.assertTrue(any(case.case_name.startswith("cert_") and not case.passed for case in result.case_results))
         self.assertIn("visible sorting logic", result.case_results[0].error or "")
 
     def test_sorting_slime_rejects_indirect_built_in_sorted_bindings(self) -> None:
@@ -165,6 +163,15 @@ def solve(values):
         result = engine.attempt(get_encounter("sorting_slime"), source)
 
         self.assertFalse(result.passed)
+        certification_failures = [
+            case for case in result.case_results if case.certification and not case.passed
+        ]
+        self.assertTrue(certification_failures)
+        self.assertTrue(all(case.case_name.startswith("cert_") for case in certification_failures))
+        self.assertTrue(
+            all("hidden spill proved the routine was memorized" in (case.error or "") for case in certification_failures)
+        )
+        self.assertFalse(any("(9, 7, 5, 3, 1)" in (case.error or "") for case in certification_failures))
 
     def test_triage_line_accepts_locked_policy(self) -> None:
         engine = GameEngine(PythonAdapter())
