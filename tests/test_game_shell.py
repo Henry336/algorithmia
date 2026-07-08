@@ -39,6 +39,29 @@ class GameShellTests(unittest.TestCase):
         self.assertIn("Mira: Good. It works when the mess changes. That is a repair.", html)
         self.assertIn("swap ${first} with ${second}", html)
 
+    def test_render_game_shell_includes_explorable_queueworks_room(self) -> None:
+        html = render_game_shell()
+
+        self.assertIn("data-queueworks-room", html)
+        self.assertIn("Tiny Queueworks Room", html)
+        self.assertIn("Explorable Queueworks room", html)
+        self.assertIn("Patchrunner player sprite", html)
+        self.assertIn("--room-sheet: url(&quot;data:image/svg+xml;base64", html)
+        self.assertIn("room-spark", html)
+        self.assertIn("Interactable Sorting Slime", html)
+        self.assertIn("data-room-interact disabled", html)
+        self.assertIn("data-move=\"up\"", html)
+        self.assertIn("data-move=\"left\"", html)
+        self.assertIn("data-move=\"down\"", html)
+        self.assertIn("data-move=\"right\"", html)
+        self.assertIn("ArrowUp", html)
+        self.assertIn("WASD", html)
+        self.assertIn("selectTab(document.querySelector('#tab-sorting_slime'))", html)
+        self.assertIn("window.algorithimiaRoom", html)
+        self.assertIn("markSortingSlimeCleared", html)
+        self.assertIn("ROUTE OPEN", html)
+        self.assertIn("Return to room", html)
+
     def test_render_game_shell_seals_certification_values(self) -> None:
         html = render_game_shell()
 

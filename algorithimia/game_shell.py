@@ -14,6 +14,7 @@ CERTIFICATION_SHEET = ASSET_DIR / "sorting-certification-markers.svg"
 SORTING_SLIME_SPRITE = ASSET_DIR / "sorting-slime.svg"
 QUEUE_GATE_SPRITE = ASSET_DIR / "queue-intake-gate.svg"
 SORTING_SLIME_SCENE_STRIP = ASSET_DIR / "sorting-slime-scene-strip.svg"
+QUEUEWORKS_ROOM_SHEET = ASSET_DIR / "queueworks-room-sheet.svg"
 
 BADGE_CELLS = {
     "sorting_slime": 0,
@@ -45,6 +46,7 @@ def render_game_shell() -> str:
     sorting_slime_uri = _svg_data_uri(SORTING_SLIME_SPRITE)
     queue_gate_uri = _svg_data_uri(QUEUE_GATE_SPRITE)
     sorting_scene_uri = _svg_data_uri(SORTING_SLIME_SCENE_STRIP)
+    room_sheet_uri = _svg_data_uri(QUEUEWORKS_ROOM_SHEET)
     encounters = tuple(ENCOUNTERS.values())
     tabs = "\n".join(_tab_button(encounter, index) for index, encounter in enumerate(encounters))
     panels = "\n".join(
@@ -155,6 +157,124 @@ def render_game_shell() -> str:
       padding: 14px;
       display: grid;
       gap: 12px;
+    }}
+    .room-shell {{
+      border: 1px solid var(--line);
+      background: var(--panel);
+      display: grid;
+      gap: 12px;
+      margin: 18px 0;
+      padding: 14px;
+    }}
+    .room-header {{
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 12px;
+    }}
+    .room-stage {{
+      position: relative;
+      min-height: 300px;
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(rgba(56, 189, 248, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(56, 189, 248, 0.08) 1px, transparent 1px),
+        linear-gradient(#172231, #0c121a);
+      background-size: 48px 48px, 48px 48px, auto;
+      overflow: hidden;
+    }}
+    .room-stage::after {{
+      content: "";
+      position: absolute;
+      inset: auto 0 0;
+      height: 58px;
+      background: rgba(11, 16, 23, 0.56);
+      border-top: 1px solid rgba(248, 250, 252, 0.08);
+      pointer-events: none;
+    }}
+    .room-actor {{
+      position: absolute;
+      width: 48px;
+      height: 48px;
+      image-rendering: pixelated;
+      transform: translate(calc(var(--x) * 48px), calc(var(--y) * 48px));
+      transition: transform 120ms ease-out;
+      z-index: 2;
+    }}
+    .player-sprite {{
+      border: 2px solid var(--cyan);
+      background-color: #203246;
+      background-image: var(--room-sheet);
+      background-repeat: no-repeat;
+      background-size: auto 48px;
+      background-position: -240px 0;
+      box-shadow: inset 0 -8px 0 rgba(56, 189, 248, 0.12);
+    }}
+    .room-sprite {{
+      width: 72px;
+      height: 72px;
+      object-fit: contain;
+      filter: drop-shadow(0 8px 0 rgba(0, 0, 0, 0.25));
+    }}
+    .room-gate {{
+      width: 88px;
+      height: 88px;
+    }}
+    .room-marker {{
+      position: absolute;
+      display: grid;
+      grid-template-columns: 24px minmax(0, 1fr);
+      gap: 6px;
+      align-items: center;
+      min-width: 132px;
+      transform: translate(calc(var(--x) * 48px), calc((var(--y) * 48px) + 56px));
+      z-index: 3;
+      color: var(--text);
+      background: rgba(11, 16, 23, 0.78);
+      border: 1px solid var(--line);
+      padding: 6px 8px;
+      font: 0.82rem/1.2 ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+    }}
+    .room-spark {{
+      width: 24px;
+      height: 24px;
+      background-image: var(--room-sheet);
+      background-repeat: no-repeat;
+      background-size: auto 24px;
+      background-position: -168px 0;
+      image-rendering: pixelated;
+    }}
+    .room-controls {{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }}
+    .move-pad {{
+      display: grid;
+      grid-template-columns: repeat(3, 40px);
+      grid-template-rows: repeat(2, 40px);
+      gap: 6px;
+    }}
+    .move-pad .action {{
+      min-height: 40px;
+      padding: 0;
+      display: grid;
+      place-items: center;
+    }}
+    .move-up {{ grid-column: 2; }}
+    .move-left {{ grid-column: 1; grid-row: 2; }}
+    .move-down {{ grid-column: 2; grid-row: 2; }}
+    .move-right {{ grid-column: 3; grid-row: 2; }}
+    .room-log {{
+      min-height: 42px;
+      border: 1px solid var(--line);
+      background: var(--ink);
+      color: var(--muted);
+      padding: 8px 10px;
+      font: 0.9rem/1.35 ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+      overflow-wrap: anywhere;
+      flex: 1 1 260px;
     }}
     .encounter-title {{
       display: flex;
@@ -381,6 +501,31 @@ def render_game_shell() -> str:
       <h1>Algorithimia</h1>
       <div class="status">Python prototype shell - code execution stays in the local CLI</div>
     </header>
+    <section class="room-shell" data-queueworks-room style="--room-sheet: url(&quot;{room_sheet_uri}&quot;)">
+      <div class="room-header">
+        <div>
+          <h2>Tiny Queueworks Room</h2>
+          <p class="muted">Move the Patchrunner to the Sorting Slime and interact to repair the jammed intake.</p>
+        </div>
+        <strong class="status-chip" data-room-status>ROUTE JAMMED</strong>
+      </div>
+      <div class="room-stage" aria-label="Explorable Queueworks room">
+        <div class="room-actor player-sprite" data-player style="--x: 1; --y: 4" aria-label="Patchrunner player sprite"></div>
+        <img class="room-actor room-sprite room-gate" data-room-gate src="{queue_gate_uri}" alt="Queueworks intake gate" style="--x: 8; --y: 3">
+        <img class="room-actor room-sprite" data-room-slime src="{sorting_slime_uri}" alt="Interactable Sorting Slime" style="--x: 5; --y: 3">
+        <div class="room-marker" style="--x: 5; --y: 3"><span class="room-spark" aria-hidden="true"></span><span>Sorting Slime</span></div>
+      </div>
+      <div class="room-controls" aria-label="Queueworks room controls">
+        <div class="move-pad" aria-label="Move Patchrunner">
+          <button class="action move-up" type="button" data-move="up" aria-label="Move up">Up</button>
+          <button class="action move-left" type="button" data-move="left" aria-label="Move left">Left</button>
+          <button class="action move-down" type="button" data-move="down" aria-label="Move down">Down</button>
+          <button class="action move-right" type="button" data-move="right" aria-label="Move right">Right</button>
+        </div>
+        <button class="action primary" type="button" data-room-interact disabled>Interact</button>
+        <div class="room-log" data-room-log>Use arrow keys, WASD, or the buttons to reach the Sorting Slime.</div>
+      </div>
+    </section>
     <nav class="tabs" role="tablist" aria-label="Encounters">
 {tabs}
     </nav>
@@ -394,6 +539,93 @@ def render_game_shell() -> str:
       panels.forEach((panel) => panel.classList.toggle('active', panel.id === tab.getAttribute('aria-controls')));
     }}
     tabs.forEach((tab) => tab.addEventListener('click', () => selectTab(tab)));
+
+    const room = document.querySelector('[data-queueworks-room]');
+    if (room) {{
+      const player = room.querySelector('[data-player]');
+      const interact = room.querySelector('[data-room-interact]');
+      const roomLog = room.querySelector('[data-room-log]');
+      const roomStatus = room.querySelector('[data-room-status]');
+      const slime = {{ x: 5, y: 3 }};
+      const bounds = {{ width: 10, height: 6 }};
+      let playerPosition = {{ x: 1, y: 4 }};
+      let roomCleared = false;
+
+      function isNearSlime() {{
+        return Math.abs(playerPosition.x - slime.x) + Math.abs(playerPosition.y - slime.y) <= 1;
+      }}
+
+      function renderRoom() {{
+        player.style.setProperty('--x', String(playerPosition.x));
+        player.style.setProperty('--y', String(playerPosition.y));
+        interact.disabled = !isNearSlime();
+        if (roomCleared) {{
+          roomStatus.textContent = 'ROUTE OPEN';
+        }} else {{
+          roomStatus.textContent = isNearSlime() ? 'SLIME READY' : 'ROUTE JAMMED';
+        }}
+      }}
+
+      function movePlayer(dx, dy) {{
+        playerPosition = {{
+          x: Math.max(0, Math.min(bounds.width - 1, playerPosition.x + dx)),
+          y: Math.max(0, Math.min(bounds.height - 1, playerPosition.y + dy)),
+        }};
+        roomLog.textContent = isNearSlime()
+          ? 'Sorting Slime blocks the intake. Interact to start the repair.'
+          : 'Queueworks floor clear. Move next to the Sorting Slime.';
+        renderRoom();
+      }}
+
+      room.querySelectorAll('[data-move]').forEach((button) => {{
+        button.addEventListener('click', () => {{
+          const direction = button.dataset.move;
+          if (direction === 'up') movePlayer(0, -1);
+          if (direction === 'down') movePlayer(0, 1);
+          if (direction === 'left') movePlayer(-1, 0);
+          if (direction === 'right') movePlayer(1, 0);
+        }});
+      }});
+
+      document.addEventListener('keydown', (event) => {{
+        const keyMap = {{
+          ArrowUp: [0, -1],
+          w: [0, -1],
+          W: [0, -1],
+          ArrowDown: [0, 1],
+          s: [0, 1],
+          S: [0, 1],
+          ArrowLeft: [-1, 0],
+          a: [-1, 0],
+          A: [-1, 0],
+          ArrowRight: [1, 0],
+          d: [1, 0],
+          D: [1, 0],
+        }};
+        const delta = keyMap[event.key];
+        if (!delta) return;
+        event.preventDefault();
+        movePlayer(delta[0], delta[1]);
+      }});
+
+      interact.addEventListener('click', () => {{
+        if (!isNearSlime()) return;
+        selectTab(document.querySelector('#tab-sorting_slime'));
+        document.querySelector('#panel-sorting_slime').scrollIntoView({{ behavior: 'smooth', block: 'start' }});
+        roomLog.textContent = 'Encounter opened: sort the visible spill, check it, then return to the room.';
+      }});
+
+      window.algorithimiaRoom = {{
+        markSortingSlimeCleared() {{
+          roomCleared = true;
+          roomLog.textContent = 'The route opens. The Patchrunner returns to the Queueworks room.';
+          renderRoom();
+          room.scrollIntoView({{ behavior: 'smooth', block: 'start' }});
+        }},
+      }};
+
+      renderRoom();
+    }}
 
     const sortingGame = document.querySelector('[data-sorting-slime-playfield]');
     if (sortingGame) {{
@@ -486,6 +718,14 @@ def render_game_shell() -> str:
         setSliceState('inspect');
         renderInspectionMarks();
         renderRunes();
+      }});
+
+      sortingGame.querySelector('[data-return-room]').addEventListener('click', () => {{
+        if (window.algorithimiaRoom && isOrdered()) {{
+          window.algorithimiaRoom.markSortingSlimeCleared();
+        }} else {{
+          setFeedback('Mira: Check the order before you reopen the intake.');
+        }}
       }});
 
       setSliceState('inspect');
@@ -586,6 +826,7 @@ def _sorting_slime_playable_slice(
           <div class="controls" aria-label="Sorting Slime actions">
             <button class="action primary" type="button" data-check-order>Check order</button>
             <button class="action" type="button" data-reset-order>Reset spill</button>
+            <button class="action" type="button" data-return-room>Return to room</button>
           </div>
           <p class="mira" data-feedback>Mira: Public spill loaded. Put the runes in smallest-to-largest order.</p>
           <div class="repair-log" data-repair-log>spill loaded: 5, 1, 4, 2</div>
