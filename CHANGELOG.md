@@ -31,6 +31,7 @@
 - Integrated Agent 5's Sorting Slime action icon sheet into the browser repair controls and sealed-check reminder.
 - Added a dependency-free browser self-smoke path for the exported game shell through `?smoke=1` or `#smoke`, covering movement, Sorting Slime interaction, wrong-order retry, rune swaps, successful return, and route-open status.
 - Added live Queueworks room-affordance cues for blocked gate, retry, sealed-check, and route-clear states, plus a repeated-interact guard after the route is repaired.
+- Integrated Agent 5's browser-smoke QA/status icon sheet into the optional `?smoke=1` / `#smoke` report without changing normal play.
 
 ## 0.1.0 - 2026-07-08
 

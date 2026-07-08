@@ -18,6 +18,7 @@ SORTING_ACTION_ICONS = ASSET_DIR / "sorting-action-icons.svg"
 QUEUEWORKS_ROOM_SHEET = ASSET_DIR / "queueworks-room-sheet.svg"
 QUEUEWORKS_ROOM_FEEDBACK_SHEET = ASSET_DIR / "queueworks-room-feedback.svg"
 QUEUEWORKS_ROOM_RETRY_SHEET = ASSET_DIR / "queueworks-room-retry-strip.svg"
+QUEUEWORKS_BROWSER_SMOKE_ICONS = ASSET_DIR / "queueworks-browser-smoke-icons.svg"
 
 BADGE_CELLS = {
     "sorting_slime": 0,
@@ -53,6 +54,7 @@ def render_game_shell() -> str:
     room_sheet_uri = _svg_data_uri(QUEUEWORKS_ROOM_SHEET)
     room_feedback_uri = _svg_data_uri(QUEUEWORKS_ROOM_FEEDBACK_SHEET)
     room_retry_uri = _svg_data_uri(QUEUEWORKS_ROOM_RETRY_SHEET)
+    smoke_icons_uri = _svg_data_uri(QUEUEWORKS_BROWSER_SMOKE_ICONS)
     encounters = tuple(ENCOUNTERS.values())
     tabs = "\n".join(_tab_button(encounter, index) for index, encounter in enumerate(encounters))
     panels = "\n".join(
@@ -355,24 +357,63 @@ def render_game_shell() -> str:
     }}
     .smoke-report {{
       display: none;
+      gap: 8px;
       border: 1px solid var(--line);
       background: var(--ink);
       color: var(--muted);
       padding: 8px 10px;
       font: 0.82rem/1.35 ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
-      white-space: pre-wrap;
       overflow-wrap: anywhere;
     }}
     .smoke-report[data-status="pass"] {{
-      display: block;
+      display: grid;
       border-color: var(--green);
-      color: var(--green);
     }}
     .smoke-report[data-status="fail"] {{
-      display: block;
+      display: grid;
       border-color: var(--rose);
+    }}
+    .smoke-summary, .smoke-row {{
+      display: grid;
+      grid-template-columns: 24px minmax(0, 1fr);
+      gap: 8px;
+      align-items: center;
+    }}
+    .smoke-summary {{
+      color: var(--text);
+      font-weight: 700;
+    }}
+    .smoke-list {{
+      display: grid;
+      gap: 6px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }}
+    .smoke-row {{
+      min-height: 28px;
+    }}
+    .smoke-row[data-passed="true"] {{
+      color: var(--green);
+    }}
+    .smoke-row[data-passed="false"], .smoke-error {{
       color: var(--rose);
     }}
+    .smoke-icon {{
+      width: 24px;
+      height: 24px;
+      background-image: var(--smoke-icons);
+      background-repeat: no-repeat;
+      background-size: auto 24px;
+      image-rendering: pixelated;
+      flex: 0 0 auto;
+    }}
+    .smoke-icon[data-smoke-icon="keyboard_move"] {{ background-position: 0 0; }}
+    .smoke-icon[data-smoke-icon="click_interact"] {{ background-position: -24px 0; }}
+    .smoke-icon[data-smoke-icon="blocked_collision"] {{ background-position: -48px 0; }}
+    .smoke-icon[data-smoke-icon="retry_return"] {{ background-position: -72px 0; }}
+    .smoke-icon[data-smoke-icon="route_open_pass"] {{ background-position: -96px 0; }}
+    .smoke-icon[data-smoke-icon="smoke_fail"] {{ background-position: -120px 0; }}
     .room-hint {{
       display: flex;
       align-items: center;
@@ -639,7 +680,7 @@ def render_game_shell() -> str:
   </style>
 </head>
 <body>
-  <main style="--room-feedback: url(&quot;{room_feedback_uri}&quot;); --room-retry: url(&quot;{room_retry_uri}&quot;)">
+  <main style="--room-feedback: url(&quot;{room_feedback_uri}&quot;); --room-retry: url(&quot;{room_retry_uri}&quot;); --smoke-icons: url(&quot;{smoke_icons_uri}&quot;)">
     <header class="topbar">
       <h1>Algorithimia</h1>
       <div class="status">Python prototype shell - code execution stays in the local CLI</div>
@@ -681,7 +722,7 @@ def render_game_shell() -> str:
         <div class="room-hint"><span class="feedback-icon" data-icon="move_hint" aria-hidden="true"></span><span data-room-hint>move close, then test the repair</span></div>
         <div class="room-log" data-room-log>Use arrow keys, WASD, or the buttons to reach the Sorting Slime.</div>
       </div>
-      <pre class="smoke-report" data-smoke-report aria-live="polite"></pre>
+      <div class="smoke-report" data-smoke-report aria-live="polite"></div>
     </section>
     <nav class="tabs" role="tablist" aria-label="Encounters">
 {tabs}
@@ -958,15 +999,52 @@ def render_game_shell() -> str:
       const report = document.querySelector('[data-smoke-report]');
       if (!report) return;
       const checks = [];
-      function record(name, passed) {{
-        checks.push({{ name, passed }});
+      function record(name, passed, icon = 'click_interact') {{
+        checks.push({{ name, passed, icon }});
         if (!passed) throw new Error(name);
       }}
       function click(selector) {{
         const element = document.querySelector(selector);
-        record(`found ${{selector}}`, Boolean(element));
+        record(`found ${{selector}}`, Boolean(element), selector.includes('move') ? 'keyboard_move' : 'click_interact');
         element.click();
         return element;
+      }}
+      function smokeText(status, error) {{
+        return [
+          `Game shell smoke: ${{status.toUpperCase()}}`,
+          ...checks.map((check) => `${{check.passed ? 'PASS' : 'FAIL'}} ${{check.name}}`),
+          ...(error ? [String(error)] : []),
+        ].join('\\n');
+      }}
+      function renderSmokeReport(status, error) {{
+        const summaryIcon = status === 'pass' ? 'route_open_pass' : 'smoke_fail';
+        report.dataset.status = status;
+        report.setAttribute('aria-label', smokeText(status, error));
+        report.replaceChildren();
+
+        const summary = document.createElement('div');
+        summary.className = 'smoke-summary';
+        summary.innerHTML = `<span class="smoke-icon" data-smoke-icon="${{summaryIcon}}" aria-hidden="true"></span><span>Game shell smoke: ${{status.toUpperCase()}}</span>`;
+        report.append(summary);
+
+        const list = document.createElement('ul');
+        list.className = 'smoke-list';
+        checks.forEach((check) => {{
+          const row = document.createElement('li');
+          row.className = 'smoke-row';
+          row.dataset.passed = String(check.passed);
+          const icon = check.passed ? check.icon : 'smoke_fail';
+          row.innerHTML = `<span class="smoke-icon" data-smoke-icon="${{icon}}" aria-hidden="true"></span><span>${{check.passed ? 'PASS' : 'FAIL'}} ${{check.name}}</span>`;
+          list.append(row);
+        }});
+        report.append(list);
+
+        if (error) {{
+          const errorRow = document.createElement('div');
+          errorRow.className = 'smoke-error';
+          errorRow.textContent = String(error);
+          report.append(errorRow);
+        }}
       }}
 
       try {{
@@ -974,11 +1052,11 @@ def render_game_shell() -> str:
         click('[data-move="right"]');
         click('[data-move="right"]');
         click('[data-move="up"]');
-        record('interact enabled beside slime', !document.querySelector('[data-room-interact]').disabled);
+        record('interact enabled beside slime', !document.querySelector('[data-room-interact]').disabled, 'click_interact');
         click('[data-room-interact]');
-        record('sorting panel active after interact', document.querySelector('#panel-sorting_slime').classList.contains('active'));
+        record('sorting panel active after interact', document.querySelector('#panel-sorting_slime').classList.contains('active'), 'click_interact');
         click('[data-return-room]');
-        record('wrong return keeps intake jammed', document.querySelector('[data-queueworks-room]').dataset.roomState === 'diagnostic_failed');
+        record('wrong return keeps intake jammed', document.querySelector('[data-queueworks-room]').dataset.roomState === 'diagnostic_failed', 'retry_return');
         click('[data-rune-index="0"]');
         click('[data-rune-index="1"]');
         click('[data-rune-index="1"]');
@@ -986,22 +1064,20 @@ def render_game_shell() -> str:
         click('[data-rune-index="2"]');
         click('[data-rune-index="3"]');
         click('[data-check-order]');
-        record('visible spill clears after swaps', document.querySelector('[data-sorting-slime-playfield]').dataset.state === 'cleared');
+        record('visible spill clears after swaps', document.querySelector('[data-sorting-slime-playfield]').dataset.state === 'cleared', 'route_open_pass');
         click('[data-return-room]');
-        record('success return opens route', document.querySelector('[data-queueworks-room]').dataset.roomState === 'cleared_intake');
-        record('route status text updates', document.querySelector('[data-room-status]').textContent === 'ROUTE OPEN');
-        record('interact disabled after repair', document.querySelector('[data-room-interact]').disabled);
+        record('success return opens route', document.querySelector('[data-queueworks-room]').dataset.roomState === 'cleared_intake', 'route_open_pass');
+        record('route status text updates', document.querySelector('[data-room-status]').textContent === 'ROUTE OPEN', 'route_open_pass');
+        record('interact disabled after repair', document.querySelector('[data-room-interact]').disabled, 'route_open_pass');
         click('[data-move="down"]');
         click('[data-move="right"]');
         click('[data-move="right"]');
         click('[data-move="right"]');
         click('[data-move="right"]');
-        record('cleared route blocker becomes passable', document.querySelector('[data-player]').style.getPropertyValue('--x') === '8');
-        report.dataset.status = 'pass';
-        report.textContent = ['Game shell smoke: PASS', ...checks.map((check) => `PASS ${{check.name}}`)].join('\\n');
+        record('cleared route blocker becomes passable', document.querySelector('[data-player]').style.getPropertyValue('--x') === '8', 'blocked_collision');
+        renderSmokeReport('pass');
       }} catch (error) {{
-        report.dataset.status = 'fail';
-        report.textContent = ['Game shell smoke: FAIL', ...checks.map((check) => `${{check.passed ? 'PASS' : 'FAIL'}} ${{check.name}}`), String(error)].join('\\n');
+        renderSmokeReport('fail', error);
         throw error;
       }}
     }}

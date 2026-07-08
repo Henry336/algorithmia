@@ -116,6 +116,17 @@ class GameShellTests(unittest.TestCase):
         html = render_game_shell()
 
         self.assertIn("data-smoke-report", html)
+        self.assertIn("--smoke-icons: url(&quot;data:image/svg+xml;base64", html)
+        self.assertIn("class=\"smoke-icon\"", html)
+        self.assertIn("data-smoke-icon=\"keyboard_move\"", html)
+        self.assertIn("data-smoke-icon=\"click_interact\"", html)
+        self.assertIn("data-smoke-icon=\"blocked_collision\"", html)
+        self.assertIn("data-smoke-icon=\"retry_return\"", html)
+        self.assertIn("data-smoke-icon=\"route_open_pass\"", html)
+        self.assertIn("data-smoke-icon=\"smoke_fail\"", html)
+        self.assertIn(".smoke-icon[data-smoke-icon=\"route_open_pass\"]", html)
+        self.assertIn("function renderSmokeReport(status, error)", html)
+        self.assertIn("report.setAttribute('aria-label', smokeText(status, error))", html)
         self.assertIn("function runGameShellSmoke()", html)
         self.assertIn("location.search.includes('smoke=1')", html)
         self.assertIn("location.hash === '#smoke'", html)
@@ -128,7 +139,7 @@ class GameShellTests(unittest.TestCase):
         self.assertIn("interact disabled after repair", html)
         self.assertIn("cleared route blocker becomes passable", html)
         self.assertIn("document.querySelector('[data-player]').style.getPropertyValue('--x') === '8'", html)
-        self.assertIn("Game shell smoke: PASS", html)
+        self.assertIn("Game shell smoke: ${status.toUpperCase()}", html)
         self.assertIn("document.querySelector('[data-queueworks-room]').dataset.roomState === 'cleared_intake'", html)
 
     def test_render_game_shell_seals_certification_values(self) -> None:
