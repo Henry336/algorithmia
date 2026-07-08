@@ -7,6 +7,7 @@ Algorithimia currently uses a small Python package organized around a determinis
 - `algorithimia.cli`: terminal entry point.
 - `algorithimia.encounters`: encounter data and test cases.
 - `algorithimia.engine`: gameplay validation flow.
+- `algorithimia.game_shell`: static browser shell export for the current encounter roster.
 - `algorithimia.language.python_adapter`: Python-first player-code execution.
 - `algorithimia.visualizers`: deterministic trace events and text labels for algorithm feedback.
 - `algorithimia.trace_viewer`: static HTML trace viewer export for the current structured event stream.
@@ -46,8 +47,10 @@ The CLI still calls `encounter_trace(...)` for labels, but those labels are deri
 
 `algorithimia.trace_viewer` is the first lightweight browser surface. It renders the selected encounter's current trace events into a self-contained HTML file and embeds the Phase 1 encounter badge plus trace-event SVG sheets as data images. Encounters with `certification_cases` also get a sealed-certification summary that shows public/certification counts and the certification marker sheet without exposing hidden case names, inputs, or expected outputs. This is deliberately a static viewer, not the final renderer or camera choice.
 
+`algorithimia.game_shell` is the first static game-shell surface. It exports a self-contained tabbed browser screen for the current encounter roster through `--game-html`, showing prompts, local run/export commands, renderer-ready trace previews, and sealed-certification status. It intentionally does not run player Python in the browser; execution remains in the existing CLI adapter until the project has a stronger sandbox and a chosen live renderer target.
+
 ## Near-Term Extension Points
 
 - Move encounter definitions into data files when content volume grows.
-- Add a UI client after the terminal loop proves the core interaction.
+- Evolve the static shell into a live UI client after Henry chooses renderer/camera direction.
 - Add more event kinds for graph traversal, stack/deque changes, recursion frames, and dynamic programming tables as those encounters land.

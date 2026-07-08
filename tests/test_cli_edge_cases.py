@@ -37,6 +37,23 @@ class CliEdgeCaseTests(unittest.TestCase):
         self.assertIn("data:image/svg+xml;base64", html)
         self.assertIn("ordinary guard: A served after two urgent", html)
 
+    def test_game_html_writes_static_shell_without_running_solution(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            output_path = Path(temp_dir) / "game.html"
+            stdout = io.StringIO()
+
+            with contextlib.redirect_stdout(stdout):
+                exit_code = main(["--game-html", str(output_path)])
+
+            html = output_path.read_text(encoding="utf-8")
+
+        self.assertEqual(0, exit_code)
+        self.assertIn("Wrote game shell", stdout.getvalue())
+        self.assertIn("Sorting Slime", html)
+        self.assertIn("Triage Line Dispatcher Trial", html)
+        self.assertIn("role=\"tablist\"", html)
+        self.assertIn("data:image/svg+xml;base64", html)
+
     def test_certification_cases_are_sealed_in_cli_output(self) -> None:
         source = """
 def solve(values):

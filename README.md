@@ -21,6 +21,12 @@ python -m algorithimia --trace-html build/sorting-trace.html
 python -m algorithimia --encounter triage_line --trace-html build/triage-trace.html
 ```
 
+Export the current browser game shell:
+
+```powershell
+python -m algorithimia --game-html build/game-shell.html
+```
+
 On Windows installations that use the Python launcher:
 
 ```powershell
@@ -83,6 +89,7 @@ When a policy case fails, the counter now reports a compact debrief bark for the
 
 The terminal trace text is generated from structured trace events. Future renderers can consume event kinds such as `comparison`, `arrival`, `urgent_override`, `stable_tie`, `ordinary_guard`, and `served` without parsing player-facing strings.
 The `--trace-html` export writes a self-contained static HTML trace viewer that embeds the current Phase 1 encounter badge, trace-event icon sheets, and sealed-certification marker sheet when the encounter uses hidden certification cases.
+The `--game-html` export writes a self-contained static browser shell with tabbed encounter selection, encounter prompts, run/export commands, trace previews, and sealed-certification status. It does not execute player Python in the browser; code execution still stays in the local CLI runner.
 
 ## Security Note
 

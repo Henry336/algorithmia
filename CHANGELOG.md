@@ -21,6 +21,7 @@
 - Added Sorting Slime certification cases so hard-coded answers for the public examples do not clear the encounter.
 - Marked certification results separately from public teaching cases and sealed their CLI expected/actual values so hidden validation inputs are not exposed.
 - Added a sealed-certification summary to the static trace viewer for encounters with hidden certification cases.
+- Added a static browser game shell export with tabbed encounter selection, trace previews, run commands, embedded Phase 1 assets, and sealed-certification status.
 
 ## 0.1.0 - 2026-07-08
 

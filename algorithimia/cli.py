@@ -6,6 +6,7 @@ from pathlib import Path
 
 from .encounters import ENCOUNTERS, get_encounter
 from .engine import GameEngine
+from .game_shell import write_game_shell
 from .language.python_adapter import PythonAdapter
 from .trace_viewer import write_trace_viewer
 from .visualizers import encounter_trace
@@ -29,12 +30,22 @@ def build_parser() -> argparse.ArgumentParser:
         type=Path,
         help="Write a static browser trace viewer for the selected encounter and exit.",
     )
+    parser.add_argument(
+        "--game-html",
+        type=Path,
+        help="Write a static browser game shell for the current encounters and exit.",
+    )
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     encounter = get_encounter(args.encounter)
+
+    if args.game_html:
+        output_path = write_game_shell(args.game_html)
+        print(f"Wrote game shell: {output_path}")
+        return 0
 
     if args.trace_html:
         output_path = write_trace_viewer(encounter, args.trace_html)
