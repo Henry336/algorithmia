@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Protocol
 
-from .encounters import Encounter
+from .encounters import Encounter, PythonCallRestriction
 
 
 @dataclass(frozen=True)
@@ -23,7 +23,12 @@ class AttemptResult:
 
 
 class LanguageAdapter(Protocol):
-    def run(self, source: str, input_values: tuple[int, ...]) -> object:
+    def run(
+        self,
+        source: str,
+        input_values: tuple[int, ...],
+        python_call_restrictions: tuple[PythonCallRestriction, ...] = (),
+    ) -> object:
         """Run player source against one case and return its JSON-compatible value."""
 
 
@@ -36,7 +41,7 @@ class GameEngine:
 
         for case in encounter.cases:
             try:
-                actual = self._adapter.run(source, case.input_values)
+                actual = self._adapter.run(source, case.input_values, encounter.python_call_restrictions)
             except Exception as exc:  # noqa: BLE001 - player errors become gameplay feedback.
                 results.append(
                     CaseResult(
@@ -62,4 +67,3 @@ class GameEngine:
         passed = all(result.passed for result in results)
         message = "The Sorting Slime dissolves into a clean path." if passed else "The slime reforms. Review the failed cases."
         return AttemptResult(passed=passed, message=message, case_results=tuple(results))
-

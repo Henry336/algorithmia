@@ -6,6 +6,7 @@
 - Replaced the demo solution with manual insertion-sort logic.
 - Rejected `sorted(...)` and `.sort()` for Sorting Slime submissions.
 - Added CLI and sorting-helper regression coverage.
+- Moved Python helper restrictions into encounter metadata so future encounters can set their own rules.
 
 ## 0.1.0 - 2026-07-08
 

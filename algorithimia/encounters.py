@@ -1,6 +1,17 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Literal
+
+
+PythonCallTarget = Literal["function", "method"]
+
+
+@dataclass(frozen=True)
+class PythonCallRestriction:
+    target: PythonCallTarget
+    name: str
+    message: str
 
 
 @dataclass(frozen=True)
@@ -16,6 +27,7 @@ class Encounter:
     title: str
     prompt: str
     cases: tuple[EncounterCase, ...]
+    python_call_restrictions: tuple[PythonCallRestriction, ...] = ()
 
 
 SORTING_SLIME = Encounter(
@@ -31,6 +43,18 @@ SORTING_SLIME = Encounter(
         EncounterCase("already_ordered", (1, 2, 3), (1, 2, 3)),
         EncounterCase("duplicates", (3, 1, 3, 2), (1, 2, 3, 3)),
         EncounterCase("empty", (), ()),
+    ),
+    python_call_restrictions=(
+        PythonCallRestriction(
+            target="function",
+            name="sorted",
+            message="Sorting Slime requires visible sorting logic; replace sorted(...) with your own loop.",
+        ),
+        PythonCallRestriction(
+            target="method",
+            name="sort",
+            message="Sorting Slime requires visible sorting logic; replace .sort() with your own loop.",
+        ),
     ),
 )
 

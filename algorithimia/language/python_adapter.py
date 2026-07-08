@@ -7,6 +7,8 @@ import sys
 import tempfile
 from pathlib import Path
 
+from algorithimia.encounters import PythonCallRestriction
+
 
 class PythonExecutionError(RuntimeError):
     """Raised when player Python cannot be executed cleanly."""
@@ -16,8 +18,13 @@ class PythonAdapter:
     def __init__(self, timeout_seconds: float = 2.0) -> None:
         self._timeout_seconds = timeout_seconds
 
-    def run(self, source: str, input_values: tuple[int, ...]) -> object:
-        _reject_disallowed_sort_helpers(source)
+    def run(
+        self,
+        source: str,
+        input_values: tuple[int, ...],
+        python_call_restrictions: tuple[PythonCallRestriction, ...] = (),
+    ) -> object:
+        _reject_disallowed_python_calls(source, python_call_restrictions)
 
         with tempfile.TemporaryDirectory(prefix="algorithimia_") as tmp:
             tmp_path = Path(tmp)
@@ -52,21 +59,31 @@ class PythonAdapter:
         return payload.get("result")
 
 
-def _reject_disallowed_sort_helpers(source: str) -> None:
+def _reject_disallowed_python_calls(source: str, restrictions: tuple[PythonCallRestriction, ...]) -> None:
+    if not restrictions:
+        return
+
     try:
         tree = ast.parse(source)
     except SyntaxError:
         return
 
     for node in ast.walk(tree):
-        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "sorted":
-            raise PythonExecutionError(
-                "Sorting Slime requires visible sorting logic; replace sorted(...) with your own loop."
-            )
-        if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and node.func.attr == "sort":
-            raise PythonExecutionError(
-                "Sorting Slime requires visible sorting logic; replace .sort() with your own loop."
-            )
+        if not isinstance(node, ast.Call):
+            continue
+        for restriction in restrictions:
+            if (
+                restriction.target == "function"
+                and isinstance(node.func, ast.Name)
+                and node.func.id == restriction.name
+            ):
+                raise PythonExecutionError(restriction.message)
+            if (
+                restriction.target == "method"
+                and isinstance(node.func, ast.Attribute)
+                and node.func.attr == restriction.name
+            ):
+                raise PythonExecutionError(restriction.message)
 
 
 def _runner_source(player_source: str) -> str:
@@ -86,6 +103,7 @@ SAFE_BUILTINS = {{
     "min": min,
     "range": range,
     "reversed": reversed,
+    "sorted": sorted,
     "sum": sum,
     "tuple": tuple,
 }}

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import unittest
 
-from algorithimia.encounters import get_encounter
+from algorithimia.encounters import Encounter, EncounterCase, get_encounter
 from algorithimia.engine import GameEngine
 from algorithimia.language.python_adapter import PythonAdapter, PythonExecutionError
 
@@ -42,6 +42,18 @@ class EngineTests(unittest.TestCase):
 
         self.assertFalse(result.passed)
         self.assertIn("visible sorting logic", result.case_results[0].error or "")
+
+    def test_python_call_restrictions_are_encounter_scoped(self) -> None:
+        encounter = Encounter(
+            slug="debug_sort",
+            title="Debug Sort",
+            prompt="Sort with any helper.",
+            cases=(EncounterCase("mixed", (2, 1), (1, 2)),),
+        )
+        engine = GameEngine(PythonAdapter())
+        result = engine.attempt(encounter, "def solve(values):\n    return sorted(values)\n")
+
+        self.assertTrue(result.passed)
 
     def test_sorting_slime_rejects_wrong_solution(self) -> None:
         engine = GameEngine(PythonAdapter())

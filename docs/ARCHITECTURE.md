@@ -20,7 +20,7 @@ Algorithimia currently uses a small Python package organized around a determinis
 
 ## Encounter Validation Policy
 
-`Sorting Slime` is a DSA teaching encounter, so the Python adapter performs a small preflight check that rejects `sorted(...)` and `.sort()` before executing player code. This is intentionally encounter-driven scaffolding for the prototype; later encounters should move helper restrictions into per-encounter metadata instead of hard-coding every rule in the adapter.
+`Sorting Slime` is a DSA teaching encounter, so its encounter metadata defines Python call restrictions that reject `sorted(...)` and `.sort()` before executing player code. The engine passes those restrictions to the Python adapter per attempt, keeping helper bans encounter-scoped for future challenges.
 
 ## Near-Term Extension Points
 
