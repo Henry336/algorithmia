@@ -1009,6 +1009,26 @@ def render_game_shell() -> str:
         element.click();
         return element;
       }}
+      function readable(selector, name, icon = 'click_interact') {{
+        const element = document.querySelector(selector);
+        record(`found ${{selector}}`, Boolean(element), icon);
+        element.scrollIntoView({{ block: 'center', inline: 'nearest' }});
+        const rect = element.getBoundingClientRect();
+        const styles = getComputedStyle(element);
+        const rendered = (
+          styles.display !== 'none' &&
+          styles.visibility !== 'hidden' &&
+          Number(styles.opacity || 1) > 0 &&
+          rect.width >= 16 &&
+          rect.height >= 16 &&
+          rect.bottom > 0 &&
+          rect.right > 0 &&
+          rect.top < window.innerHeight &&
+          rect.left < window.innerWidth
+        );
+        record(name, rendered, icon);
+        return element;
+      }}
       function smokeText(status, error) {{
         return [
           `Game shell smoke: ${{status.toUpperCase()}}`,
@@ -1048,15 +1068,21 @@ def render_game_shell() -> str:
       }}
 
       try {{
+        readable('[data-room-status]', 'room status cue is visible before movement', 'blocked_collision');
+        readable('[data-room-hint]', 'room hint cue is visible before movement', 'keyboard_move');
         click('[data-move="right"]');
         click('[data-move="right"]');
         click('[data-move="right"]');
         click('[data-move="up"]');
+        readable('[data-room-interact]', 'interact control is visible beside slime', 'click_interact');
         record('interact enabled beside slime', !document.querySelector('[data-room-interact]').disabled, 'click_interact');
         click('[data-room-interact]');
+        readable('[data-check-order]', 'sorting action controls are visible after interact', 'click_interact');
         record('sorting panel active after interact', document.querySelector('#panel-sorting_slime').classList.contains('active'), 'click_interact');
         click('[data-return-room]');
         record('wrong return keeps intake jammed', document.querySelector('[data-queueworks-room]').dataset.roomState === 'diagnostic_failed', 'retry_return');
+        readable('[data-room-retry-panel]', 'retry panel is visible after wrong return', 'retry_return');
+        readable('[data-room-hint]', 'retry hint cue is visible after wrong return', 'retry_return');
         click('[data-rune-index="0"]');
         click('[data-rune-index="1"]');
         click('[data-rune-index="1"]');
@@ -1068,6 +1094,8 @@ def render_game_shell() -> str:
         click('[data-return-room]');
         record('success return opens route', document.querySelector('[data-queueworks-room]').dataset.roomState === 'cleared_intake', 'route_open_pass');
         record('route status text updates', document.querySelector('[data-room-status]').textContent === 'ROUTE OPEN', 'route_open_pass');
+        readable('[data-room-status]', 'route-open status cue is visible after success', 'route_open_pass');
+        readable('[data-room-hint]', 'route-open hint cue is visible after success', 'route_open_pass');
         record('interact disabled after repair', document.querySelector('[data-room-interact]').disabled, 'route_open_pass');
         click('[data-move="down"]');
         click('[data-move="right"]');
@@ -1075,6 +1103,8 @@ def render_game_shell() -> str:
         click('[data-move="right"]');
         click('[data-move="right"]');
         record('cleared route blocker becomes passable', document.querySelector('[data-player]').style.getPropertyValue('--x') === '8', 'blocked_collision');
+        renderSmokeReport('pass');
+        readable('[data-smoke-report]', 'smoke report is visible after completion', 'route_open_pass');
         renderSmokeReport('pass');
       }} catch (error) {{
         renderSmokeReport('fail', error);
