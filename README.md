@@ -1,11 +1,17 @@
 # Algorithimia
 
-Algorithimia is a DSA programming RPG. The current build is a terminal-first prototype with one Python encounter.
+Algorithimia is a DSA programming RPG. The current build is a terminal-first prototype with two Python encounters.
 
 ## Run
 
 ```powershell
 python -m algorithimia
+```
+
+Choose a specific encounter:
+
+```powershell
+python -m algorithimia --encounter triage_line
 ```
 
 On Windows installations that use the Python launcher:
@@ -26,7 +32,9 @@ Or:
 py -m unittest
 ```
 
-## First Encounter Contract
+## Encounter Contracts
+
+### Sorting Slime
 
 The player submits Python that defines:
 
@@ -45,6 +53,19 @@ def solve(values):
 
 The engine runs several deterministic cases and reports whether the encounter is cleared.
 The Sorting Slime encounter rejects `sorted(...)` and `.sort()` so the player demonstrates visible sorting logic.
+
+### Triage Line Dispatcher Trial
+
+The player submits Python that defines:
+
+```python
+def solve(tickets):
+    # Return ticket ids in service order.
+    return []
+```
+
+Each ticket is a JSON-compatible object with `id`, `arrival`, and `urgent`.
+Urgent tickets may advance, ties keep arrival order, and after two urgent services the oldest waiting ordinary ticket must be served if one exists.
 
 ## Security Note
 

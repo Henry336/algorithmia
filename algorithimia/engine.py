@@ -9,7 +9,7 @@ from .encounters import Encounter, PythonCallRestriction
 @dataclass(frozen=True)
 class CaseResult:
     case_name: str
-    expected: tuple[int, ...]
+    expected: object
     actual: object
     passed: bool
     error: str | None = None
@@ -26,7 +26,7 @@ class LanguageAdapter(Protocol):
     def run(
         self,
         source: str,
-        input_values: tuple[int, ...],
+        input_values: object,
         python_call_restrictions: tuple[PythonCallRestriction, ...] = (),
     ) -> object:
         """Run player source against one case and return its JSON-compatible value."""
@@ -55,15 +55,17 @@ class GameEngine:
                 continue
 
             normalized = tuple(actual) if isinstance(actual, list) else actual
+            validation_error = encounter.output_validator(case, actual) if encounter.output_validator else None
             results.append(
                 CaseResult(
                     case_name=case.name,
                     expected=case.expected,
                     actual=normalized,
-                    passed=normalized == case.expected,
+                    passed=validation_error is None and normalized == case.expected,
+                    error=validation_error,
                 )
             )
 
         passed = all(result.passed for result in results)
-        message = "The Sorting Slime dissolves into a clean path." if passed else "The slime reforms. Review the failed cases."
+        message = encounter.success_message if passed else encounter.failure_message
         return AttemptResult(passed=passed, message=message, case_results=tuple(results))

@@ -21,7 +21,7 @@ class PythonAdapter:
     def run(
         self,
         source: str,
-        input_values: tuple[int, ...],
+        input_values: object,
         python_call_restrictions: tuple[PythonCallRestriction, ...] = (),
     ) -> object:
         _reject_disallowed_python_calls(source, python_call_restrictions)

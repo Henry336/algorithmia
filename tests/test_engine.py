@@ -19,6 +19,32 @@ def solve(values):
     return ordered
 """
 
+TRIAGE_POLICY = """
+def solve(tickets):
+    waiting = sorted(tickets, key=lambda ticket: ticket["arrival"])
+    served = []
+    urgent_streak = 0
+
+    while waiting:
+        ordinary = [ticket for ticket in waiting if not ticket["urgent"]]
+        if urgent_streak >= 2 and ordinary:
+            chosen = ordinary[0]
+            urgent_streak = 0
+        else:
+            urgent = [ticket for ticket in waiting if ticket["urgent"]]
+            if urgent:
+                chosen = urgent[0]
+                urgent_streak += 1
+            else:
+                chosen = waiting[0]
+                urgent_streak = 0
+
+        served.append(chosen["id"])
+        waiting.remove(chosen)
+
+    return served
+"""
+
 
 class EngineTests(unittest.TestCase):
     def test_sorting_slime_accepts_correct_solution(self) -> None:
@@ -49,6 +75,10 @@ class EngineTests(unittest.TestCase):
             title="Debug Sort",
             prompt="Sort with any helper.",
             cases=(EncounterCase("mixed", (2, 1), (1, 2)),),
+            success_message="ok",
+            failure_message="failed",
+            trace_kind="comparison",
+            default_solution="def solve(values):\n    return sorted(values)\n",
         )
         engine = GameEngine(PythonAdapter())
         result = engine.attempt(encounter, "def solve(values):\n    return sorted(values)\n")
@@ -61,6 +91,32 @@ class EngineTests(unittest.TestCase):
 
         self.assertFalse(result.passed)
         self.assertTrue(any(not case.passed for case in result.case_results))
+
+    def test_triage_line_accepts_locked_policy(self) -> None:
+        engine = GameEngine(PythonAdapter())
+        result = engine.attempt(get_encounter("triage_line"), TRIAGE_POLICY)
+
+        self.assertTrue(result.passed)
+        self.assertTrue(all(case.passed for case in result.case_results))
+
+    def test_triage_line_rejects_priority_sort_without_starvation_guard(self) -> None:
+        engine = GameEngine(PythonAdapter())
+        source = """
+def solve(tickets):
+    return [ticket["id"] for ticket in sorted(tickets, key=lambda ticket: (not ticket["urgent"], ticket["arrival"]))]
+"""
+        result = engine.attempt(get_encounter("triage_line"), source)
+
+        self.assertFalse(result.passed)
+        failed_cases = {case.case_name for case in result.case_results if not case.passed}
+        self.assertIn("ordinary_guard_after_two_urgent", failed_cases)
+
+    def test_triage_line_rejects_unknown_ticket_ids_with_bark(self) -> None:
+        engine = GameEngine(PythonAdapter())
+        result = engine.attempt(get_encounter("triage_line"), "def solve(tickets):\n    return ['MISSING']\n")
+
+        self.assertFalse(result.passed)
+        self.assertIn("Queueworks never issued", result.case_results[1].error or "")
 
     def test_adapter_requires_solve_function(self) -> None:
         adapter = PythonAdapter()
