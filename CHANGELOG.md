@@ -13,6 +13,7 @@
 - Improved the Triage CLI trace so it previews the ordinary-guard case with arrival, urgent override, stable tie, ordinary guard, and served labels.
 - Added renderer-ready trace events with stable kinds, player-facing labels, and metadata payloads while preserving the current CLI trace text.
 - Added validator-linked Triage debrief barks for buried urgency, broken stable ties, ordinary starvation, FIFO drift, and ticket identity mistakes.
+- Added a static browser trace viewer export with embedded Phase 1 badge and trace-event icons through `--trace-html`.
 
 ## 0.1.0 - 2026-07-08
 

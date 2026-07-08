@@ -9,6 +9,7 @@ Algorithimia currently uses a small Python package organized around a determinis
 - `algorithimia.engine`: gameplay validation flow.
 - `algorithimia.language.python_adapter`: Python-first player-code execution.
 - `algorithimia.visualizers`: deterministic trace events and text labels for algorithm feedback.
+- `algorithimia.trace_viewer`: static HTML trace viewer export for the current structured event stream.
 
 ## Gameplay Flow
 
@@ -36,6 +37,8 @@ Visualizers now expose renderer-ready `TraceEvent` values with:
 - `payload`: JSON-compatible details a future renderer can bind to sprites, lanes, badges, or animation states.
 
 The CLI still calls `encounter_trace(...)` for labels, but those labels are derived from `encounter_trace_events(...)`. Future graphical clients should consume the structured events instead of scraping terminal text.
+
+`algorithimia.trace_viewer` is the first lightweight browser surface. It renders the selected encounter's current trace events into a self-contained HTML file and embeds the Phase 1 encounter badge plus trace-event SVG sheets as data images. This is deliberately a static viewer, not the final renderer or camera choice.
 
 ## Near-Term Extension Points
 
