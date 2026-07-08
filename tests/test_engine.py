@@ -109,6 +109,24 @@ class EngineTests(unittest.TestCase):
 
         self.assertTrue(result.passed)
 
+    def test_adapter_rejects_imports_before_execution(self) -> None:
+        adapter = PythonAdapter()
+
+        with self.assertRaisesRegex(PythonExecutionError, "Imports are not available"):
+            adapter.run("import os\n\ndef solve(values):\n    return list(values)\n", (1, 2, 3))
+
+    def test_adapter_rejects_dunder_introspection_before_execution(self) -> None:
+        adapter = PythonAdapter()
+
+        with self.assertRaisesRegex(PythonExecutionError, "Dunder introspection"):
+            adapter.run("def solve(values):\n    return values.__class__.__name__\n", (1, 2, 3))
+
+    def test_adapter_rejects_dynamic_builtin_names_before_execution(self) -> None:
+        adapter = PythonAdapter()
+
+        with self.assertRaisesRegex(PythonExecutionError, "getattr is not available"):
+            adapter.run("def solve(values):\n    return getattr(values, 'count')(1)\n", (1, 2, 3))
+
     def test_sorting_slime_rejects_wrong_solution(self) -> None:
         engine = GameEngine(PythonAdapter())
         result = engine.attempt(get_encounter("sorting_slime"), "def solve(values):\n    return list(values)\n")

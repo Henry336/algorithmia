@@ -10,6 +10,9 @@ Current controls:
 - temporary working directory
 - minimal environment
 - restricted builtins for player code
+- source preflight that rejects imports
+- source preflight that rejects dunder introspection
+- source preflight that rejects dynamic evaluation/introspection helpers such as `eval`, `exec`, `open`, `getattr`, `globals`, and `__import__`
 - preflight rejection of disallowed sorting helpers for the current DSA encounter
 - JSON-only input/output
 
@@ -19,5 +22,6 @@ Known gaps:
 - no container or job-object limit
 - no durable audit log for submissions
 - no multi-language runner contract yet
+- AST preflight is a local guardrail, not a security boundary against hostile Python experts
 
 Before accepting public arbitrary code, replace this adapter boundary with OS-level isolation and resource limits.

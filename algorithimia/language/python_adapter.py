@@ -14,6 +14,23 @@ class PythonExecutionError(RuntimeError):
     """Raised when player Python cannot be executed cleanly."""
 
 
+_DISALLOWED_DYNAMIC_NAMES = {
+    "__import__",
+    "compile",
+    "delattr",
+    "dir",
+    "eval",
+    "exec",
+    "getattr",
+    "globals",
+    "input",
+    "locals",
+    "open",
+    "setattr",
+    "vars",
+}
+
+
 class PythonAdapter:
     def __init__(self, timeout_seconds: float = 2.0) -> None:
         self._timeout_seconds = timeout_seconds
@@ -24,6 +41,7 @@ class PythonAdapter:
         input_values: object,
         python_call_restrictions: tuple[PythonCallRestriction, ...] = (),
     ) -> object:
+        _reject_disallowed_python_syntax(source)
         _reject_disallowed_python_calls(source, python_call_restrictions)
 
         with tempfile.TemporaryDirectory(prefix="algorithimia_") as tmp:
@@ -57,6 +75,23 @@ class PythonAdapter:
         if not payload.get("ok"):
             raise PythonExecutionError(str(payload.get("error", "player code failed")))
         return payload.get("result")
+
+
+def _reject_disallowed_python_syntax(source: str) -> None:
+    try:
+        tree = ast.parse(source)
+    except SyntaxError:
+        return
+
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.Import, ast.ImportFrom)):
+            raise PythonExecutionError("Imports are not available in Algorithimia puzzle submissions.")
+        if isinstance(node, ast.Attribute) and node.attr.startswith("__"):
+            raise PythonExecutionError("Dunder introspection is not available in Algorithimia puzzle submissions.")
+        if isinstance(node, ast.Name) and node.id.startswith("__"):
+            raise PythonExecutionError("Dunder introspection is not available in Algorithimia puzzle submissions.")
+        if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Load) and node.id in _DISALLOWED_DYNAMIC_NAMES:
+            raise PythonExecutionError(f"{node.id} is not available in Algorithimia puzzle submissions.")
 
 
 def _reject_disallowed_python_calls(source: str, restrictions: tuple[PythonCallRestriction, ...]) -> None:

@@ -28,6 +28,8 @@ Local verification is `python -m unittest` from the repository root. The GitHub 
 
 `Sorting Slime` is a DSA teaching encounter, so its encounter metadata defines Python call restrictions that reject `sorted(...)`, indirect built-in `sorted` bindings, and `.sort()` before executing player code. The adapter also removes restricted built-in function names from the child runner's `SAFE_BUILTINS` for that encounter, keeping helper bans encounter-scoped for future challenges.
 
+The Python adapter also applies encounter-neutral source preflight before subprocess execution. Early puzzle submissions cannot use imports, dunder introspection, or dynamic evaluation/introspection helpers such as `eval`, `exec`, `open`, `getattr`, `globals`, or `__import__`. These checks keep the current educational contract narrow and give players clearer feedback, but they are not a substitute for OS-level sandboxing.
+
 `Triage Line Dispatcher Trial` uses the same engine path with JSON ticket objects instead of integer rune values. Its output validator checks that returned ids were issued by the fixture and that every issued ticket is served exactly once before the expected policy order is compared. If the ids are valid but the order is wrong, the validator returns a compact encounter bark tied to the failed policy case: FIFO drift, buried urgency, broken stable ties, or ordinary starvation.
 
 Encounter metadata can name a `trace_case_name` when the most useful preview is not the first non-empty fixture. Triage Line uses this to show the ordinary-guard fixture in the CLI trace, including arrival, urgent override, stable tie, ordinary guard, and served labels.
