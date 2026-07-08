@@ -26,7 +26,7 @@ Local verification is `python -m unittest` from the repository root. The GitHub 
 
 ## Encounter Validation Policy
 
-`Sorting Slime` is a DSA teaching encounter, so its encounter metadata defines Python call restrictions that reject `sorted(...)`, indirect built-in `sorted` bindings, and `.sort()` before executing player code. The adapter also removes restricted built-in function names from the child runner's `SAFE_BUILTINS` for that encounter, keeping helper bans encounter-scoped for future challenges.
+`Sorting Slime` is a DSA teaching encounter, so its encounter metadata defines Python call restrictions that reject `sorted(...)`, indirect built-in `sorted` bindings, and `.sort()` before executing player code. The adapter also removes restricted built-in function names from the child runner's `SAFE_BUILTINS` for that encounter, keeping helper bans encounter-scoped for future challenges. Sorting Slime also has deterministic certification cases that run during attempts in addition to the public teaching fixtures, so hard-coded answers for the visible examples do not clear the encounter.
 
 The Python adapter also applies encounter-neutral source preflight before subprocess execution. Early puzzle submissions cannot use imports, dunder introspection, or dynamic evaluation/introspection helpers such as `eval`, `exec`, `open`, `getattr`, `globals`, or `__import__`. It also caps submitted source size before parsing and caps serialized result payloads inside the child runner before printing JSON back to the parent process. These checks keep the current educational contract narrow and reduce accidental local resource blowups, but they are not a substitute for OS-level sandboxing.
 

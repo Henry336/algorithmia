@@ -54,6 +54,7 @@ class EngineTests(unittest.TestCase):
 
         self.assertTrue(result.passed)
         self.assertTrue(all(case.passed for case in result.case_results))
+        self.assertTrue(any(case.case_name.startswith("cert_") for case in result.case_results))
 
     def test_sorting_slime_rejects_built_in_sorted(self) -> None:
         engine = GameEngine(PythonAdapter())
@@ -68,6 +69,8 @@ class EngineTests(unittest.TestCase):
         result = engine.attempt(get_encounter("sorting_slime"), source)
 
         self.assertFalse(result.passed)
+        self.assertTrue(any(case.case_name.startswith("cert_") and not case.passed for case in result.case_results))
+        self.assertTrue(any(case.case_name.startswith("cert_") and not case.passed for case in result.case_results))
         self.assertIn("visible sorting logic", result.case_results[0].error or "")
 
     def test_sorting_slime_rejects_indirect_built_in_sorted_bindings(self) -> None:
@@ -146,6 +149,22 @@ class EngineTests(unittest.TestCase):
 
         self.assertFalse(result.passed)
         self.assertTrue(any(not case.passed for case in result.case_results))
+
+    def test_sorting_slime_rejects_public_fixture_oracle_solution(self) -> None:
+        engine = GameEngine(PythonAdapter())
+        source = """
+def solve(values):
+    fixtures = {
+        (5, 1, 4, 2): [1, 2, 4, 5],
+        (1, 2, 3): [1, 2, 3],
+        (3, 1, 3, 2): [1, 2, 3, 3],
+        (): [],
+    }
+    return fixtures[tuple(values)]
+"""
+        result = engine.attempt(get_encounter("sorting_slime"), source)
+
+        self.assertFalse(result.passed)
 
     def test_triage_line_accepts_locked_policy(self) -> None:
         engine = GameEngine(PythonAdapter())

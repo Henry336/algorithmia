@@ -39,7 +39,7 @@ class GameEngine:
     def attempt(self, encounter: Encounter, source: str) -> AttemptResult:
         results: list[CaseResult] = []
 
-        for case in encounter.cases:
+        for case in encounter.cases + encounter.certification_cases:
             try:
                 actual = self._adapter.run(source, case.input_values, encounter.python_call_restrictions)
             except Exception as exc:  # noqa: BLE001 - player errors become gameplay feedback.

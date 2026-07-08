@@ -18,6 +18,7 @@
 - Added a GitHub Actions unit-test workflow for Python 3.11 pushes and pull requests.
 - Hardened the Python adapter preflight so imports, dunder introspection, and dynamic evaluation/introspection helpers are rejected before player code runs.
 - Added source-size and result-payload caps to the Python adapter to limit oversized local submissions and outputs.
+- Added Sorting Slime certification cases so hard-coded answers for the public examples do not clear the encounter.
 
 ## 0.1.0 - 2026-07-08
 

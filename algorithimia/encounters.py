@@ -36,6 +36,7 @@ class Encounter:
     python_call_restrictions: tuple[PythonCallRestriction, ...] = ()
     output_validator: OutputValidator | None = None
     trace_case_name: str | None = None
+    certification_cases: tuple[EncounterCase, ...] = ()
 
 
 SORTING_SLIME = Encounter(
@@ -51,6 +52,11 @@ SORTING_SLIME = Encounter(
         EncounterCase("already_ordered", (1, 2, 3), (1, 2, 3)),
         EncounterCase("duplicates", (3, 1, 3, 2), (1, 2, 3, 3)),
         EncounterCase("empty", (), ()),
+    ),
+    certification_cases=(
+        EncounterCase("cert_reverse_runes", (9, 7, 5, 3, 1), (1, 3, 5, 7, 9)),
+        EncounterCase("cert_negative_runes", (0, -2, 4, -2, 1), (-2, -2, 0, 1, 4)),
+        EncounterCase("cert_single_rune", (8,), (8,)),
     ),
     python_call_restrictions=(
         PythonCallRestriction(
