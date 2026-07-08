@@ -68,6 +68,7 @@ def _reject_disallowed_python_calls(source: str, restrictions: tuple[PythonCallR
     except SyntaxError:
         return
 
+    disallowed_aliases = _find_disallowed_aliases(tree, restrictions)
     for node in ast.walk(tree):
         if not isinstance(node, ast.Call):
             continue
@@ -75,7 +76,7 @@ def _reject_disallowed_python_calls(source: str, restrictions: tuple[PythonCallR
             if (
                 restriction.target == "function"
                 and isinstance(node.func, ast.Name)
-                and node.func.id == restriction.name
+                and (node.func.id == restriction.name or node.func.id in disallowed_aliases)
             ):
                 raise PythonExecutionError(restriction.message)
             if (
@@ -84,6 +85,46 @@ def _reject_disallowed_python_calls(source: str, restrictions: tuple[PythonCallR
                 and node.func.attr == restriction.name
             ):
                 raise PythonExecutionError(restriction.message)
+            if (
+                restriction.target == "method"
+                and isinstance(node.func, ast.Name)
+                and node.func.id in disallowed_aliases
+            ):
+                raise PythonExecutionError(restriction.message)
+
+
+def _find_disallowed_aliases(
+    tree: ast.AST,
+    restrictions: tuple[PythonCallRestriction, ...],
+) -> set[str]:
+    aliases: set[str] = set()
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Assign):
+            continue
+        if not _is_disallowed_alias_value(node.value, restrictions, aliases):
+            continue
+        for target in node.targets:
+            if isinstance(target, ast.Name):
+                aliases.add(target.id)
+    return aliases
+
+
+def _is_disallowed_alias_value(
+    value: ast.expr,
+    restrictions: tuple[PythonCallRestriction, ...],
+    aliases: set[str],
+) -> bool:
+    for restriction in restrictions:
+        if restriction.target == "function" and isinstance(value, ast.Name):
+            if value.id == restriction.name or value.id in aliases:
+                return True
+        if restriction.target == "method" and isinstance(value, ast.Attribute):
+            if value.attr == restriction.name:
+                return True
+        if restriction.target == "method" and isinstance(value, ast.Name):
+            if value.id in aliases:
+                return True
+    return False
 
 
 def _runner_source(player_source: str) -> str:

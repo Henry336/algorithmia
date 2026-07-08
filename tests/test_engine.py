@@ -5,6 +5,7 @@ import unittest
 from algorithimia.encounters import Encounter, EncounterCase, get_encounter
 from algorithimia.engine import GameEngine
 from algorithimia.language.python_adapter import PythonAdapter, PythonExecutionError
+from algorithimia.visualizers import encounter_trace
 
 MANUAL_SORT = """
 def solve(values):
@@ -57,6 +58,14 @@ class EngineTests(unittest.TestCase):
     def test_sorting_slime_rejects_built_in_sorted(self) -> None:
         engine = GameEngine(PythonAdapter())
         result = engine.attempt(get_encounter("sorting_slime"), "def solve(values):\n    return sorted(values)\n")
+
+        self.assertFalse(result.passed)
+        self.assertIn("visible sorting logic", result.case_results[0].error or "")
+
+    def test_sorting_slime_rejects_aliased_built_in_sorted(self) -> None:
+        engine = GameEngine(PythonAdapter())
+        source = "def solve(values):\n    helper = sorted\n    return helper(values)\n"
+        result = engine.attempt(get_encounter("sorting_slime"), source)
 
         self.assertFalse(result.passed)
         self.assertIn("visible sorting logic", result.case_results[0].error or "")
@@ -117,6 +126,14 @@ def solve(tickets):
 
         self.assertFalse(result.passed)
         self.assertIn("Queueworks never issued", result.case_results[1].error or "")
+
+    def test_triage_line_trace_previews_starvation_guard_case(self) -> None:
+        trace = encounter_trace(get_encounter("triage_line"))
+
+        self.assertIn("urgent override: B before A", trace)
+        self.assertIn("stable tie: C keeps urgent arrival order", trace)
+        self.assertIn("ordinary guard: A served after two urgent", trace)
+        self.assertIn("served A", trace)
 
     def test_adapter_requires_solve_function(self) -> None:
         adapter = PythonAdapter()

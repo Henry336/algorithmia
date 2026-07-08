@@ -35,6 +35,7 @@ class Encounter:
     default_solution: str
     python_call_restrictions: tuple[PythonCallRestriction, ...] = ()
     output_validator: OutputValidator | None = None
+    trace_case_name: str | None = None
 
 
 SORTING_SLIME = Encounter(
@@ -179,6 +180,7 @@ def solve(tickets):
     return served
 """,
     output_validator=_validate_ticket_ids,
+    trace_case_name="ordinary_guard_after_two_urgent",
 )
 
 
