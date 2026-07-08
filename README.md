@@ -38,6 +38,8 @@ Or:
 py -m unittest
 ```
 
+GitHub Actions also runs the same unit-test suite on pushes to `main` and on pull requests.
+
 ## Encounter Contracts
 
 ### Sorting Slime

@@ -11,6 +11,10 @@ Algorithimia currently uses a small Python package organized around a determinis
 - `algorithimia.visualizers`: deterministic trace events and text labels for algorithm feedback.
 - `algorithimia.trace_viewer`: static HTML trace viewer export for the current structured event stream.
 
+## Verification
+
+Local verification is `python -m unittest` from the repository root. The GitHub Actions workflow in `.github/workflows/tests.yml` installs the package on Python 3.11 and runs the same deterministic unit-test suite on pushes to `main` and pull requests.
+
 ## Gameplay Flow
 
 1. The CLI loads an encounter.

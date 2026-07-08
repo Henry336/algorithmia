@@ -15,6 +15,7 @@
 - Added validator-linked Triage debrief barks for buried urgency, broken stable ties, ordinary starvation, FIFO drift, and ticket identity mistakes.
 - Added a static browser trace viewer export with embedded Phase 1 badge and trace-event icons through `--trace-html`.
 - Hardened Sorting Slime again so indirect built-in `sorted` bindings through default arguments, lambda arguments, or tuple indexing are rejected.
+- Added a GitHub Actions unit-test workflow for Python 3.11 pushes and pull requests.
 
 ## 0.1.0 - 2026-07-08
 
