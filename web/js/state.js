@@ -7,6 +7,8 @@ const defaults = {
   foundDispatcherSecret: false,
   heapWardenDefeated: false,
   foundHeaplightSecret: false,
+  bogoDefeated: false,
+  foundArrayPlainsSecret: false,
   textSpeed: "normal",
 };
 

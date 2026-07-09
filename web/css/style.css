@@ -630,6 +630,55 @@ html, body {
   color: var(--danger);
 }
 
+.code-battle-scene {
+  width: min(92vw, 680px);
+}
+
+.code-editor {
+  width: 100%;
+  min-height: 160px;
+  margin-top: 10px;
+  background: #0d1117;
+  color: #d7e0e8;
+  border: 2px solid var(--panel-border);
+  font-family: "Courier New", monospace;
+  font-size: 0.85rem;
+  padding: 10px;
+  resize: vertical;
+  tab-size: 2;
+}
+
+.code-editor:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.code-results {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+  font-family: "Courier New", monospace;
+  font-size: 0.78rem;
+}
+
+.code-result-row {
+  padding: 3px 8px;
+  border-left: 3px solid transparent;
+}
+
+.code-result-row.pass {
+  color: #7fd8a0;
+  border-left-color: #7fd8a0;
+}
+
+.code-result-row.fail {
+  color: #e07f7c;
+  border-left-color: #e07f7c;
+}
+
 /* ---------- Transition wipe ---------- */
 
 .screen-transition {

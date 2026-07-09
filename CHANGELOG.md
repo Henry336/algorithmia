@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Added Chapter 3 (Array Plains): a Shuffle Imp minor encounter, a hidden secret (Bogo Court lore), and Lord Bogo, Duke of Randomness, as the first boss requiring the player to write and run real code rather than click tokens.
+- Added a code-editor battle screen (`codeBattle.js`): a real `solve(values)` textarea, executed in a Web Worker with a hard timeout so an infinite loop can't freeze the page (verified: a `while(true){}` submission is killed at ~2s and the page stays responsive), rejects `.sort()`/`sorted()` to force visible sorting logic, and runs the same public-round-then-sealed-round structure as the other bosses.
 - Added Chapter 2 (Heaplight Foundry): an Ember Sorter minor encounter, a hidden secret (forged priority-tag lore), and The Heap Warden boss, all using a new max-priority-first policy (`priorityPolicy.js`, stable ties by arrival) verified against hand-computed fixtures before wiring into UI.
 - Generalized `ticketBattle.js` from a Chapter-1-only ticket screen into a reusable pick-the-order battle screen: callers now pass their own `solve(items)` policy, sealed-round generator, and flag/hint text, so Chapter 2's heap battles reuse the exact same UI and public/sealed-round structure as Chapter 1's triage battles.
 - Added Chapter 1 (The Dispatcher's Line): a larger explorable room with a Line Cutter minor encounter, a hidden secret (sealed emergency-route lore), and The Dispatcher boss fight.

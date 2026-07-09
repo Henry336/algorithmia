@@ -6,22 +6,23 @@ const screens = {
   options: document.getElementById("screen-options"),
 };
 
-export function initTitle({ onEnterChapter0, onEnterChapter1, onEnterChapter2 }) {
+export function initTitle({ onEnterChapter0, onEnterChapter1, onEnterChapter2, onEnterChapter3 }) {
   const continueBtn = document.querySelector('[data-action="continue"]');
   continueBtn.disabled = !hasSave();
 
   document.getElementById("title-build").textContent = `build ${buildStamp()}`;
 
   function resumeFurthest() {
-    const { queueworksGateOpen, dispatcherDefeated } = getState();
+    const { queueworksGateOpen, dispatcherDefeated, heapWardenDefeated } = getState();
     hideAll();
-    if (dispatcherDefeated) onEnterChapter2();
+    if (heapWardenDefeated) onEnterChapter3();
+    else if (dispatcherDefeated) onEnterChapter2();
     else if (queueworksGateOpen) onEnterChapter1();
     else onEnterChapter0();
   }
 
   function refreshChapterCards() {
-    const { queueworksGateOpen, dispatcherDefeated } = getState();
+    const { queueworksGateOpen, dispatcherDefeated, heapWardenDefeated } = getState();
     const ch1Card = document.querySelector('.chapter-card[data-chapter="1"]');
     if (ch1Card) {
       ch1Card.disabled = !queueworksGateOpen;
@@ -31,6 +32,11 @@ export function initTitle({ onEnterChapter0, onEnterChapter1, onEnterChapter2 })
     if (ch2Card) {
       ch2Card.disabled = !dispatcherDefeated;
       ch2Card.classList.toggle("locked", !dispatcherDefeated);
+    }
+    const ch3Card = document.querySelector('.chapter-card[data-chapter="3"]');
+    if (ch3Card) {
+      ch3Card.disabled = !heapWardenDefeated;
+      ch3Card.classList.toggle("locked", !heapWardenDefeated);
     }
   }
   refreshChapterCards();
@@ -64,6 +70,7 @@ export function initTitle({ onEnterChapter0, onEnterChapter1, onEnterChapter2 })
       if (chapter === 0) onEnterChapter0();
       else if (chapter === 1) onEnterChapter1();
       else if (chapter === 2) onEnterChapter2();
+      else if (chapter === 3) onEnterChapter3();
     });
   });
 
@@ -82,6 +89,7 @@ export function initTitle({ onEnterChapter0, onEnterChapter1, onEnterChapter2 })
       document.getElementById("screen-room").classList.remove("active");
       document.getElementById("screen-room-ch1").classList.remove("active");
       document.getElementById("screen-room-ch2").classList.remove("active");
+      document.getElementById("screen-room-ch3").classList.remove("active");
       show(screens.title);
       continueBtn.disabled = !hasSave();
     });

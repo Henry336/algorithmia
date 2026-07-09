@@ -7,6 +7,7 @@ The player-facing game lives in `web/` — a plain static site (no build step, n
 - **Chapter 0 — Queueworks Intake**: the Sorting Slime (rune ordering, public + sealed rounds).
 - **Chapter 1 — The Dispatcher's Line**: a Line Cutter minor fight and The Dispatcher boss, both ticket-service-order puzzles mirroring the CLI's urgent/stable-tie/starvation-guard policy.
 - **Chapter 2 — Heaplight Foundry**: an Ember Sorter minor fight and The Heap Warden boss, both max-priority-first battles (a real priority-queue/heap-extraction rule, ties broken by arrival order) reusing the same battle-screen UI with a different policy plugged in.
+- **Chapter 3 — Array Plains**: a Shuffle Imp minor fight and Lord Bogo, Duke of Randomness, as the first boss requiring the player to actually write and run a `solve(values)` function rather than click tokens — real code, executed client-side in a Web Worker with a hard timeout so an infinite loop can't freeze the page.
 
 Art is currently hand-authored placeholder pixel art rendered to `<canvas>`, meant to be swapped for real exported sprites later without touching game logic.
 
@@ -41,9 +42,12 @@ web/
     room.js               tile-grid overworld engine + Chapter 0 map
     chapter1.js            tile-grid overworld engine + Chapter 1 map (Dispatcher's Line)
     chapter2.js             tile-grid overworld engine + Chapter 2 map (Heaplight Foundry)
+    chapter3.js              tile-grid overworld engine + Chapter 3 map (Array Plains)
     battle.js              Sorting Slime battle screen (public + sealed rounds)
     ticketBattle.js          generic pick-the-order battle screen (public + sealed rounds),
                               driven by a pluggable `solve(items)` policy + display config
+    codeBattle.js             real solve(values) code editor battle screen, run in a
+                               Web Worker with a hard timeout (public + sealed rounds)
     triagePolicy.js           urgent/stable-tie/starvation-guard policy, ported from encounters.py
     priorityPolicy.js          max-priority-first policy (stable ties by arrival), for Chapter 2
     dialogue.js             typewriter dialogue box

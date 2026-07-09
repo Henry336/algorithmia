@@ -184,6 +184,49 @@ export const LINE_CUTTER = {
 };
 
 // Simple tile "icon" overlays drawn as small pixel glyphs on top of a floor tile.
+export const LORD_BOGO = {
+  palette: {
+    P: "#8a4fc9", // purple coat
+    Y: "#d8c24a", // gold coat
+    S: "#c98f5e", // skin
+    E: "#2a2016", // eyes
+    W: "#f2f2f2", // ruff
+    C: "#c9c9d0", // crown
+    D: "#5a2fa0", // dark purple shadow
+  },
+  matrix: [
+    "...CCC....",
+    "..CCCCC...",
+    "...WWW....",
+    "..SSSSS...",
+    "..SEESE...",
+    "..SSSSS...",
+    ".WPYPYPW..",
+    "PPYPYPYPY.",
+    "PPYPYPYPY.",
+    "PDYDYDYDY.",
+    ".PP...YY..",
+    ".PP...YY..",
+  ],
+};
+
+export const SHUFFLE_IMP = {
+  palette: {
+    P: "#8a4fc9",
+    K: "#2a2a30",
+    E: "#d8c24a",
+  },
+  matrix: [
+    "..PPPP..",
+    ".PKEEKP.",
+    ".PPPPPP.",
+    "PPKPPKPP",
+    "PPPPPPPP",
+    ".PP..PP.",
+    ".P....P.",
+  ],
+};
+
 export const GATE_ICON = {
   palette: { M: "#8a6a3a", D: "#4a3620", L: "#d8b26a" },
   matrix: [

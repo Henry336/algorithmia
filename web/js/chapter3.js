@@ -1,16 +1,15 @@
 import { applyPixelArt } from "./pixelart.js";
-import { PLAYER_DOWN, HEAP_WARDEN, EMBER_SORTER, GATE_ICON, LEDGER_ICON, PIXEL_SIZE as SPRITE_PX } from "./sprites.js";
+import { PLAYER_DOWN, LORD_BOGO, SHUFFLE_IMP, GATE_ICON, LEDGER_ICON, PIXEL_SIZE as SPRITE_PX } from "./sprites.js";
 import { sayLines, isDialogueActive, advance as advanceDialogue } from "./dialogue.js";
 import { getState, setState } from "./state.js";
-import { startTicketBattle, makeTicket } from "./ticketBattle.js";
-import { solvePriorityOrder } from "./priorityPolicy.js";
+import { startCodeBattle } from "./codeBattle.js";
 
 export const TILE = 42;
 const COLS = 13;
 const ROWS = 10;
 
-// 1 wall, 0 floor, 2 furnace clutter, 3 gate closed, 6 gate open,
-// 5 Ember Sorter (minor), 8 secret, 9 Heap Warden boss
+// 1 wall, 0 floor, 2 marker-post clutter, 3 gate closed, 6 gate open,
+// 5 Shuffle Imp (minor), 8 secret, 9 Lord Bogo boss
 const BASE_MAP = [
   [1, 1, 1, 1, 1, 1, 3, 3, 1, 1, 1, 1, 1],
   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
@@ -26,31 +25,50 @@ const BASE_MAP = [
 
 const PLAYER_START = { col: 6, row: 8 };
 
+const STARTER_CODE = `function solve(values) {
+  const ordered = values.slice();
+  // write your own comparisons here (no .sort()/sorted())
+  return ordered;
+}`;
+
 let viewport;
 let map;
 let player = { ...PLAYER_START, facing: "up" };
 let playerEl;
 let hasGreeted = false;
-let hasWarnedGateOnce = false;
-let onExitToChapter3 = null;
+let onExitToChapter4 = null;
 
-function priorityTicket(id, arrival, priority) {
-  return { id, arrival, priority };
-}
-
-function randomSealedEmbers(count) {
-  const letters = ["A", "B", "C", "D", "E", "F", "G"];
-  const pool = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+function shuffledDistinct(count, max) {
+  const pool = Array.from({ length: max }, (_, i) => i + 1);
   for (let i = pool.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [pool[i], pool[j]] = [pool[j], pool[i]];
   }
-  return Array.from({ length: count }, (_, i) => priorityTicket(letters[i], i, pool[i]));
+  return pool.slice(0, count);
 }
 
-export function initChapter2Room({ onExitToChapter3: exitHandler } = {}) {
-  onExitToChapter3 = exitHandler || null;
-  viewport = document.getElementById("room-viewport-ch2");
+function sortedCase(name, values) {
+  return { name, input: values, expected: values.slice().sort((a, b) => a - b) };
+}
+
+function generateSealedShuffleImp() {
+  return [
+    sortedCase("sealed_1", shuffledDistinct(4, 9)),
+    sortedCase("sealed_2", shuffledDistinct(4, 9)),
+  ];
+}
+
+function generateSealedBogo() {
+  return [
+    sortedCase("sealed_1", shuffledDistinct(6, 12)),
+    sortedCase("sealed_2", shuffledDistinct(6, 12)),
+    sortedCase("sealed_3", shuffledDistinct(6, 12)),
+  ];
+}
+
+export function initChapter3Room({ onExitToChapter4: exitHandler } = {}) {
+  onExitToChapter4 = exitHandler || null;
+  viewport = document.getElementById("room-viewport-ch3");
   viewport.style.width = `${COLS * TILE}px`;
   viewport.style.height = `${ROWS * TILE}px`;
   viewport.style.transformOrigin = "top center";
@@ -59,8 +77,8 @@ export function initChapter2Room({ onExitToChapter3: exitHandler } = {}) {
   window.addEventListener("resize", fitViewportToScreen);
   map = BASE_MAP.map((row) => row.slice());
 
-  const { heapWardenDefeated } = getState();
-  if (heapWardenDefeated) {
+  const { bogoDefeated } = getState();
+  if (bogoDefeated) {
     map[2][6] = 0;
     map[0][6] = 6;
     map[0][7] = 6;
@@ -74,8 +92,8 @@ export function initChapter2Room({ onExitToChapter3: exitHandler } = {}) {
     hasGreeted = true;
     window.setTimeout(() => {
       sayLines([
-        { speaker: "", text: "Heat rolls off the furnace floor. Every ember here fights to be the one that matters most." },
-        { speaker: "Mira Vale", text: "The Heap Warden keeps the worst fires burning first. Show him priority needs rules, not just heat." },
+        { speaker: "", text: "The Plains stretch out in restless rows, formations shifting whenever no one looks directly at them." },
+        { speaker: "Mira Vale", text: "Lord Bogo thinks disorder is freedom. You'll need code that holds even when he reshuffles it." },
       ]);
     }, 250);
   }
@@ -108,8 +126,8 @@ function render() {
     }
   }
 
-  if (map[2][6] === 9) placeEntity("warden", 6, 2, HEAP_WARDEN, 5);
-  if (map[5][5] === 5) placeEntity("ember", 5, 5, EMBER_SORTER, SPRITE_PX);
+  if (map[2][6] === 9) placeEntity("bogo", 6, 2, LORD_BOGO, 5);
+  if (map[5][5] === 5) placeEntity("imp", 5, 5, SHUFFLE_IMP, SPRITE_PX);
 
   playerEl = placeEntity("player", player.col, player.row, PLAYER_DOWN, SPRITE_PX);
 }
@@ -174,8 +192,8 @@ function tryMove(dir) {
   const targetRow = player.row + dr;
   const code = tileAt(targetCol, targetRow);
 
-  if (code === 5) return enterEmberSorterBattle();
-  if (code === 9) return enterHeapWardenBattle();
+  if (code === 5) return enterShuffleImpBattle();
+  if (code === 9) return enterLordBogoBattle();
   if (code === 8) return findSecret();
   if (code === 6) return onReachOpenGate();
   if (isBlocking(code)) return;
@@ -188,81 +206,59 @@ function tryMove(dir) {
   }
 }
 
-const PRIORITY_BATTLE_TEXT = {
-  roundHint1: "Click embers in the order the Foundry should burn them: highest priority first.",
-  roundHint2: "The Foundry banked a fresh set of embers. Prove the rule still holds.",
-  wrongPublicHint: "Not quite. Highest priority goes first; equal priority keeps arrival order.",
-  wrongSealedHint: "The visible order held, but a fresh bank of embers exposed a guess.",
-  wonPublicHint: "That holds. But can it survive a fresh bank of embers?",
-  wonHint: "Priority confirmed. The heap holds its shape.",
-  incompletePickHint: "Every ember needs a place in the burn order.",
-  flagLabel: (t) => `P${t.priority}`,
-  flagClass: (t) => t.priority >= 7,
-  solve: solvePriorityOrder,
-  generateSealed: randomSealedEmbers,
-};
-
-function enterEmberSorterBattle() {
+function enterShuffleImpBattle() {
   sayLines(
-    [{ speaker: "", text: "An Ember Sorter spins loose, burning whatever it grabs first instead of what matters most." }],
+    [{ speaker: "", text: "A Shuffle Imp giggles, scrambling a small formation just to watch it fall apart." }],
     () => {
-      startTicketBattle({
-        title: "Ember Sorter",
-        publicTickets: [
-          priorityTicket("A", 0, 3),
-          priorityTicket("B", 1, 7),
-          priorityTicket("C", 2, 5),
-        ],
-        sealedCount: 3,
-        enemySprite: EMBER_SORTER,
+      startCodeBattle({
+        title: "Shuffle Imp",
+        starterCode: STARTER_CODE,
+        publicCases: [sortedCase("public_mixed", [4, 2, 3])],
+        generateSealed: generateSealedShuffleImp,
+        enemySprite: SHUFFLE_IMP,
         enemyPixelSize: 6,
-        returnScreen: "screen-room-ch2",
-        ...PRIORITY_BATTLE_TEXT,
+        returnScreen: "screen-room-ch3",
+        wonHint: "The formation holds its shape. The imp sulks off.",
         onWin: () => {
           map[5][5] = 0;
           render();
-          sayLines([{ speaker: "Mira Vale", text: "Good. The floor cools where it should." }]);
+          sayLines([{ speaker: "Mira Vale", text: "Good. It didn't just work once - it works." }]);
         },
       });
     }
   );
 }
 
-function enterHeapWardenBattle() {
-  const { heapWardenDefeated } = getState();
-  if (heapWardenDefeated) {
-    sayLines([{ speaker: "The Heap Warden", text: "The hottest fire still rises first. As it should." }]);
+function enterLordBogoBattle() {
+  const { bogoDefeated } = getState();
+  if (bogoDefeated) {
+    sayLines([{ speaker: "Lord Bogo", text: "Order again? How dreadfully reliable of you." }]);
     return;
   }
   sayLines(
     [
-      { speaker: "The Heap Warden", text: "Crisis has one shape: the worst fire, first. Nothing else matters." },
-      { speaker: "The Heap Warden", text: "Prove your rule survives more than one furnace." },
+      { speaker: "Lord Bogo", text: "Order is just luck that hasn't run out yet!" },
+      { speaker: "Lord Bogo", text: "Prove your little rule survives a proper reshuffling." },
     ],
     () => {
-      startTicketBattle({
-        title: "The Heap Warden",
-        publicTickets: [
-          priorityTicket("A", 0, 4),
-          priorityTicket("B", 1, 9),
-          priorityTicket("C", 2, 4),
-          priorityTicket("D", 3, 7),
-          priorityTicket("E", 4, 1),
-        ],
-        sealedCount: 5,
-        enemySprite: HEAP_WARDEN,
+      startCodeBattle({
+        title: "Lord Bogo, Duke of Randomness",
+        starterCode: STARTER_CODE,
+        publicCases: [sortedCase("public_mixed", [5, 3, 4, 1, 2])],
+        generateSealed: generateSealedBogo,
+        enemySprite: LORD_BOGO,
         enemyPixelSize: 6,
-        returnScreen: "screen-room-ch2",
-        ...PRIORITY_BATTLE_TEXT,
+        returnScreen: "screen-room-ch3",
+        wonHint: "Order confirmed. Even Lord Bogo can't shuffle it loose.",
         onWin: () => {
-          setState({ heapWardenDefeated: true });
+          setState({ bogoDefeated: true });
           map[2][6] = 0;
           map[0][6] = 6;
           map[0][7] = 6;
           render();
           sayLines([
-            { speaker: "The Heap Warden", text: "...Equal fires can wait their turn fairly. I hadn't proven that before." },
-            { speaker: "", text: "The furnace floor settles into a steady, legible heat." },
+            { speaker: "Lord Bogo", text: "...Huh. Still ordered. That is - annoyingly consistent." },
+            { speaker: "", text: "The Plains settle. For the first time, the formations hold their shape." },
           ]);
         },
       });
@@ -271,29 +267,27 @@ function enterHeapWardenBattle() {
 }
 
 function findSecret() {
-  const { foundHeaplightSecret } = getState();
-  if (foundHeaplightSecret) {
-    sayLines([{ speaker: "", text: "The cooled vent is already open. Just old ash now." }]);
+  const { foundArrayPlainsSecret } = getState();
+  if (foundArrayPlainsSecret) {
+    sayLines([{ speaker: "", text: "The buried marker is already dug up." }]);
     return;
   }
-  setState({ foundHeaplightSecret: true });
+  setState({ foundArrayPlainsSecret: true });
   sayLines([
-    { speaker: "", text: "A cooled vent shaft, easy to miss between the furnace stacks." },
-    { speaker: "", text: "Old tags inside show forged priority stamps: someone was manipulating whose fire burned first." },
-    { speaker: "Mira Vale", text: "Importance is only as honest as whoever assigns it. Worth remembering." },
+    { speaker: "", text: "A half-buried marker post, carved with mismatched sigils and dice." },
+    { speaker: "", text: "It names a 'Bogo Court' - nobles who treat randomness as freedom, and order as a kind of tyranny." },
+    { speaker: "Mira Vale", text: "Funny people to argue with. Harder to argue with a repair that just works." },
   ]);
 }
 
 function onReachOpenGate() {
-  if (hasWarnedGateOnce) return;
-  hasWarnedGateOnce = true;
   sayLines(
     [
-      { speaker: "", text: "The vent shaft leads up, out past the furnace floor into open, restless ground." },
-      { speaker: "Mira Vale", text: "That's the Array Plains. Watch your footing - the formations shift out there." },
+      { speaker: "", text: "The formation opens a clear path onward." },
+      { speaker: "Mira Vale", text: "That's as far as the map goes for now. Good work, Patchrunner." },
     ],
     () => {
-      if (onExitToChapter3) onExitToChapter3();
+      if (onExitToChapter4) onExitToChapter4();
     }
   );
 }
@@ -302,14 +296,14 @@ function bindInput() {
   document.removeEventListener("keydown", onKeyDown);
   document.addEventListener("keydown", onKeyDown);
 
-  const dpad = document.getElementById("dpad-ch2");
+  const dpad = document.getElementById("dpad-ch3");
   dpad.querySelectorAll("button").forEach((btn) => {
     btn.onclick = () => handleDirAction(btn.dataset.dir);
   });
 }
 
 function handleDirAction(dir) {
-  if (document.getElementById("screen-room-ch2").classList.contains("active") === false) return;
+  if (document.getElementById("screen-room-ch3").classList.contains("active") === false) return;
   if (dir === "interact") {
     if (isDialogueActive()) {
       advanceDialogue();
@@ -326,14 +320,14 @@ function interactFacing() {
   if (isDialogueActive()) return;
   const { dc, dr } = DIR_OFFSET[player.facing];
   const code = tileAt(player.col + dc, player.row + dr);
-  if (code === 5) enterEmberSorterBattle();
-  else if (code === 9) enterHeapWardenBattle();
+  if (code === 5) enterShuffleImpBattle();
+  else if (code === 9) enterLordBogoBattle();
   else if (code === 8) findSecret();
   else if (code === 6) onReachOpenGate();
 }
 
 function onKeyDown(e) {
-  if (document.getElementById("screen-room-ch2").classList.contains("active") === false) return;
+  if (document.getElementById("screen-room-ch3").classList.contains("active") === false) return;
   const key = e.code;
   const keyDirs = {
     ArrowUp: "up", KeyW: "up",

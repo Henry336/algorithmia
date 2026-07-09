@@ -43,9 +43,9 @@
           <span class="chapter-num">Chapter 2</span>
           <span class="chapter-name">Heaplight Foundry</span>
         </button>
-        <button class="chapter-card locked" disabled>
+        <button class="chapter-card locked" data-chapter="3" disabled>
           <span class="chapter-num">Chapter 3</span>
-          <span class="chapter-name">Coming soon</span>
+          <span class="chapter-name">Array Plains</span>
         </button>
       </div>
       <button class="back-button" data-action="back-to-title">Back</button>
@@ -123,6 +123,23 @@
     </div>
   </section>
 
+  <!-- CHAPTER 3 ROOM -->
+  <section id="screen-room-ch3" class="screen">
+    <div class="hud">
+      <span id="hud-chapter-ch3">Chapter 3 &middot; Array Plains</span>
+      <button class="hud-menu-btn" data-action="quit-to-title">Menu</button>
+    </div>
+    <div id="room-viewport-ch3"></div>
+    <div class="controls-hint">Move: Arrow keys / WASD &nbsp;&middot;&nbsp; Interact: Space / Enter</div>
+    <div id="dpad-ch3" class="dpad" aria-hidden="false">
+      <button data-dir="up">&#9650;</button>
+      <button data-dir="left">&#9664;</button>
+      <button data-dir="interact">&#9679;</button>
+      <button data-dir="right">&#9654;</button>
+      <button data-dir="down">&#9660;</button>
+    </div>
+  </section>
+
   <!-- DIALOGUE BOX (overlay, shown on top of room) -->
   <div id="dialogue-box" class="dialogue-box hidden">
     <div class="dialogue-speaker" id="dialogue-speaker"></div>
@@ -171,6 +188,28 @@
       </div>
 
       <div class="battle-feedback" id="ticket-battle-feedback"></div>
+    </div>
+  </section>
+
+  <!-- CODE BATTLE SCREEN (Shuffle Imp minor fight + Lord Bogo boss) -->
+  <section id="screen-battle-code" class="screen">
+    <div class="battle-scene code-battle-scene">
+      <div class="battle-backdrop"></div>
+      <div class="battle-enemy" id="code-battle-enemy-sprite"></div>
+      <h2 class="battle-title" id="code-battle-title">Lord Bogo</h2>
+      <p class="battle-subtitle" id="code-round-label">Public cases</p>
+
+      <p class="battle-hint" id="code-hint">Write solve(values) and Run it against the visible cases.</p>
+
+      <textarea id="code-editor" class="code-editor" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea>
+
+      <div class="battle-actions">
+        <button class="battle-btn primary" data-action="run-code">Run</button>
+        <button class="battle-btn" data-action="reset-code">Reset</button>
+      </div>
+
+      <div class="code-results" id="code-results"></div>
+      <div class="battle-feedback" id="code-battle-feedback"></div>
     </div>
   </section>
 
