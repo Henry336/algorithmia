@@ -1,4 +1,6 @@
 import { applyPixelArt } from "./pixelart.js";
+import { applyBattleCost } from "./combatState.js";
+import { describeCost, initBattleHud, logBattle, updateBattleVitals } from "./battleHud.js";
 
 // Player writes a Python-flavored `solve(values)` function. The static browser
 // build supports the small subset this first sorting lesson needs: def,
@@ -55,7 +57,7 @@ function compilePythonSolve(source) {
     throw new Error("Add an indented body under def solve(values):");
   }
 
-  const js = ["function solve(values) {"];
+  const js = ["function solve(values) {", "const __metrics = { steps: 0, writes: 0, assignments: 0 };"];
   const stack = [];
   const declared = new Set(["values"]);
   let swapTemp = 0;
@@ -83,6 +85,7 @@ function compilePythonSolve(source) {
       const step = args.length === 3 ? args[2] : "1";
       declared.add(name);
       js.push("for (let " + name + " = " + start + "; " + name + " < " + end + "; " + name + " += " + step + ") {");
+      js.push("__metrics.steps += 1; if (__metrics.steps > 10000) throw new Error('Too many loop steps. Check for runaway work.');");
       stack.push(item.indent);
       continue;
     }
@@ -97,13 +100,14 @@ function compilePythonSolve(source) {
     match = line.match(/^while\\s+(.+)\\s*:\\s*$/);
     if (match) {
       js.push("while (" + translateExpr(match[1]) + ") {");
+      js.push("__metrics.steps += 1; if (__metrics.steps > 10000) throw new Error('Too many loop steps. Check for runaway work.');");
       stack.push(item.indent);
       continue;
     }
 
     match = line.match(/^return\\s+(.+)$/);
     if (match) {
-      js.push("return " + translateExpr(match[1]) + ";");
+      js.push("return { __algorithimiaValue: " + translateExpr(match[1]) + ", __algorithimiaMetrics: __metrics };");
       continue;
     }
 
@@ -118,6 +122,7 @@ function compilePythonSolve(source) {
       swapTemp += 1;
       js.push("const " + tempA + " = " + rightA + ";");
       js.push("const " + tempB + " = " + rightB + ";");
+      js.push("__metrics.writes += 2;");
       js.push(leftA + " = " + tempA + ";");
       js.push(leftB + " = " + tempB + ";");
       continue;
@@ -131,6 +136,7 @@ function compilePythonSolve(source) {
       if (!declared.has(name)) {
         throw new Error("Unknown variable near line " + item.lineNo + ": " + name);
       }
+      js.push("__metrics.assignments += 1;");
       js.push(name + " " + op + "= " + value + ";");
       continue;
     }
@@ -140,9 +146,11 @@ function compilePythonSolve(source) {
       const name = match[1];
       const value = translateExpr(match[2]);
       if (declared.has(name)) {
+        js.push("__metrics.assignments += 1;");
         js.push(name + " = " + value + ";");
       } else {
         declared.add(name);
+        js.push("__metrics.assignments += 1;");
         js.push("let " + name + " = " + value + ";");
       }
       continue;
@@ -150,6 +158,7 @@ function compilePythonSolve(source) {
 
     match = line.match(/^(.+\\[[^\\]]+\\])\\s*=\\s*(.+)$/);
     if (match) {
+      js.push("__metrics.writes += 1;");
       js.push(translateExpr(match[1]) + " = " + translateExpr(match[2]) + ";");
       continue;
     }
@@ -175,8 +184,10 @@ self.onmessage = (e) => {
   try {
     const results = cases.map((c) => {
       try {
-        const actual = solve(c.input.slice());
-        return { name: c.name, pass: JSON.stringify(actual) === JSON.stringify(c.expected) };
+        const raw = solve(c.input.slice());
+        const actual = raw && Object.prototype.hasOwnProperty.call(raw, "__algorithimiaValue") ? raw.__algorithimiaValue : raw;
+        const metrics = raw && raw.__algorithimiaMetrics ? raw.__algorithimiaMetrics : { steps: 0, writes: 0, assignments: 0 };
+        return { name: c.name, pass: JSON.stringify(actual) === JSON.stringify(c.expected), metrics };
       } catch (err) {
         return { name: c.name, pass: false, error: String((err && err.message) || err) };
       }
@@ -239,6 +250,7 @@ let round = 1;
 let config = null;
 let activeScreen = null;
 let locked = false;
+let failedRuns = 0;
 
 // { title, starterCode, publicCases: [{name, input, expected}], generateSealed(): cases,
 //   enemySprite, enemyPixelSize, returnScreen, onWin,
@@ -255,6 +267,10 @@ export function startCodeBattle(battleConfig) {
   if (config.enemySprite) {
     applyPixelArt(enemySpriteHost, config.enemySprite.matrix, config.enemySprite.palette, config.enemyPixelSize || 5);
   }
+  initBattleHud(screenBattle, {
+    objective: config.objective || "Write Python that passes visible and sealed cases with reasonable work.",
+    enemyStatus: round === 1 ? "Public cases loaded" : "Sealed cases armed",
+  });
 
   wipeTo(() => {
     if (activeScreen) activeScreen.classList.remove("active");
@@ -264,11 +280,19 @@ export function startCodeBattle(battleConfig) {
 }
 
 function setupRound() {
+  failedRuns = 0;
   feedbackEl.textContent = "";
   feedbackEl.classList.remove("error");
   resultsEl.innerHTML = "";
   runBtn.disabled = false;
   roundLabel.textContent = round === 1 ? "Public cases" : "Sealed check";
+  initBattleHud(screenBattle, {
+    objective: round === 1
+      ? (config.objective || "Write Python repair logic, then check its observed work.")
+      : "Run the same Python against fresh hidden cases.",
+    enemyStatus: round === 1 ? "Visible tests online" : "Hidden tests online",
+  });
+  logBattle(screenBattle, "Analyzer tracks loop steps, list writes, and assignments.", "warning");
   hintEl.textContent = round === 1
     ? (config.roundHint1 || "Write Python def solve(values): and run it against the visible cases.")
     : (config.roundHint2 || "The Archive tried fresh input. Prove the repair still holds.");
@@ -279,9 +303,52 @@ function renderResults(results) {
   results.forEach((r) => {
     const row = document.createElement("div");
     row.className = "code-result-row " + (r.pass ? "pass" : "fail");
-    row.textContent = `${r.pass ? "PASS" : "FAIL"} ${round === 1 ? r.name : "sealed case"}${r.error ? " - " + r.error : ""}`;
+    const metrics = r.metrics ? ` | steps ${r.metrics.steps || 0}, writes ${r.metrics.writes || 0}` : "";
+    row.textContent = `${r.pass ? "PASS" : "FAIL"} ${round === 1 ? r.name : "sealed case"}${metrics}${r.error ? " - " + r.error : ""}`;
     resultsEl.appendChild(row);
   });
+}
+
+function summarizeMetrics(results) {
+  return results.reduce((total, result) => {
+    const metrics = result.metrics || {};
+    return {
+      steps: total.steps + (metrics.steps || 0),
+      writes: total.writes + (metrics.writes || 0),
+      assignments: total.assignments + (metrics.assignments || 0),
+    };
+  }, { steps: 0, writes: 0, assignments: 0 });
+}
+
+function expectedWorkBudget(cases) {
+  return cases.reduce((total, c) => {
+    const n = Array.isArray(c.input) ? c.input.length : 1;
+    return total + (n * n) + n + 4;
+  }, 0);
+}
+
+function applyCodeMistake(message, hp, focus) {
+  failedRuns += 1;
+  const cost = applyBattleCost({ hp, focus });
+  updateBattleVitals(screenBattle);
+  logBattle(screenBattle, `${message} ${describeCost(cost)}.`, "danger");
+}
+
+function scoreCodeWork(results, cases) {
+  const totals = summarizeMetrics(results);
+  const budget = expectedWorkBudget(cases);
+  const overBudget = Math.max(0, totals.steps - budget);
+  if (!overBudget) {
+    logBattle(screenBattle, `Work cost: ${totals.steps} loop steps, ${totals.writes} writes, ${totals.assignments} assignments. Within O(n^2) lesson budget.`, "good");
+    return totals;
+  }
+  const cost = applyBattleCost({
+    hp: round === 2 ? Math.min(6, Math.floor(overBudget / 8)) : 0,
+    focus: Math.min(8, Math.ceil(overBudget / 6)),
+  });
+  updateBattleVitals(screenBattle);
+  logBattle(screenBattle, `Work cost: ${totals.steps} loop steps, ${overBudget} over budget. ${describeCost(cost)}.`, "warning");
+  return totals;
 }
 
 runBtn.addEventListener("click", async () => {
@@ -292,6 +359,7 @@ runBtn.addEventListener("click", async () => {
     if (rule.pattern.test(source)) {
       feedbackEl.textContent = rule.message;
       feedbackEl.classList.add("error");
+      applyCodeMistake(`Shortcut blocked ${failedRuns + 1}: no visible algorithm.`, 2, 2);
       return;
     }
   }
@@ -308,6 +376,7 @@ runBtn.addEventListener("click", async () => {
     feedbackEl.textContent = outcome.error;
     feedbackEl.classList.add("error");
     resultsEl.innerHTML = "";
+    applyCodeMistake(`Runtime failure ${failedRuns + 1}: Python did not complete.`, 4, 1);
     return;
   }
 
@@ -319,8 +388,10 @@ runBtn.addEventListener("click", async () => {
       ? (config.wrongPublicHint || "Not quite. Check the failing cases above.")
       : (config.wrongSealedHint || "The visible cases held, but a fresh mess exposed a guess.");
     feedbackEl.classList.add("error");
+    applyCodeMistake(`Failed run ${failedRuns + 1}: incorrect output.`, round === 1 ? 3 : 5, 2);
     return;
   }
+  scoreCodeWork(outcome.results, cases);
 
   if (round === 1) {
     feedbackEl.textContent = config.wonPublicHint || "That holds. But can it survive a fresh mess?";
@@ -335,6 +406,7 @@ runBtn.addEventListener("click", async () => {
 
   locked = true;
   feedbackEl.textContent = config.wonHint || "Repair confirmed.";
+  logBattle(screenBattle, "Sealed Python held. Enemy corruption collapsed.", "good");
   runBtn.disabled = true;
   window.setTimeout(() => {
     wipeTo(() => {
@@ -353,6 +425,7 @@ resetBtn.addEventListener("click", () => {
   resultsEl.innerHTML = "";
   feedbackEl.textContent = "";
   feedbackEl.classList.remove("error");
+  logBattle(screenBattle, "Restored starter Python. Test results cleared.");
 });
 
 function wipeTo(afterFadeIn) {

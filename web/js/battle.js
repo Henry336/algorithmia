@@ -1,5 +1,7 @@
 import { applyPixelArt } from "./pixelart.js";
 import { SORTING_SLIME } from "./sprites.js";
+import { applyBattleCost } from "./combatState.js";
+import { describeCost, initBattleHud, logBattle, updateBattleVitals } from "./battleHud.js";
 
 const RUNE_COLORS = ["#c94f4f", "#4f7fc9", "#d8c24a", "#8a4fc9", "#5fbf5f", "#e08a3f", "#4fc9b0"];
 
@@ -22,6 +24,9 @@ let originalValues = [];
 let selectedIndex = null;
 let onWinCallback = null;
 let locked = false;
+let swapCount = 0;
+let wrongChecks = 0;
+let cleanSwapTarget = 0;
 
 function shuffledSealedSet() {
   const pool = [1, 2, 3, 4, 5, 6, 7, 8, 9];
@@ -44,6 +49,10 @@ export function startSortingSlimeBattle({ onWin, title = "Sorting Slime", enemyS
   locked = false;
   titleEl.textContent = title;
   applyPixelArt(enemySpriteHost, enemySprite.matrix, enemySprite.palette, 6);
+  initBattleHud(screenBattle, {
+    objective: "Sort the spill without wasting motion. Extra swaps drain Focus; wrong checks break HP.",
+    enemyStatus: round === 1 ? "Public spill exposed" : "Sealed spill hidden",
+  });
   wipeTo(() => {
     screenRoom.classList.remove("active");
     screenBattle.classList.add("active");
@@ -54,10 +63,20 @@ export function startSortingSlimeBattle({ onWin, title = "Sorting Slime", enemyS
 function setupRound() {
   originalValues = values.slice();
   selectedIndex = null;
+  swapCount = 0;
+  wrongChecks = 0;
+  cleanSwapTarget = minimumSwapCountToSort(values);
   feedbackEl.textContent = "";
   feedbackEl.classList.remove("error");
   checkBtn.disabled = false;
   roundLabel.textContent = round === 1 ? "Public spill" : "Sealed check";
+  initBattleHud(screenBattle, {
+    objective: round === 1
+      ? "Sort the visible runes, then prove the same repair on fresh input."
+      : "The values are hidden. Your swap pattern still has to make the order true.",
+    enemyStatus: round === 1 ? "Watching public order" : "Testing generalization",
+  });
+  logBattle(screenBattle, `Target work: ${cleanSwapTarget} clean swaps for this spill.`, "warning");
   hintEl.textContent = round === 1
     ? "Select two runes to swap them into ascending order."
     : "The Archive tried a fresh mess. Prove the repair still holds.";
@@ -102,6 +121,8 @@ function onRuneClick(i) {
     return;
   }
   [values[selectedIndex], values[i]] = [values[i], values[selectedIndex]];
+  swapCount += 1;
+  logBattle(screenBattle, `Swap ${swapCount}: positions ${selectedIndex + 1} and ${i + 1}.`);
   selectedIndex = null;
   renderRunes();
 }
@@ -113,6 +134,47 @@ function isAscending(list) {
   return true;
 }
 
+function minimumSwapCountToSort(list) {
+  const indexed = list.map((value, index) => ({ value, index })).sort((a, b) => a.value - b.value);
+  const visited = Array(list.length).fill(false);
+  let swaps = 0;
+  for (let i = 0; i < list.length; i++) {
+    if (visited[i] || indexed[i].index === i) continue;
+    let cycleSize = 0;
+    let j = i;
+    while (!visited[j]) {
+      visited[j] = true;
+      j = indexed[j].index;
+      cycleSize += 1;
+    }
+    if (cycleSize > 1) {
+      swaps += cycleSize - 1;
+    }
+  }
+  return swaps;
+}
+
+function applyRuneMistake(message, hp, focus) {
+  wrongChecks += 1;
+  const cost = applyBattleCost({ hp, focus });
+  updateBattleVitals(screenBattle);
+  logBattle(screenBattle, `${message} ${describeCost(cost)}.`, "danger");
+}
+
+function scoreRuneRound() {
+  const extraSwaps = Math.max(0, swapCount - cleanSwapTarget);
+  if (!extraSwaps) {
+    logBattle(screenBattle, `Work cost: ${swapCount} swaps. Clean repair.`, "good");
+    return;
+  }
+  const cost = applyBattleCost({
+    hp: round === 2 ? Math.floor(extraSwaps / 2) : 0,
+    focus: Math.min(6, extraSwaps),
+  });
+  updateBattleVitals(screenBattle);
+  logBattle(screenBattle, `Work cost: ${swapCount} swaps, ${extraSwaps} over target. ${describeCost(cost)}.`, "warning");
+}
+
 checkBtn.addEventListener("click", () => {
   if (locked) return;
   if (!isAscending(values)) {
@@ -120,10 +182,12 @@ checkBtn.addEventListener("click", () => {
       ? "Not yet. The runes still fight the order."
       : "The visible spill held, but the Archive tried a fresh mess and the repair guessed.";
     feedbackEl.classList.add("error");
+    applyRuneMistake(`Bad check ${wrongChecks + 1}: order failed.`, round === 1 ? 2 : 4, 1);
     return;
   }
 
   feedbackEl.classList.remove("error");
+  scoreRuneRound();
 
   if (round === 1) {
     feedbackEl.textContent = "The slime followed your order exactly. That is the problem.";
@@ -139,6 +203,7 @@ checkBtn.addEventListener("click", () => {
 
   locked = true;
   feedbackEl.textContent = "The route opens. Repair confirmed.";
+  logBattle(screenBattle, "Sealed repair held. Enemy route opened.", "good");
   checkBtn.disabled = true;
   window.setTimeout(() => {
     wipeTo(() => {
@@ -155,6 +220,8 @@ resetBtn.addEventListener("click", () => {
   if (locked) return;
   values = originalValues.slice();
   selectedIndex = null;
+  swapCount = 0;
+  logBattle(screenBattle, "Reset current spill. Work counter cleared.");
   renderRunes();
 });
 

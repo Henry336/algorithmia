@@ -2,6 +2,8 @@ const SAVE_KEY = "algorithimia-save-v1";
 
 const defaults = {
   chapter: 0,
+  playerHp: 40,
+  playerFocus: 20,
   runeSnarlCleared: false,
   queueworksGateOpen: false,
   lineCutterCleared: false,

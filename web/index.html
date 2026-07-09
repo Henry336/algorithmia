@@ -154,67 +154,109 @@
 
   <!-- BATTLE SCREEN -->
   <section id="screen-battle" class="screen">
-    <div class="battle-scene">
+    <div class="battle-scene battle-shell">
       <div class="battle-backdrop"></div>
-      <div class="battle-enemy" id="battle-enemy-sprite"></div>
-      <h2 class="battle-title" id="battle-title">Sorting Slime</h2>
-      <p class="battle-subtitle" id="battle-round-label">Public spill</p>
-
-      <div class="rune-track" id="rune-track"></div>
-
-      <p class="battle-hint" id="battle-hint">Select two runes to swap them into ascending order.</p>
-
-      <div class="battle-actions">
-        <button class="battle-btn" data-action="swap-hint">Swap</button>
-        <button class="battle-btn primary" data-action="check-order">Check Order</button>
-        <button class="battle-btn" data-action="reset-runes">Reset</button>
+      <div class="battle-arena">
+        <div class="combatant-card player-card">
+          <div class="battle-player-sprite" data-battle-player-sprite></div>
+          <div class="combatant-name">Patchrunner</div>
+          <div class="vitals-row">HP <span data-battle-hp>40/40</span></div>
+          <div class="vitals-row">Focus <span data-battle-focus>20/20</span></div>
+        </div>
+        <div class="battle-objective" data-battle-objective>Repair the ordering spill.</div>
+        <div class="combatant-card enemy-card">
+          <div class="battle-enemy" id="battle-enemy-sprite"></div>
+          <h2 class="battle-title" id="battle-title">Sorting Slime</h2>
+          <p class="battle-subtitle" id="battle-round-label">Public spill</p>
+          <div class="enemy-status" data-battle-enemy-status>Corruption active</div>
+        </div>
       </div>
 
-      <div class="battle-feedback" id="battle-feedback"></div>
+      <div class="battle-body">
+        <div class="mechanic-panel">
+          <div class="rune-track" id="rune-track"></div>
+          <p class="battle-hint" id="battle-hint">Select two runes to swap them into ascending order.</p>
+          <div class="battle-actions command-bar">
+            <button class="battle-btn" data-action="swap-hint">Inspect</button>
+            <button class="battle-btn primary" data-action="check-order">Check Order</button>
+            <button class="battle-btn" data-action="reset-runes">Reset</button>
+          </div>
+          <div class="battle-feedback" id="battle-feedback"></div>
+        </div>
+        <aside class="battle-log" aria-label="Battle log" data-battle-log></aside>
+      </div>
     </div>
   </section>
 
   <!-- TICKET BATTLE SCREEN (Line Cutter minor fight + Dispatcher boss) -->
   <section id="screen-battle-ticket" class="screen">
-    <div class="battle-scene">
+    <div class="battle-scene battle-shell">
       <div class="battle-backdrop"></div>
-      <div class="battle-enemy" id="ticket-battle-enemy-sprite"></div>
-      <h2 class="battle-title" id="ticket-battle-title">The Dispatcher</h2>
-      <p class="battle-subtitle" id="ticket-round-label">Public spill</p>
-
-      <div class="ticket-track" id="ticket-track"></div>
-      <div class="ticket-order-label">Service order: <span id="ticket-order-built"></span></div>
-
-      <p class="battle-hint" id="ticket-hint">Click tickets in the order you would serve them.</p>
-
-      <div class="battle-actions">
-        <button class="battle-btn primary" data-action="check-ticket-order">Check Order</button>
-        <button class="battle-btn" data-action="reset-tickets">Reset</button>
+      <div class="battle-arena">
+        <div class="combatant-card player-card">
+          <div class="battle-player-sprite" data-battle-player-sprite></div>
+          <div class="combatant-name">Patchrunner</div>
+          <div class="vitals-row">HP <span data-battle-hp>40/40</span></div>
+          <div class="vitals-row">Focus <span data-battle-focus>20/20</span></div>
+        </div>
+        <div class="battle-objective" data-battle-objective>Serve every ticket by policy.</div>
+        <div class="combatant-card enemy-card">
+          <div class="battle-enemy" id="ticket-battle-enemy-sprite"></div>
+          <h2 class="battle-title" id="ticket-battle-title">The Dispatcher</h2>
+          <p class="battle-subtitle" id="ticket-round-label">Public spill</p>
+          <div class="enemy-status" data-battle-enemy-status>Queue pressure rising</div>
+        </div>
       </div>
 
-      <div class="battle-feedback" id="ticket-battle-feedback"></div>
+      <div class="battle-body">
+        <div class="mechanic-panel">
+          <div class="ticket-track" id="ticket-track"></div>
+          <div class="ticket-order-label">Service order: <span id="ticket-order-built"></span></div>
+          <p class="battle-hint" id="ticket-hint">Click tickets in the order you would serve them.</p>
+          <div class="battle-actions command-bar">
+            <button class="battle-btn primary" data-action="check-ticket-order">Check Order</button>
+            <button class="battle-btn" data-action="reset-tickets">Reset</button>
+          </div>
+          <div class="battle-feedback" id="ticket-battle-feedback"></div>
+        </div>
+        <aside class="battle-log" aria-label="Battle log" data-battle-log></aside>
+      </div>
     </div>
   </section>
 
   <!-- CODE BATTLE SCREEN (Shuffle Imp minor fight + Lord Bogo boss) -->
   <section id="screen-battle-code" class="screen">
-    <div class="battle-scene code-battle-scene">
+    <div class="battle-scene battle-shell code-battle-scene">
       <div class="battle-backdrop"></div>
-      <div class="battle-enemy" id="code-battle-enemy-sprite"></div>
-      <h2 class="battle-title" id="code-battle-title">Lord Bogo</h2>
-      <p class="battle-subtitle" id="code-round-label">Public cases</p>
-
-      <p class="battle-hint" id="code-hint">Write Python def solve(values): and run it against the visible cases.</p>
-
-      <textarea id="code-editor" class="code-editor" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea>
-
-      <div class="battle-actions">
-        <button class="battle-btn primary" data-action="run-code">Run</button>
-        <button class="battle-btn" data-action="reset-code">Reset</button>
+      <div class="battle-arena">
+        <div class="combatant-card player-card">
+          <div class="battle-player-sprite" data-battle-player-sprite></div>
+          <div class="combatant-name">Patchrunner</div>
+          <div class="vitals-row">HP <span data-battle-hp>40/40</span></div>
+          <div class="vitals-row">Focus <span data-battle-focus>20/20</span></div>
+        </div>
+        <div class="battle-objective" data-battle-objective>Write a Python repair that holds under fresh cases.</div>
+        <div class="combatant-card enemy-card">
+          <div class="battle-enemy" id="code-battle-enemy-sprite"></div>
+          <h2 class="battle-title" id="code-battle-title">Lord Bogo</h2>
+          <p class="battle-subtitle" id="code-round-label">Public cases</p>
+          <div class="enemy-status" data-battle-enemy-status>Entropy spreading</div>
+        </div>
       </div>
 
-      <div class="code-results" id="code-results"></div>
-      <div class="battle-feedback" id="code-battle-feedback"></div>
+      <div class="battle-body code-battle-body">
+        <div class="mechanic-panel code-mechanic-panel">
+          <p class="battle-hint" id="code-hint">Write Python def solve(values): and run it against the visible cases.</p>
+          <textarea id="code-editor" class="code-editor" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea>
+          <div class="battle-actions command-bar">
+            <button class="battle-btn primary" data-action="run-code">Run</button>
+            <button class="battle-btn" data-action="reset-code">Reset</button>
+          </div>
+          <div class="code-results" id="code-results"></div>
+          <div class="battle-feedback" id="code-battle-feedback"></div>
+        </div>
+        <aside class="battle-log" aria-label="Battle log" data-battle-log></aside>
+      </div>
     </div>
   </section>
 

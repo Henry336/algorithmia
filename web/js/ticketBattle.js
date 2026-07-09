@@ -1,4 +1,6 @@
 import { applyPixelArt } from "./pixelart.js";
+import { applyBattleCost } from "./combatState.js";
+import { describeCost, initBattleHud, logBattle, updateBattleVitals } from "./battleHud.js";
 
 const screenBattle = document.getElementById("screen-battle-ticket");
 const transition = document.getElementById("screen-transition");
@@ -18,6 +20,7 @@ let round = 1;
 let config = null;
 let activeScreen = null;
 let locked = false;
+let wrongChecks = 0;
 
 function ticket(id, arrival, urgent) {
   return { id, arrival, urgent };
@@ -53,6 +56,10 @@ export function startTicketBattle(battleConfig) {
   if (config.enemySprite) {
     applyPixelArt(enemySpriteHost, config.enemySprite.matrix, config.enemySprite.palette, config.enemyPixelSize || 5);
   }
+  initBattleHud(screenBattle, {
+    objective: config.objective || "Build the service order. Wrong policies cost HP; wasted retries drain Focus.",
+    enemyStatus: round === 1 ? "Public queue exposed" : "Sealed queue ready",
+  });
 
   wipeTo(() => {
     if (activeScreen) activeScreen.classList.remove("active");
@@ -63,10 +70,18 @@ export function startTicketBattle(battleConfig) {
 
 function setupRound() {
   picked = [];
+  wrongChecks = 0;
   feedbackEl.textContent = "";
   feedbackEl.classList.remove("error");
   checkBtn.disabled = false;
   roundLabel.textContent = round === 1 ? "Public spill" : "Sealed check";
+  initBattleHud(screenBattle, {
+    objective: round === 1
+      ? (config.objective || "Serve the visible tickets by policy.")
+      : "Serve a fresh queue without relying on visible IDs.",
+    enemyStatus: round === 1 ? "Public queue exposed" : "Policy audit active",
+  });
+  logBattle(screenBattle, `Decision budget: ${tickets.length} picks. Policy must cover every ticket.`, "warning");
   hintEl.textContent = round === 1
     ? (config.roundHint1 || "Click tickets in the order you would serve them.")
     : (config.roundHint2 || "The Archive tried a fresh line. Prove the policy still holds.");
@@ -114,8 +129,16 @@ function onTicketClick(id) {
   if (locked) return;
   if (picked.includes(id)) return;
   picked.push(id);
+  logBattle(screenBattle, `Decision ${picked.length}: ticket ${round === 1 ? id : "?"} selected.`);
   renderTickets();
   renderOrder();
+}
+
+function applyTicketMistake(message, hp, focus) {
+  wrongChecks += 1;
+  const cost = applyBattleCost({ hp, focus });
+  updateBattleVitals(screenBattle);
+  logBattle(screenBattle, `${message} ${describeCost(cost)}.`, "danger");
 }
 
 checkBtn.addEventListener("click", () => {
@@ -123,6 +146,7 @@ checkBtn.addEventListener("click", () => {
   if (picked.length !== tickets.length) {
     feedbackEl.textContent = config.incompletePickHint || "Every item needs a place in the order.";
     feedbackEl.classList.add("error");
+    applyTicketMistake(`Incomplete check ${wrongChecks + 1}: queue still has unserved work.`, 1, 1);
     return;
   }
 
@@ -132,10 +156,12 @@ checkBtn.addEventListener("click", () => {
       ? (config.wrongPublicHint || "Not quite. Check the policy and try again.")
       : (config.wrongSealedHint || "The visible order held, but a fresh mess exposed a guess.");
     feedbackEl.classList.add("error");
+    applyTicketMistake(`Wrong policy check ${wrongChecks + 1}: service order violated.`, round === 1 ? 3 : 5, 2);
     return;
   }
 
   feedbackEl.classList.remove("error");
+  logBattle(screenBattle, `Policy work: ${picked.length} decisions, ${wrongChecks} failed checks.`, wrongChecks ? "warning" : "good");
 
   if (round === 1) {
     feedbackEl.textContent = config.wonPublicHint || "That holds. But can it survive a fresh mess?";
@@ -152,6 +178,7 @@ checkBtn.addEventListener("click", () => {
 
   locked = true;
   feedbackEl.textContent = config.wonHint || "Policy confirmed.";
+  logBattle(screenBattle, "Sealed policy held. Enemy pressure broken.", "good");
   checkBtn.disabled = true;
   window.setTimeout(() => {
     wipeTo(() => {
@@ -167,6 +194,7 @@ checkBtn.addEventListener("click", () => {
 resetBtn.addEventListener("click", () => {
   if (locked) return;
   picked = [];
+  logBattle(screenBattle, "Reset service order. Decision list cleared.");
   renderTickets();
   renderOrder();
 });
