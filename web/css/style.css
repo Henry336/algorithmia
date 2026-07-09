@@ -632,22 +632,52 @@ html, body {
   width: min(96vw, 920px);
   max-height: 96vh;
   padding: 18px;
-  background: linear-gradient(180deg, #1b1420 0%, #12161c 100%);
+  background:
+    linear-gradient(180deg, #191424 0%, #101820 54%, #151610 100%),
+    repeating-linear-gradient(90deg, #ffffff05 0 1px, transparent 1px 42px);
   border: 3px solid var(--panel-border);
   display: flex;
   flex-direction: column;
   align-items: stretch;
   gap: 12px;
   overflow: hidden;
+  box-shadow: 0 18px 42px #00000066, inset 0 0 0 1px #ffffff10;
+}
+
+.battle-scene::before,
+.battle-scene::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.battle-scene::before {
+  inset: -30%;
+  background:
+    linear-gradient(112deg, transparent 0 38%, #7fd8c91a 47%, transparent 57%),
+    linear-gradient(248deg, transparent 0 34%, #d8a04a17 45%, transparent 58%);
+  opacity: 0.75;
+  animation: battleLightSweep 11s linear infinite;
+}
+
+.battle-scene::after {
+  background:
+    repeating-linear-gradient(0deg, transparent 0 21px, #7fd8c908 22px, transparent 23px),
+    repeating-linear-gradient(90deg, transparent 0 27px, #d8a04a09 28px, transparent 29px);
+  opacity: 0.42;
+  animation: battleGridBreathe 5.5s ease-in-out infinite;
 }
 
 .battle-backdrop {
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(180deg, #7fd8c90b 0%, transparent 34%, #d8a04a0a 100%),
-    repeating-linear-gradient(45deg, #ffffff05 0 2px, transparent 2px 14px);
+    linear-gradient(180deg, #7fd8c916 0%, transparent 30%, #d8a04a10 100%),
+    repeating-linear-gradient(135deg, #ffffff06 0 1px, transparent 1px 18px);
+  background-size: auto, 36px 36px;
   pointer-events: none;
+  animation: battleBackdropDrift 18s linear infinite;
 }
 
 .battle-arena,
@@ -669,29 +699,53 @@ html, body {
 .battle-log {
   background: #101820dd;
   border: 2px solid #324653;
-  box-shadow: inset 0 0 0 1px #ffffff08;
+  box-shadow: inset 0 0 0 1px #ffffff08, 0 8px 18px #00000024;
 }
 
 .combatant-card {
-  min-height: 138px;
+  min-height: 162px;
   padding: 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 5px;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+  animation: battlePanelIdle 5.6s ease-in-out infinite;
+}
+
+.enemy-card {
+  animation-delay: -2.3s;
+}
+
+.combatant-card:hover,
+.battle-objective:hover,
+.mechanic-panel:hover,
+.battle-log:hover {
+  border-color: #5f91a4;
+  box-shadow: inset 0 0 0 1px #ffffff12, 0 10px 22px #00000030, 0 0 18px #7fd8c91c;
 }
 
 .battle-player-sprite {
-  min-height: 72px;
+  position: relative;
+  width: 94px;
+  min-height: 112px;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
+  overflow: hidden;
+  margin: -14px 0 -6px;
 }
 
 .battle-player-sprite .patchrunner-title-sprite {
-  width: 72px;
-  height: 72px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 178px;
+  height: 178px;
+  transform: translate(-50%, -50%) translateY(-4px);
+  animation: battleHeroIdle 1.8s ease-in-out infinite;
+  filter: drop-shadow(0 9px 5px #00000088) drop-shadow(0 0 8px #7fd8c944);
 }
 
 .combatant-name {
@@ -716,7 +770,8 @@ html, body {
 }
 
 .battle-objective {
-  min-height: 138px;
+  position: relative;
+  min-height: 162px;
   padding: 18px;
   display: flex;
   align-items: center;
@@ -725,6 +780,16 @@ html, body {
   text-align: center;
   line-height: 1.5;
   font-size: 0.95rem;
+  overflow: hidden;
+}
+
+.battle-objective::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, #7fd8c912 48%, transparent 100%);
+  transform: translateX(-120%);
+  animation: objectiveScan 6.5s ease-in-out infinite;
 }
 
 .battle-body {
@@ -750,6 +815,7 @@ html, body {
   max-height: 100%;
   padding: 10px;
   overflow: auto;
+  scrollbar-color: #4c6b7a #101820;
 }
 
 .battle-log::before {
@@ -768,6 +834,7 @@ html, body {
   color: var(--text-dim);
   font-size: 0.74rem;
   line-height: 1.35;
+  animation: battleLogIn 0.22s ease-out;
 }
 
 .battle-log-row.good {
@@ -786,6 +853,11 @@ html, body {
   position: relative;
   margin-top: 0;
   filter: drop-shadow(0 6px 6px #00000066);
+}
+
+.enemy-card .battle-enemy canvas {
+  animation: battleEnemyIdle 2.2s ease-in-out infinite;
+  transform-origin: 50% 82%;
 }
 
 .battle-title {
@@ -825,7 +897,13 @@ html, body {
   border: 2px solid transparent;
   padding: 4px 2px;
   background: #ffffff08;
-  transition: border-color 0.1s, transform 0.08s;
+  transition: border-color 0.1s, box-shadow 0.1s, transform 0.08s;
+}
+
+.rune:hover {
+  border-color: #7fd8c980;
+  box-shadow: 0 0 14px #7fd8c91f;
+  transform: translateY(-2px);
 }
 
 .rune.selected {
@@ -864,11 +942,18 @@ html, body {
   background: #1a212b;
   cursor: pointer;
   gap: 4px;
-  transition: opacity 0.1s, border-color 0.1s;
+  transition: opacity 0.1s, border-color 0.1s, box-shadow 0.1s, transform 0.08s;
+}
+
+.ticket:hover:not(.served) {
+  border-color: var(--accent);
+  box-shadow: 0 0 14px #7fd8c924;
+  transform: translateY(-2px);
 }
 
 .ticket.urgent {
   border-color: #c9524f;
+  animation: urgentTicketPulse 1.7s ease-in-out infinite;
 }
 
 .ticket.urgent .ticket-flag {
@@ -936,10 +1021,13 @@ html, body {
   color: var(--text-main);
   padding: 8px 16px;
   cursor: pointer;
+  transition: border-color 0.1s, box-shadow 0.1s, transform 0.06s;
 }
 
 .battle-btn:hover {
   border-color: var(--accent);
+  box-shadow: 0 0 12px #7fd8c922;
+  transform: translateY(-1px);
 }
 
 .battle-btn.primary {
@@ -950,6 +1038,7 @@ html, body {
 .battle-btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+  transform: none;
 }
 
 .battle-feedback {
@@ -1006,6 +1095,53 @@ html, body {
   font-size: 0.78rem;
 }
 
+@keyframes battleLightSweep {
+  0% { transform: translateX(-9%) translateY(-4%); }
+  50% { transform: translateX(8%) translateY(3%); }
+  100% { transform: translateX(-9%) translateY(-4%); }
+}
+
+@keyframes battleGridBreathe {
+  0%, 100% { opacity: 0.28; }
+  50% { opacity: 0.48; }
+}
+
+@keyframes battleBackdropDrift {
+  0% { background-position: 0 0, 0 0; }
+  100% { background-position: 0 0, 72px 36px; }
+}
+
+@keyframes battlePanelIdle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+@keyframes battleHeroIdle {
+  0%, 100% { transform: translate(-50%, -50%) translateY(-4px) scale(1); }
+  50% { transform: translate(-50%, -50%) translateY(-8px) scale(1.02); }
+}
+
+@keyframes battleEnemyIdle {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-3px) scale(1.03); }
+}
+
+@keyframes objectiveScan {
+  0%, 58% { transform: translateX(-120%); opacity: 0; }
+  68% { opacity: 1; }
+  82%, 100% { transform: translateX(120%); opacity: 0; }
+}
+
+@keyframes battleLogIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes urgentTicketPulse {
+  0%, 100% { box-shadow: 0 0 0 #c9524f00; }
+  50% { box-shadow: 0 0 14px #c9524f2f; }
+}
+
 @media (max-width: 760px) {
   .battle-scene {
     width: 98vw;
@@ -1028,20 +1164,44 @@ html, body {
   .combatant-card {
     flex-direction: row;
     justify-content: space-between;
+    min-height: 96px;
   }
 
   .battle-player-sprite {
-    min-height: 46px;
+    width: 72px;
+    min-height: 82px;
+    margin: -8px 0;
   }
 
   .battle-player-sprite .patchrunner-title-sprite {
-    width: 46px;
-    height: 46px;
+    width: 132px;
+    height: 132px;
   }
 
   .battle-log,
   .mechanic-panel {
     min-height: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .battle-scene::before,
+  .battle-scene::after,
+  .battle-backdrop,
+  .combatant-card,
+  .battle-player-sprite .patchrunner-title-sprite,
+  .enemy-card .battle-enemy canvas,
+  .battle-objective::after,
+  .battle-log-row,
+  .ticket.urgent {
+    animation: none;
+  }
+
+  .combatant-card,
+  .battle-btn,
+  .ticket,
+  .rune {
+    transition: none;
   }
 }
 
