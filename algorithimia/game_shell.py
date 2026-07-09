@@ -405,6 +405,16 @@ def render_game_shell() -> str:
     .smoke-evidence-row dd {{
       margin: 0;
     }}
+    .smoke-copy {{
+      width: 100%;
+      min-height: 132px;
+      border: 1px solid var(--line);
+      background: rgba(12, 18, 26, 0.72);
+      color: var(--muted);
+      padding: 8px;
+      font: inherit;
+      resize: vertical;
+    }}
     .smoke-list {{
       display: grid;
       gap: 6px;
@@ -1116,8 +1126,14 @@ def render_game_shell() -> str:
       }}
       function renderSmokeReport(status, error) {{
         const summaryIcon = status === 'pass' ? 'route_open_pass' : 'smoke_fail';
+        const evidenceText = smokeText(status, error);
+        const failed = checks.find((check) => !check.passed);
+        const failureLabel = failed ? failed.name : '';
         report.dataset.status = status;
-        report.setAttribute('aria-label', smokeText(status, error));
+        report.dataset.smokeResult = status;
+        report.dataset.smokeLabel = failureLabel;
+        report.dataset.smokeViewport = `${{window.innerWidth}}x${{window.innerHeight}}`;
+        report.setAttribute('aria-label', evidenceText);
         report.replaceChildren();
 
         const summary = document.createElement('div');
@@ -1139,6 +1155,14 @@ def render_game_shell() -> str:
           evidence.append(row);
         }});
         report.append(evidence);
+
+        const copy = document.createElement('textarea');
+        copy.className = 'smoke-copy';
+        copy.readOnly = true;
+        copy.dataset.smokeCopy = 'evidence';
+        copy.setAttribute('aria-label', 'Copyable browser evidence card');
+        copy.value = evidenceText;
+        report.append(copy);
 
         const list = document.createElement('ul');
         list.className = 'smoke-list';
