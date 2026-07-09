@@ -497,10 +497,12 @@ html, body {
 }
 
 .patchrunner-sprite {
-  width: 58px;
-  height: 58px;
+  --patchrunner-foot-offset: 22px;
+  width: 84px;
+  height: 84px;
   object-fit: contain;
   image-rendering: pixelated;
+  transform: translateY(var(--patchrunner-foot-offset));
   transform-origin: 50% 88%;
   filter: drop-shadow(0 5px 3px #00000066);
 }
@@ -510,10 +512,10 @@ html, body {
 }
 
 @keyframes patchrunnerStep {
-  0% { transform: translateY(0) rotate(0deg); }
-  35% { transform: translateY(-3px) rotate(-2deg); }
-  70% { transform: translateY(0) rotate(2deg); }
-  100% { transform: translateY(0) rotate(0deg); }
+  0% { transform: translateY(var(--patchrunner-foot-offset)) rotate(0deg); }
+  35% { transform: translateY(calc(var(--patchrunner-foot-offset) - 3px)) rotate(-2deg); }
+  70% { transform: translateY(var(--patchrunner-foot-offset)) rotate(2deg); }
+  100% { transform: translateY(var(--patchrunner-foot-offset)) rotate(0deg); }
 }
 
 .patchrunner-title-sprite {
