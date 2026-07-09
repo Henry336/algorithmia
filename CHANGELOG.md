@@ -39,6 +39,7 @@
 - Fixed the optional browser self-smoke rune-swap script so the scripted visible spill stays sorted before the route-clear check.
 - Added copyable text and machine-readable result metadata to the optional browser self-smoke report so Agent 4 or Henry can capture live-browser evidence more reliably.
 - Added viewport profile and page-size metadata to the optional browser self-smoke report so narrow/mobile evidence is easier to classify.
+- Added orientation, capture-quality, and manual-review prompts to the optional browser self-smoke evidence card so normal/narrow browser findings are easier to report.
 
 ## 0.1.0 - 2026-07-08
 
