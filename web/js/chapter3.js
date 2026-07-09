@@ -4,6 +4,7 @@ import { animatePatchrunnerStep, placePatchrunnerEntity, updatePatchrunnerFacing
 import { sayLines, isDialogueActive, advance as advanceDialogue } from "./dialogue.js";
 import { getState, setState } from "./state.js";
 import { startCodeBattle } from "./codeBattle.js";
+import { startBogoBossBattle } from "./bogoBossBattle.js";
 
 export const TILE = 42;
 const COLS = 13;
@@ -491,17 +492,8 @@ function enterLordBogoBattle() {
       { speaker: "Mira Vale", text: "That sounds like nonsense. Which means we should remember it exactly." },
     ],
     () => {
-      startCodeBattle({
-        title: "Lord Bogo, Duke of Randomness",
-        starterCode: STARTER_CODE,
-        publicCases: [sortedCase("public_mixed", [5, 3, 4, 1, 2])],
-        generateSealed: generateSealedBogo,
-        enemySprite: LORD_BOGO,
-        enemyPixelSize: 6,
+      startBogoBossBattle({
         returnScreen: "screen-room-ch3",
-        roundHint1: "Write Python sorting logic. Lord Bogo is betting you only memorized the sample.",
-        roundHint2: "Fresh random formation. The same Python must survive it.",
-        wonHint: "Order confirmed. Even Lord Bogo can't shuffle it loose.",
         onWin: () => {
           setState({ bogoDefeated: true, archiveFragmentAwake: true });
           clearCode(map, BOGO_CODE);

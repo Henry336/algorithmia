@@ -281,6 +281,57 @@
     </div>
   </section>
 
+  <!-- BOGO BOSS SCREEN -->
+  <section id="screen-battle-bogo" class="screen">
+    <div class="battle-scene battle-shell bogo-boss-scene">
+      <div class="battle-backdrop"></div>
+      <div class="battle-arena">
+        <div class="combatant-card player-card">
+          <div class="battle-player-sprite" data-battle-player-sprite></div>
+          <div class="combatant-name">Patchrunner</div>
+          <div class="vitals-row">HP <span data-battle-hp>40/40</span></div>
+          <div class="vitals-row">Focus <span data-battle-focus>20/20</span></div>
+        </div>
+        <div class="battle-objective" data-battle-objective>Break Bogolord's phases with Python repairs.</div>
+        <div class="combatant-card enemy-card bogo-enemy-card">
+          <div class="bogo-battle-sprite" id="bogo-boss-sprite"></div>
+          <h2 class="battle-title" id="bogo-battle-title">Bogolord</h2>
+          <p class="battle-subtitle" id="bogo-phase-label">Phase 1</p>
+          <div class="enemy-status" data-battle-enemy-status>Null Rot gathering</div>
+          <div class="boss-hp-shell" aria-label="Bogolord health">
+            <div class="boss-hp-fill" id="bogo-hp-fill"></div>
+          </div>
+          <div class="boss-hp-text" id="bogo-hp-text">90/90</div>
+        </div>
+      </div>
+
+      <div class="battle-body code-battle-body bogo-battle-body">
+        <div class="mechanic-panel code-mechanic-panel bogo-code-panel">
+          <div class="bogo-readout">
+            <span id="bogo-challenge-name">Challenge</span>
+            <span id="bogo-attack-readout">Next attack: --</span>
+          </div>
+          <p class="battle-hint" id="bogo-hint">Write Python def solve(values): and break the first phase.</p>
+          <div class="bogo-editor-wrap" id="bogo-editor-wrap">
+            <textarea id="bogo-code-editor" class="code-editor bogo-code-editor" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea>
+          </div>
+          <div class="battle-actions command-bar">
+            <button class="battle-btn primary" data-action="run-bogo-code">Run Repair</button>
+            <button class="battle-btn" data-action="reset-bogo-code">Reset Phase</button>
+          </div>
+          <div class="power-up-bar" aria-label="Power-up slots">
+            <button class="power-up-slot" disabled>Mira: Stabilize</button>
+            <button class="power-up-slot" disabled>Slime: Buffer</button>
+            <button class="power-up-slot" disabled>Shard: Trace</button>
+          </div>
+          <div class="code-results" id="bogo-code-results"></div>
+          <div class="battle-feedback" id="bogo-battle-feedback"></div>
+        </div>
+        <aside class="battle-log" aria-label="Battle log" data-battle-log></aside>
+      </div>
+    </div>
+  </section>
+
   <div id="screen-transition" class="screen-transition"></div>
 </div>
 

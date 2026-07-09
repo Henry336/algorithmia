@@ -1,0 +1,36 @@
+{
+  "group_id": null,
+  "states": [
+    {
+      "character": {
+        "id": "68ad4730-cd78-4a0b-9e46-c92efc923b3b",
+        "name": "Style: 16-bit horror pixel art",
+        "prompt": "Style: 16-bit horror pixel art game sprite, hard pixel edges, no anti-aliasing, limited\nmuted palette with clashing accents, full-body, front-facing, centered on flat dark grey\nbackground.\nA mysterious hooded oracle of chaos and permutation \u2014 an ominous fortune-teller, NOT a\nclown. Its long ragged robe is covered in dozens of scattered number-tiles (7,2,9,1,4,3)\nin wildly mismatched sizes and rotations, clearly caught mid-shuffle, some tiles peeling\noff and floating around its body in a swirling cloud. The robe itself is asymmetric and\nwrong: one sleeve far longer than the other, the hem torn at random uneven lengths, patches\nof clashing color stitched in no pattern. It holds up a shallow bowl containing a churning,\nnever-settling swirl of glowing dice and tiles mid-roll. Its face is hidden in deep hood\nshadow except one cold glowing eye and a faint knowing smile. Around its feet, faint grey\nNull-Rot static creeps in subtly. Unsettling, chaotic, and prophetic \u2014 a being made of\nrandomness that has seen something it shouldn't have.",
+        "size": {
+          "width": 92,
+          "height": 92
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-07-09T19:19:05.966401+00:00"
+      },
+      "folder": "Style_16-bit_horror_pixel_art",
+      "frames": {
+        "rotations": {
+          "south": "Style_16-bit_horror_pixel_art/rotations/south.png",
+          "south-east": "Style_16-bit_horror_pixel_art/rotations/south-east.png",
+          "east": "Style_16-bit_horror_pixel_art/rotations/east.png",
+          "north-east": "Style_16-bit_horror_pixel_art/rotations/north-east.png",
+          "north": "Style_16-bit_horror_pixel_art/rotations/north.png",
+          "north-west": "Style_16-bit_horror_pixel_art/rotations/north-west.png",
+          "west": "Style_16-bit_horror_pixel_art/rotations/west.png",
+          "south-west": "Style_16-bit_horror_pixel_art/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    }
+  ],
+  "export_version": "3.0",
+  "export_date": "2026-07-09T19:24:58.174841"
+}
