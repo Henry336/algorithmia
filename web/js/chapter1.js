@@ -1,5 +1,5 @@
 import { applyPixelArt } from "./pixelart.js";
-import { PLAYER_DOWN, DISPATCHER, LINE_CUTTER, GATE_ICON, LEDGER_ICON, PIXEL_SIZE as SPRITE_PX } from "./sprites.js";
+import { PLAYER_DOWN, DISPATCHER, LINE_CUTTER, GATE_ICON, QUEUE_RAIL_ICON, PIXEL_SIZE as SPRITE_PX } from "./sprites.js";
 import { sayLines, isDialogueActive, advance as advanceDialogue } from "./dialogue.js";
 import { getState, setState } from "./state.js";
 import { startTicketBattle, makeTicket } from "./ticketBattle.js";
@@ -37,6 +37,7 @@ let onExitToChapter2 = null;
 export function initChapter1Room({ onExitToChapter2: exitHandler } = {}) {
   onExitToChapter2 = exitHandler || null;
   viewport = document.getElementById("room-viewport-ch1");
+  viewport.className = "room-viewport theme-dispatch";
   viewport.style.width = `${COLS * TILE}px`;
   viewport.style.height = `${ROWS * TILE}px`;
   viewport.style.transformOrigin = "top center";
@@ -45,7 +46,10 @@ export function initChapter1Room({ onExitToChapter2: exitHandler } = {}) {
   window.addEventListener("resize", fitViewportToScreen);
   map = BASE_MAP.map((row) => row.slice());
 
-  const { dispatcherDefeated } = getState();
+  const { dispatcherDefeated, lineCutterCleared } = getState();
+  if (lineCutterCleared) {
+    map[5][5] = 0;
+  }
   if (dispatcherDefeated) {
     map[2][6] = 0;
     map[0][6] = 6;
@@ -88,7 +92,7 @@ function render() {
       if (code === 3 || code === 6) {
         appendIcon(tile, GATE_ICON, code === 6);
       } else if (code === 2) {
-        appendIcon(tile, LEDGER_ICON, false);
+        appendIcon(tile, QUEUE_RAIL_ICON, false);
       }
       viewport.appendChild(tile);
     }
@@ -188,9 +192,13 @@ function enterLineCutterBattle() {
         enemyPixelSize: 6,
         returnScreen: "screen-room-ch1",
         onWin: () => {
+          setState({ lineCutterCleared: true });
           map[5][5] = 0;
           render();
-          sayLines([{ speaker: "Mira Vale", text: "The line moves again. One less snag." }]);
+          sayLines([
+            { speaker: "Mira Vale", text: "The line moves again. One less snag." },
+            { speaker: "", text: "The ticket rails pulse in arrival order, then let urgency pass without breaking the line." },
+          ]);
         },
       });
     }
@@ -231,7 +239,7 @@ function enterDispatcherBattle() {
           render();
           sayLines([
             { speaker: "The Dispatcher", text: "...Urgent doesn't have to mean forgotten. I see that now." },
-            { speaker: "", text: "The counter strip clears. The line moves on its own." },
+            { speaker: "", text: "The counter strip clears. The line moves on its own, urgent lights woven back into ordinary service." },
           ]);
         },
       });

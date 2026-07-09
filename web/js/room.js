@@ -1,5 +1,5 @@
 import { applyPixelArt } from "./pixelart.js";
-import { PLAYER_DOWN, MIRA_DOWN, SORTING_SLIME, GATE_ICON, LEDGER_ICON, PIXEL_SIZE as SPRITE_PX } from "./sprites.js";
+import { PLAYER_DOWN, MIRA_DOWN, SORTING_SLIME, GATE_ICON, QUEUE_RAIL_ICON, ARCHIVE_SHARD, PIXEL_SIZE as SPRITE_PX } from "./sprites.js";
 import { sayLines, isDialogueActive, advance as advanceDialogue } from "./dialogue.js";
 import { getState, setState } from "./state.js";
 import { startSortingSlimeBattle } from "./battle.js";
@@ -35,6 +35,7 @@ let onExitToChapter1 = null;
 export function initRoom({ onExitToChapter1: exitHandler } = {}) {
   onExitToChapter1 = exitHandler || null;
   viewport = document.getElementById("room-viewport");
+  viewport.className = "room-viewport theme-queueworks";
   viewport.style.width = `${COLS * TILE}px`;
   viewport.style.height = `${ROWS * TILE}px`;
   viewport.style.transformOrigin = "top center";
@@ -86,14 +87,18 @@ function render() {
       if (code === 3 || code === 6) {
         appendIcon(tile, GATE_ICON, code === 6);
       } else if (code === 2) {
-        appendIcon(tile, LEDGER_ICON, false);
+        appendIcon(tile, QUEUE_RAIL_ICON, false);
       }
       viewport.appendChild(tile);
     }
   }
 
+  const { queueworksGateOpen } = getState();
   if (map[3][5] === 5) {
     placeEntity("slime", 5, 3, SORTING_SLIME);
+  }
+  if (queueworksGateOpen) {
+    placeEntity("archive-shard", 5, 1, ARCHIVE_SHARD, 3);
   }
   placeEntity("mira", 2, 5, MIRA_DOWN);
 
@@ -207,6 +212,7 @@ function enterSortingSlimeBattle() {
           render();
           sayLines([
             { speaker: "Mira Vale", text: "Good. It works when the mess changes. That is a repair." },
+            { speaker: "", text: "A small Archive shard wakes above the intake, bright as a remembered route." },
             { speaker: "", text: "The stair accepts the repair and the intake starts moving again." },
           ]);
         },

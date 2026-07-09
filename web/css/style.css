@@ -85,6 +85,37 @@ html, body {
   text-shadow: 0 0 12px #7fd8c977, 3px 3px 0 #0d1117;
 }
 
+.title-party {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: clamp(12px, 4vw, 28px);
+  min-height: 78px;
+  margin-bottom: 4px;
+  filter: drop-shadow(0 8px 6px #00000077);
+}
+
+.title-sprite {
+  image-rendering: pixelated;
+}
+
+.title-sprite-main {
+  transform: translateY(-4px);
+}
+
+#title-sprite-shard {
+  align-self: center;
+  transform: translateY(-12px);
+  filter: drop-shadow(0 0 10px #7fd8c999);
+  animation: shardPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes shardPulse {
+  0%, 100% { opacity: 0.76; transform: translateY(-12px); }
+  50% { opacity: 1; transform: translateY(-18px); }
+}
+
 .title-tagline {
   position: relative;
   color: var(--text-dim);
@@ -248,7 +279,10 @@ html, body {
 
 /* ---------- Room / overworld ---------- */
 
-#screen-room {
+#screen-room,
+#screen-room-ch1,
+#screen-room-ch2,
+#screen-room-ch3 {
   justify-content: flex-start;
   padding-top: 10px;
   gap: 8px;
@@ -274,12 +308,14 @@ html, body {
   font-size: 0.75rem;
 }
 
+.room-viewport,
 #room-viewport {
   position: relative;
   background: #171c22;
   border: 3px solid var(--panel-border);
   overflow: hidden;
   image-rendering: pixelated;
+  box-shadow: 0 12px 28px #00000055;
 }
 
 .tile {
@@ -313,6 +349,126 @@ html, body {
 .tile-ledger {
   background: #201a12;
   border: 1px solid #14100a;
+}
+
+.theme-queueworks {
+  border-color: #4c6b7a;
+  background: #171f24;
+}
+
+.theme-queueworks .tile-floor {
+  background: #232d35;
+  border-color: #182128;
+}
+
+.theme-queueworks .tile-floor.alt {
+  background: #263740;
+}
+
+.theme-queueworks .tile-wall {
+  background: #141b20;
+  border-color: #0d1215;
+}
+
+.theme-queueworks .tile-ledger {
+  background: #17282c;
+  border-color: #0f1a1d;
+}
+
+.theme-dispatch {
+  border-color: #6f6756;
+  background: #1c1a17;
+}
+
+.theme-dispatch .tile-floor {
+  background: #2b2822;
+  border-color: #1c1a16;
+}
+
+.theme-dispatch .tile-floor.alt {
+  background: #312d25;
+}
+
+.theme-dispatch .tile-wall {
+  background: #1b1814;
+  border-color: #0f0d0b;
+}
+
+.theme-dispatch .tile-ledger {
+  background: #2f2617;
+  border-color: #1b140b;
+}
+
+.theme-dispatch .tile-gate {
+  background: #302414;
+}
+
+.theme-dispatch .tile-gate.open {
+  background: #213029;
+}
+
+.theme-heaplight {
+  border-color: #8a5a3a;
+  background: #1e1715;
+}
+
+.theme-heaplight .tile-floor {
+  background: #302620;
+  border-color: #1f1814;
+}
+
+.theme-heaplight .tile-floor.alt {
+  background: #39291f;
+}
+
+.theme-heaplight .tile-wall {
+  background: #211b1a;
+  border-color: #120f0f;
+}
+
+.theme-heaplight .tile-ledger {
+  background: #342014;
+  border-color: #1d100a;
+}
+
+.theme-heaplight .tile-gate {
+  background: #3a2115;
+}
+
+.theme-heaplight .tile-gate.open {
+  background: #2d2a1d;
+}
+
+.theme-array {
+  border-color: #6b5a8a;
+  background: #171924;
+}
+
+.theme-array .tile-floor {
+  background: #232838;
+  border-color: #171b26;
+}
+
+.theme-array .tile-floor.alt {
+  background: #2b2d42;
+}
+
+.theme-array .tile-wall {
+  background: #17151f;
+  border-color: #0d0c12;
+}
+
+.theme-array .tile-ledger {
+  background: #20243a;
+  border-color: #121524;
+}
+
+.theme-array .tile-gate {
+  background: #2b2140;
+}
+
+.theme-array .tile-gate.open {
+  background: #1f2f30;
 }
 
 .tile-icon-wrap {

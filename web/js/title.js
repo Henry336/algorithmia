@@ -1,4 +1,6 @@
 import { getState, setState, hasSave, resetState } from "./state.js";
+import { applyPixelArt } from "./pixelart.js";
+import { MIRA_DOWN, PLAYER_DOWN, ARCHIVE_SHARD } from "./sprites.js";
 
 const screens = {
   title: document.getElementById("screen-title"),
@@ -11,6 +13,7 @@ export function initTitle({ onEnterChapter0, onEnterChapter1, onEnterChapter2, o
   continueBtn.disabled = !hasSave();
 
   document.getElementById("title-build").textContent = `build ${buildStamp()}`;
+  renderTitleSprites();
 
   function resumeFurthest() {
     const { queueworksGateOpen, dispatcherDefeated, heapWardenDefeated } = getState();
@@ -93,6 +96,19 @@ export function initTitle({ onEnterChapter0, onEnterChapter1, onEnterChapter2, o
       show(screens.title);
       continueBtn.disabled = !hasSave();
     });
+  });
+}
+
+function renderTitleSprites() {
+  const sprites = [
+    ["title-sprite-mira", MIRA_DOWN, 4],
+    ["title-sprite-player", PLAYER_DOWN, 4],
+    ["title-sprite-shard", ARCHIVE_SHARD, 5],
+  ];
+  sprites.forEach(([id, sprite, pixelSize]) => {
+    const host = document.getElementById(id);
+    if (!host || host.childElementCount) return;
+    applyPixelArt(host, sprite.matrix, sprite.palette, pixelSize);
   });
 }
 

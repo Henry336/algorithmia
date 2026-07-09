@@ -3,12 +3,16 @@ const SAVE_KEY = "algorithimia-save-v1";
 const defaults = {
   chapter: 0,
   queueworksGateOpen: false,
+  lineCutterCleared: false,
   dispatcherDefeated: false,
   foundDispatcherSecret: false,
+  emberSorterCleared: false,
   heapWardenDefeated: false,
   foundHeaplightSecret: false,
+  shuffleImpCleared: false,
   bogoDefeated: false,
   foundArrayPlainsSecret: false,
+  archiveFragmentAwake: false,
   textSpeed: "normal",
 };
 

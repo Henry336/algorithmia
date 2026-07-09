@@ -252,3 +252,73 @@ export const LEDGER_ICON = {
     "CCCCCC",
   ],
 };
+
+export const QUEUE_RAIL_ICON = {
+  palette: {
+    R: "#4c6b7a",
+    T: "#7fd8c9",
+    D: "#26343d",
+  },
+  matrix: [
+    "R......R",
+    "RTTTTTTR",
+    "R.DDDD.R",
+    "R.TTTT.R",
+    "R.DDDD.R",
+    "RTTTTTTR",
+    "R......R",
+  ],
+};
+
+export const FURNACE_STACK_ICON = {
+  palette: {
+    S: "#4a4a52",
+    D: "#2a2a30",
+    O: "#e08a3f",
+    F: "#ffb066",
+  },
+  matrix: [
+    "..SSSS..",
+    ".SDDDDS.",
+    "SDOFFODS",
+    "SDOFFODS",
+    "SDOOOODS",
+    ".SDDDDS.",
+    "..SSSS..",
+  ],
+};
+
+export const ARRAY_MARKER_ICON = {
+  palette: {
+    P: "#8a4fc9",
+    T: "#7fd8c9",
+    Y: "#d8c24a",
+    D: "#2a2a30",
+  },
+  matrix: [
+    "PPTTYY",
+    "P.D.TY",
+    "PPTTYY",
+    "YYTTPP",
+    "YTD.PP",
+    "YYTTPP",
+  ],
+};
+
+export const ARCHIVE_SHARD = {
+  palette: {
+    T: "#7fd8c9",
+    W: "#eef2f0",
+    B: "#3a6f8f",
+    G: "#d8a04a",
+  },
+  matrix: [
+    "...W...",
+    "..WTW..",
+    ".WTBTW.",
+    "WTBTBTW",
+    ".WTBTW.",
+    "..WGW..",
+    "...G...",
+  ],
+};

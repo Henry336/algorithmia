@@ -1,5 +1,5 @@
 import { applyPixelArt } from "./pixelart.js";
-import { PLAYER_DOWN, HEAP_WARDEN, EMBER_SORTER, GATE_ICON, LEDGER_ICON, PIXEL_SIZE as SPRITE_PX } from "./sprites.js";
+import { PLAYER_DOWN, HEAP_WARDEN, EMBER_SORTER, GATE_ICON, FURNACE_STACK_ICON, PIXEL_SIZE as SPRITE_PX } from "./sprites.js";
 import { sayLines, isDialogueActive, advance as advanceDialogue } from "./dialogue.js";
 import { getState, setState } from "./state.js";
 import { startTicketBattle, makeTicket } from "./ticketBattle.js";
@@ -51,6 +51,7 @@ function randomSealedEmbers(count) {
 export function initChapter2Room({ onExitToChapter3: exitHandler } = {}) {
   onExitToChapter3 = exitHandler || null;
   viewport = document.getElementById("room-viewport-ch2");
+  viewport.className = "room-viewport theme-heaplight";
   viewport.style.width = `${COLS * TILE}px`;
   viewport.style.height = `${ROWS * TILE}px`;
   viewport.style.transformOrigin = "top center";
@@ -59,7 +60,10 @@ export function initChapter2Room({ onExitToChapter3: exitHandler } = {}) {
   window.addEventListener("resize", fitViewportToScreen);
   map = BASE_MAP.map((row) => row.slice());
 
-  const { heapWardenDefeated } = getState();
+  const { heapWardenDefeated, emberSorterCleared } = getState();
+  if (emberSorterCleared) {
+    map[5][5] = 0;
+  }
   if (heapWardenDefeated) {
     map[2][6] = 0;
     map[0][6] = 6;
@@ -102,7 +106,7 @@ function render() {
       if (code === 3 || code === 6) {
         appendIcon(tile, GATE_ICON, code === 6);
       } else if (code === 2) {
-        appendIcon(tile, LEDGER_ICON, false);
+        appendIcon(tile, FURNACE_STACK_ICON, false);
       }
       viewport.appendChild(tile);
     }
@@ -219,9 +223,13 @@ function enterEmberSorterBattle() {
         returnScreen: "screen-room-ch2",
         ...PRIORITY_BATTLE_TEXT,
         onWin: () => {
+          setState({ emberSorterCleared: true });
           map[5][5] = 0;
           render();
-          sayLines([{ speaker: "Mira Vale", text: "Good. The floor cools where it should." }]);
+          sayLines([
+            { speaker: "Mira Vale", text: "Good. The floor cools where it should." },
+            { speaker: "", text: "The furnace stack lowers its brightest ember into place instead of thrashing for attention." },
+          ]);
         },
       });
     }
@@ -262,7 +270,7 @@ function enterHeapWardenBattle() {
           render();
           sayLines([
             { speaker: "The Heap Warden", text: "...Equal fires can wait their turn fairly. I hadn't proven that before." },
-            { speaker: "", text: "The furnace floor settles into a steady, legible heat." },
+            { speaker: "", text: "The furnace floor settles into a steady, legible heat. Priority becomes a tool again, not a throne." },
           ]);
         },
       });

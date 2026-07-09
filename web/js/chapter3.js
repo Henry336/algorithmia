@@ -1,5 +1,5 @@
 import { applyPixelArt } from "./pixelart.js";
-import { PLAYER_DOWN, LORD_BOGO, SHUFFLE_IMP, GATE_ICON, LEDGER_ICON, PIXEL_SIZE as SPRITE_PX } from "./sprites.js";
+import { PLAYER_DOWN, LORD_BOGO, SHUFFLE_IMP, GATE_ICON, ARRAY_MARKER_ICON, ARCHIVE_SHARD, PIXEL_SIZE as SPRITE_PX } from "./sprites.js";
 import { sayLines, isDialogueActive, advance as advanceDialogue } from "./dialogue.js";
 import { getState, setState } from "./state.js";
 import { startCodeBattle } from "./codeBattle.js";
@@ -27,7 +27,8 @@ const PLAYER_START = { col: 6, row: 8 };
 
 const STARTER_CODE = `function solve(values) {
   const ordered = values.slice();
-  // write your own comparisons here (no .sort()/sorted())
+  // Use loops and comparisons here (no .sort()/sorted()).
+  // Swap neighbors when they are out of order.
   return ordered;
 }`;
 
@@ -69,6 +70,7 @@ function generateSealedBogo() {
 export function initChapter3Room({ onExitToChapter4: exitHandler } = {}) {
   onExitToChapter4 = exitHandler || null;
   viewport = document.getElementById("room-viewport-ch3");
+  viewport.className = "room-viewport theme-array";
   viewport.style.width = `${COLS * TILE}px`;
   viewport.style.height = `${ROWS * TILE}px`;
   viewport.style.transformOrigin = "top center";
@@ -77,7 +79,10 @@ export function initChapter3Room({ onExitToChapter4: exitHandler } = {}) {
   window.addEventListener("resize", fitViewportToScreen);
   map = BASE_MAP.map((row) => row.slice());
 
-  const { bogoDefeated } = getState();
+  const { bogoDefeated, shuffleImpCleared } = getState();
+  if (shuffleImpCleared) {
+    map[5][5] = 0;
+  }
   if (bogoDefeated) {
     map[2][6] = 0;
     map[0][6] = 6;
@@ -120,7 +125,7 @@ function render() {
       if (code === 3 || code === 6) {
         appendIcon(tile, GATE_ICON, code === 6);
       } else if (code === 2) {
-        appendIcon(tile, LEDGER_ICON, false);
+        appendIcon(tile, ARRAY_MARKER_ICON, false);
       }
       viewport.appendChild(tile);
     }
@@ -128,6 +133,7 @@ function render() {
 
   if (map[2][6] === 9) placeEntity("bogo", 6, 2, LORD_BOGO, 5);
   if (map[5][5] === 5) placeEntity("imp", 5, 5, SHUFFLE_IMP, SPRITE_PX);
+  if (getState().bogoDefeated) placeEntity("archive-shard", 6, 1, ARCHIVE_SHARD, 3);
 
   playerEl = placeEntity("player", player.col, player.row, PLAYER_DOWN, SPRITE_PX);
 }
@@ -220,9 +226,13 @@ function enterShuffleImpBattle() {
         returnScreen: "screen-room-ch3",
         wonHint: "The formation holds its shape. The imp sulks off.",
         onWin: () => {
+          setState({ shuffleImpCleared: true });
           map[5][5] = 0;
           render();
-          sayLines([{ speaker: "Mira Vale", text: "Good. It didn't just work once - it works." }]);
+          sayLines([
+            { speaker: "Mira Vale", text: "Good. It didn't just work once - it works." },
+            { speaker: "", text: "The marker posts stop sliding around the path, at least while your invariant holds." },
+          ]);
         },
       });
     }
@@ -251,7 +261,7 @@ function enterLordBogoBattle() {
         returnScreen: "screen-room-ch3",
         wonHint: "Order confirmed. Even Lord Bogo can't shuffle it loose.",
         onWin: () => {
-          setState({ bogoDefeated: true });
+          setState({ bogoDefeated: true, archiveFragmentAwake: true });
           map[2][6] = 0;
           map[0][6] = 6;
           map[0][7] = 6;
@@ -259,6 +269,8 @@ function enterLordBogoBattle() {
           sayLines([
             { speaker: "Lord Bogo", text: "...Huh. Still ordered. That is - annoyingly consistent." },
             { speaker: "", text: "The Plains settle. For the first time, the formations hold their shape." },
+            { speaker: "", text: "The Archive shard answers with a new route: bridges, missing villages, and a map that refuses to stay connected." },
+            { speaker: "Mira Vale", text: "Graphreach. Not ready, but it knows we're coming." },
           ]);
         },
       });
@@ -283,8 +295,8 @@ function findSecret() {
 function onReachOpenGate() {
   sayLines(
     [
-      { speaker: "", text: "The formation opens a clear path onward." },
-      { speaker: "Mira Vale", text: "That's as far as the map goes for now. Good work, Patchrunner." },
+      { speaker: "", text: "The formation opens a clear path onward, but the next bridge is still only a signal in the shard." },
+      { speaker: "Mira Vale", text: "That's as far as this build goes. Next repair: Graphreach, when the route is ready." },
     ],
     () => {
       if (onExitToChapter4) onExitToChapter4();
