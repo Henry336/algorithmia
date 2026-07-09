@@ -1,6 +1,7 @@
 import { applyPixelArt } from "./pixelart.js";
 import { applyBattleCost } from "./combatState.js";
 import { describeCost, initBattleHud, logBattle, updateBattleVitals } from "./battleHud.js";
+import { isAdminMode } from "./admin.js";
 
 // Player writes a Python-flavored `solve(values)` function. The static browser
 // build supports the small subset this first sorting lesson needs: def,
@@ -244,6 +245,7 @@ const resultsEl = document.getElementById("code-results");
 const feedbackEl = document.getElementById("code-battle-feedback");
 const runBtn = document.querySelector('[data-action="run-code"]');
 const resetBtn = document.querySelector('[data-action="reset-code"]');
+const adminWinBtn = document.querySelector('[data-action="admin-win-code"]');
 const enemySpriteHost = document.getElementById("code-battle-enemy-sprite");
 
 let round = 1;
@@ -409,13 +411,7 @@ runBtn.addEventListener("click", async () => {
   logBattle(screenBattle, "Sealed Python held. Enemy corruption collapsed.", "good");
   runBtn.disabled = true;
   window.setTimeout(() => {
-    wipeTo(() => {
-      screenBattle.classList.remove("active");
-      if (activeScreen) activeScreen.classList.add("active");
-      const cb = config.onWin;
-      config = null;
-      if (cb) cb();
-    });
+    finishBattle();
   }, 900);
 });
 
@@ -427,6 +423,26 @@ resetBtn.addEventListener("click", () => {
   feedbackEl.classList.remove("error");
   logBattle(screenBattle, "Restored starter Python. Test results cleared.");
 });
+
+adminWinBtn.addEventListener("click", () => {
+  if (!isAdminMode() || !config) return;
+  locked = true;
+  runBtn.disabled = true;
+  feedbackEl.classList.remove("error");
+  feedbackEl.textContent = "Admin Python accepted.";
+  logBattle(screenBattle, "Admin mode completed this Python encounter.", "good");
+  finishBattle();
+});
+
+function finishBattle() {
+  wipeTo(() => {
+    screenBattle.classList.remove("active");
+    if (activeScreen) activeScreen.classList.add("active");
+    const cb = config && config.onWin;
+    config = null;
+    if (cb) cb();
+  });
+}
 
 function wipeTo(afterFadeIn) {
   transition.classList.add("active");

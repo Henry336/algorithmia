@@ -2,6 +2,7 @@ import { applyPixelArt } from "./pixelart.js";
 import { applyBattleCost } from "./combatState.js";
 import { describeCost, initBattleHud, logBattle, updateBattleVitals } from "./battleHud.js";
 import { renderSortingSlimeBattleSprite } from "./playerSprite.js";
+import { isAdminMode } from "./admin.js";
 
 const RUNE_COLORS = ["#c94f4f", "#4f7fc9", "#d8c24a", "#8a4fc9", "#5fbf5f", "#e08a3f", "#4fc9b0"];
 
@@ -15,6 +16,7 @@ const feedbackEl = document.getElementById("battle-feedback");
 const checkBtn = document.querySelector('[data-action="check-order"]');
 const resetBtn = document.querySelector('[data-action="reset-runes"]');
 const swapHintBtn = document.querySelector('[data-action="swap-hint"]');
+const adminWinBtn = document.querySelector('[data-action="admin-win-rune"]');
 const enemySpriteHost = document.getElementById("battle-enemy-sprite");
 const titleEl = document.getElementById("battle-title");
 
@@ -210,13 +212,7 @@ checkBtn.addEventListener("click", () => {
   logBattle(screenBattle, "Sealed repair held. Enemy route opened.", "good");
   checkBtn.disabled = true;
   window.setTimeout(() => {
-    wipeTo(() => {
-      screenBattle.classList.remove("active");
-      screenRoom.classList.add("active");
-      const cb = onWinCallback;
-      onWinCallback = null;
-      if (cb) cb();
-    });
+    finishBattle();
   }, 900);
 });
 
@@ -233,6 +229,26 @@ swapHintBtn.addEventListener("click", () => {
   if (locked) return;
   hintEl.textContent = "Click one rune, then another, to swap their places.";
 });
+
+adminWinBtn.addEventListener("click", () => {
+  if (!isAdminMode() || !onWinCallback) return;
+  locked = true;
+  checkBtn.disabled = true;
+  feedbackEl.classList.remove("error");
+  feedbackEl.textContent = "Admin repair accepted.";
+  logBattle(screenBattle, "Admin mode completed this rune encounter.", "good");
+  finishBattle();
+});
+
+function finishBattle() {
+  wipeTo(() => {
+    screenBattle.classList.remove("active");
+    screenRoom.classList.add("active");
+    const cb = onWinCallback;
+    onWinCallback = null;
+    if (cb) cb();
+  });
+}
 
 function wipeTo(afterFadeIn) {
   transition.classList.add("active");

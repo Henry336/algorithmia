@@ -312,6 +312,11 @@ html, body {
   z-index: 1;
 }
 
+body.admin-mode .title-build {
+  color: var(--accent-warm);
+  text-shadow: 0 0 10px #d8a04a44;
+}
+
 /* ---------- Panel frame (chapter select / options) ---------- */
 
 .panel-frame {
@@ -1495,6 +1500,18 @@ html, body {
 .battle-btn.primary {
   border-color: var(--accent-warm);
   color: var(--accent-warm);
+}
+
+.admin-only {
+  display: none;
+}
+
+body.admin-mode .admin-only {
+  display: inline-flex;
+  align-items: center;
+  border-color: #d8a04a;
+  color: #ffd36a;
+  box-shadow: inset 0 0 0 1px #d8a04a33, 0 0 12px #d8a04a1f;
 }
 
 .battle-btn:disabled {

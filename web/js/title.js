@@ -2,6 +2,7 @@ import { getState, setState, hasSave, resetState } from "./state.js";
 import { applyPixelArt } from "./pixelart.js";
 import { ARCHIVE_SHARD } from "./sprites.js";
 import { renderMiraPortrait, renderPatchrunnerPortrait } from "./playerSprite.js";
+import { isAdminMode, syncAdminModeFromUrl } from "./admin.js";
 
 const screens = {
   title: document.getElementById("screen-title"),
@@ -10,10 +11,11 @@ const screens = {
 };
 
 export function initTitle({ onEnterChapter0, onEnterChapter1, onEnterChapter2, onEnterChapter3, onEnterChapter4 }) {
+  syncAdminModeFromUrl();
   const continueBtn = document.querySelector('[data-action="continue"]');
   continueBtn.disabled = !hasSave();
 
-  document.getElementById("title-build").textContent = `build ${buildStamp()}`;
+  document.getElementById("title-build").textContent = isAdminMode() ? `build ${buildStamp()} - ADMIN MODE` : `build ${buildStamp()}`;
   renderTitleSprites();
 
   function resumeFurthest() {
@@ -28,25 +30,26 @@ export function initTitle({ onEnterChapter0, onEnterChapter1, onEnterChapter2, o
 
   function refreshChapterCards() {
     const { queueworksGateOpen, dispatcherDefeated, heapWardenDefeated, bogoDefeated } = getState();
+    const admin = isAdminMode();
     const ch1Card = document.querySelector('.chapter-card[data-chapter="1"]');
     if (ch1Card) {
-      ch1Card.disabled = !queueworksGateOpen;
-      ch1Card.classList.toggle("locked", !queueworksGateOpen);
+      ch1Card.disabled = !admin && !queueworksGateOpen;
+      ch1Card.classList.toggle("locked", !admin && !queueworksGateOpen);
     }
     const ch2Card = document.querySelector('.chapter-card[data-chapter="2"]');
     if (ch2Card) {
-      ch2Card.disabled = !dispatcherDefeated;
-      ch2Card.classList.toggle("locked", !dispatcherDefeated);
+      ch2Card.disabled = !admin && !dispatcherDefeated;
+      ch2Card.classList.toggle("locked", !admin && !dispatcherDefeated);
     }
     const ch3Card = document.querySelector('.chapter-card[data-chapter="3"]');
     if (ch3Card) {
-      ch3Card.disabled = !heapWardenDefeated;
-      ch3Card.classList.toggle("locked", !heapWardenDefeated);
+      ch3Card.disabled = !admin && !heapWardenDefeated;
+      ch3Card.classList.toggle("locked", !admin && !heapWardenDefeated);
     }
     const ch4Card = document.querySelector('.chapter-card[data-chapter="4"]');
     if (ch4Card) {
-      ch4Card.disabled = !bogoDefeated;
-      ch4Card.classList.toggle("locked", !bogoDefeated);
+      ch4Card.disabled = !admin && !bogoDefeated;
+      ch4Card.classList.toggle("locked", !admin && !bogoDefeated);
     }
   }
   refreshChapterCards();

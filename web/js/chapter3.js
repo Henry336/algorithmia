@@ -63,8 +63,8 @@ const ROOM_MAPS = [
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
     [1, 20, 10, 0, 0, 2, 0, 0, 2, 0, 10, 20, 1],
     [1, 0, 2, 14, 10, 0, 0, 0, 10, 14, 2, 0, 1],
-    [1, 0, 0, 2, 0, 0, 8, 0, 0, 2, 0, 0, 1],
-    [1, 2, 0, 0, 14, 10, 11, 10, 0, 0, 0, 2, 3],
+    [1, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 1],
+    [1, 2, 0, 0, 14, 10, 11, 10, 0, 0, 0, 0, 3],
     [1, 0, 0, 10, 0, 0, 0, 0, 0, 10, 0, 0, 1],
     [1, 0, 2, 0, 0, 19, 0, 19, 0, 2, 0, 0, 1],
     [1, 20, 0, 0, 2, 0, 8, 0, 2, 0, 0, 20, 1],
@@ -115,6 +115,14 @@ const STARTER_CODE = `def solve(values):
     # Swap neighbors when they are out of order.
     return ordered`;
 
+const NULL_ECHO_FIX_CODE = `def solve(values):
+    result = values[:]
+    for i in range(len(result)):
+        if result[i] == 0:
+            result[i] = None
+    # Fix the corrupted script so it keeps 0 values and returns the list sorted.
+    return result`;
+
 let viewport;
 let map;
 let roomIndex = ROOM_APPROACH;
@@ -123,6 +131,21 @@ let playerEl;
 let hasGreeted = false;
 let onExitToChapter4 = null;
 let touchedMirrors = new Set();
+let patrolTimer = null;
+let patrolStep = 0;
+
+const APPROACH_PATROLS = [
+  {
+    code: SHUFFLE_IMP_CODE,
+    flag: "shuffleImpCleared",
+    path: [{ col: 3, row: 3 }, { col: 4, row: 3 }, { col: 5, row: 3 }, { col: 4, row: 3 }],
+  },
+  {
+    code: PIVOT_SHADE_CODE,
+    flag: "pivotShadeCleared",
+    path: [{ col: 9, row: 3 }, { col: 10, row: 3 }, { col: 10, row: 4 }, { col: 9, row: 4 }],
+  },
+];
 
 function shuffledDistinct(count, max) {
   const pool = Array.from({ length: max }, (_, i) => i + 1);
@@ -211,10 +234,12 @@ function clearCode(targetMap, code) {
 }
 
 function goToRoom(nextRoom, start, lines) {
+  stopPatrols();
   roomIndex = nextRoom;
   map = buildCurrentMap();
   player = { ...start };
   render();
+  startPatrols();
   if (lines) sayLines(lines);
 }
 
@@ -431,16 +456,18 @@ function enterNullEchoBattle() {
   sayLines(
     [
       { speaker: "", text: "The dark seam repeats your footsteps one beat late, then asks for a sort in your own voice." },
-      { speaker: "Mira Vale", text: "Null Echo. It is not an enemy exactly. More like a missing answer wearing an enemy's outline." },
+      { speaker: "Mira Vale", text: "Null Echo. This script is already wounded. Repair it before the wound decides zero means gone." },
     ],
     () => startCodeEncounter({
       title: "Null Echo",
+      starterCode: NULL_ECHO_FIX_CODE,
+      objective: "Fix the corrupted Python script. Keep zero as a real value, then return the sorted list.",
       publicCases: [sortedCase("public_gap", [2, 0, 2, 1])],
       generateSealed: () => [sortedCase("sealed_1", [0, 3, 0, 1, 2]), sortedCase("sealed_2", [4, 0, 4, 1])],
       enemySprite: PIVOT_SHADE,
       clearFlag: "nullEchoCleared",
       clearCodeValue: NULL_ECHO_CODE,
-      roundHint1: "Sort the formation even when zero-value gaps appear.",
+      roundHint1: "Repair the broken Python. None is rot here; 0 must survive as a value.",
       roundHint2: "Fresh gaps. Keep every value; do not let the rot erase anything.",
       wonHint: "The echo loses your voice and collapses back into a seam.",
       winLines: [
@@ -451,10 +478,12 @@ function enterNullEchoBattle() {
   );
 }
 
-function startCodeEncounter({ title, publicCases, generateSealed, enemySprite, clearFlag, clearCodeValue, roundHint1, roundHint2, wonHint, winLines }) {
+function startCodeEncounter({ title, starterCode = STARTER_CODE, objective, publicCases, generateSealed, enemySprite, clearFlag, clearCodeValue, roundHint1, roundHint2, wonHint, winLines }) {
+  stopPatrols();
   startCodeBattle({
     title,
-    starterCode: STARTER_CODE,
+    starterCode,
+    objective,
     publicCases,
     generateSealed,
     enemySprite,
@@ -468,6 +497,7 @@ function startCodeEncounter({ title, publicCases, generateSealed, enemySprite, c
       clearCode(map, clearCodeValue);
       map = buildCurrentMap();
       render();
+      startPatrols();
       sayLines(winLines);
     },
   });
@@ -490,6 +520,7 @@ function enterLordBogoBattle() {
       { speaker: "Mira Vale", text: "That sounds like nonsense. Which means we should remember it exactly." },
     ],
     () => {
+      stopPatrols();
       startBogoBossBattle({
         returnScreen: "screen-room-ch3",
         onWin: () => {
@@ -497,6 +528,7 @@ function enterLordBogoBattle() {
           clearCode(map, BOGO_CODE);
           map = buildCurrentMap();
           render();
+          startPatrols();
           sayLines([
             { speaker: "Lord Bogo", text: "...Still ordered. Then the rot must learn to eat the rule, not the row." },
             { speaker: "", text: "The Plains settle, but the black seams under them remain awake." },
@@ -649,6 +681,37 @@ function bindInput() {
   dpad.querySelectorAll("button").forEach((btn) => {
     btn.onclick = () => handleDirAction(btn.dataset.dir);
   });
+}
+
+function startPatrols() {
+  stopPatrols();
+  if (roomIndex !== ROOM_APPROACH) return;
+  patrolTimer = window.setInterval(stepPatrols, 1050);
+}
+
+function stopPatrols() {
+  if (patrolTimer) window.clearInterval(patrolTimer);
+  patrolTimer = null;
+}
+
+function stepPatrols() {
+  if (!document.getElementById("screen-room-ch3").classList.contains("active") || isDialogueActive()) return;
+  const state = getState();
+  let moved = false;
+  patrolStep += 1;
+  APPROACH_PATROLS.forEach((patrol) => {
+    if (state[patrol.flag]) return;
+    const current = findCode(patrol.code);
+    if (!current) return;
+    const next = patrol.path[patrolStep % patrol.path.length];
+    if (!next || (next.col === player.col && next.row === player.row)) return;
+    const targetCode = tileAt(next.col, next.row);
+    if (targetCode !== FLOOR && targetCode !== GRASS) return;
+    map[current.row][current.col] = FLOOR;
+    map[next.row][next.col] = patrol.code;
+    moved = true;
+  });
+  if (moved) render();
 }
 
 function handleDirAction(dir) {

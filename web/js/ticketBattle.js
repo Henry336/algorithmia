@@ -1,6 +1,7 @@
 import { applyPixelArt } from "./pixelart.js";
 import { applyBattleCost } from "./combatState.js";
 import { describeCost, initBattleHud, logBattle, updateBattleVitals } from "./battleHud.js";
+import { isAdminMode } from "./admin.js";
 
 const screenBattle = document.getElementById("screen-battle-ticket");
 const transition = document.getElementById("screen-transition");
@@ -12,6 +13,7 @@ const orderBuiltEl = document.getElementById("ticket-order-built");
 const titleEl = document.getElementById("ticket-battle-title");
 const checkBtn = document.querySelector('[data-action="check-ticket-order"]');
 const resetBtn = document.querySelector('[data-action="reset-tickets"]');
+const adminWinBtn = document.querySelector('[data-action="admin-win-ticket"]');
 const enemySpriteHost = document.getElementById("ticket-battle-enemy-sprite");
 
 let tickets = [];
@@ -181,13 +183,7 @@ checkBtn.addEventListener("click", () => {
   logBattle(screenBattle, "Sealed policy held. Enemy pressure broken.", "good");
   checkBtn.disabled = true;
   window.setTimeout(() => {
-    wipeTo(() => {
-      screenBattle.classList.remove("active");
-      if (activeScreen) activeScreen.classList.add("active");
-      const cb = config.onWin;
-      config = null;
-      if (cb) cb();
-    });
+    finishBattle();
   }, 900);
 });
 
@@ -198,6 +194,26 @@ resetBtn.addEventListener("click", () => {
   renderTickets();
   renderOrder();
 });
+
+adminWinBtn.addEventListener("click", () => {
+  if (!isAdminMode() || !config) return;
+  locked = true;
+  checkBtn.disabled = true;
+  feedbackEl.classList.remove("error");
+  feedbackEl.textContent = "Admin policy accepted.";
+  logBattle(screenBattle, "Admin mode completed this queue encounter.", "good");
+  finishBattle();
+});
+
+function finishBattle() {
+  wipeTo(() => {
+    screenBattle.classList.remove("active");
+    if (activeScreen) activeScreen.classList.add("active");
+    const cb = config && config.onWin;
+    config = null;
+    if (cb) cb();
+  });
+}
 
 function wipeTo(afterFadeIn) {
   transition.classList.add("active");

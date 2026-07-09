@@ -11,6 +11,8 @@ This file records live direction that should survive context refreshes. Keep it 
 - Room boards should use most of the available browser viewport; avoid fixed 1x rendering that leaves large empty space on desktop.
 - Battles should evaluate correctness and observed work cost, then affect HP/Focus through readable combat feedback.
 - Starting with Bogolord, major bosses should have their own HP, multiple phases, timed attacks, and battle-specific pressure mechanics. Later bosses should not feel like one generic code check.
+- Admin testing mode is enabled with `?admin=1` and can be disabled with `?admin=0`. It unlocks level select and shows Admin Win buttons that complete active encounters through the same win callbacks as normal play.
+- Required room routes should be protected by reachability tests. If a gate opens, the tile path to it must be reachable; if a puzzle requires objects, every required object must be interactable from the room start.
 
 ## Asset Direction
 
@@ -36,6 +38,7 @@ This file records live direction that should survive context refreshes. Keep it 
 
 - Chapter 2: Heaplight Foundry is a connected route graph: intake floor branches east to the ash archive, west to a hidden cold vent, north to the furnace core, and east from the core into the Heap Warden crucible. Ember Sorter and Priority Forger gate the core; Heat Sifter plus three reachable valves gate the boss; Ash Auditor is optional archive combat/lore.
 - Chapter 3: Array Plains is a connected route graph: corrupted rowgrass approach branches east to the index library, west to a hidden null-marsh, north to Bogo's court, and east from the court into Lord Bogo's amphitheatre. Shuffle Imp and Pivot Shade gate the court; Null Echo plus three array mirrors gate the boss; Index Ghost is optional library combat/lore.
+- Chapter 3 minions should not all be identical sorting prompts. Null Echo currently uses a script-fixing variant: the starter Python is corrupted by a `None`/zero confusion and the player repairs it.
 - Chapter 4: Graphreach is a connected bridge/cave route graph: bridgehead branches east to the component chapel, west to a hidden cave, north to the anchor crossing, and east from the crossing into the Null Ferryman dock. Bridge Wisp and Cycle Hound gate the crossing; three bridge anchors gate the boss; Component Hermit is optional chapel combat/lore.
 - Optional rooms may hold lore, optional enemies, hidden secrets, creepy darkness dialogue, or quiet deco space. They should make chapters feel like places, not just combat queues.
 - Sorting Slime has a real exported asset and should idle on the map while acting more aggressive in battle.

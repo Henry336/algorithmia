@@ -1,5 +1,6 @@
 import { applyBattleCost } from "./combatState.js";
 import { describeCost, initBattleHud, logBattle, updateBattleVitals } from "./battleHud.js";
+import { isAdminMode } from "./admin.js";
 
 const WORKER_SOURCE = `
 function countIndent(line) {
@@ -289,6 +290,7 @@ const resultsEl = document.getElementById("bogo-code-results");
 const feedbackEl = document.getElementById("bogo-battle-feedback");
 const runBtn = document.querySelector('[data-action="run-bogo-code"]');
 const resetBtn = document.querySelector('[data-action="reset-bogo-code"]');
+const adminWinBtn = document.querySelector('[data-action="admin-win-bogo"]');
 const spriteHost = document.getElementById("bogo-boss-sprite");
 const hpFill = document.getElementById("bogo-hp-fill");
 const hpText = document.getElementById("bogo-hp-text");
@@ -565,6 +567,17 @@ resetBtn.addEventListener("click", () => {
   feedbackEl.textContent = "";
   feedbackEl.classList.remove("error");
   logBattle(screenBattle, "Phase starter restored. Bogo keeps counting time.");
+});
+
+adminWinBtn.addEventListener("click", () => {
+  if (!isAdminMode() || !config) return;
+  locked = true;
+  bossHp = 0;
+  updateBossHp();
+  feedbackEl.classList.remove("error");
+  feedbackEl.textContent = "Admin phase collapse accepted.";
+  logBattle(screenBattle, "Admin mode forced Bogolord's HP to zero.", "good");
+  finishBattle();
 });
 
 function finishBattle() {
