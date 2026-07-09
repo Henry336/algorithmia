@@ -733,7 +733,7 @@ def render_game_shell() -> str:
         <div class="room-blocker" data-blocked-tile="jammed gate base" data-route-blocker style="--x: 8; --y: 4" aria-label="Blocked jammed gate tile"></div>
         <div class="room-actor player-sprite" data-player style="--x: 1; --y: 4" aria-label="Patchrunner player sprite"></div>
         <img class="room-actor room-sprite room-gate" data-room-gate src="{queue_gate_uri}" alt="Queueworks intake gate" style="--x: 8; --y: 3">
-        <img class="room-actor room-sprite" data-room-slime src="{sorting_slime_uri}" alt="Interactable Sorting Slime" style="--x: 5; --y: 3">
+        <img class="room-actor room-sprite" data-room-slime data-room-object="sorting_slime" src="{sorting_slime_uri}" alt="Interactable Sorting Slime" style="--x: 5; --y: 3">
         <div class="room-marker" style="--x: 5; --y: 3"><span class="room-spark" aria-hidden="true"></span><span>Sorting Slime</span></div>
       </div>
       <div class="retry-panel" data-room-retry-panel>
