@@ -1100,15 +1100,32 @@ def render_game_shell() -> str:
         const cramped = rows.filter((row) => row.getBoundingClientRect().height < 28);
         record(name, cramped.length === 0, icon);
       }}
+      function viewportProfile() {{
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        const pageWidth = Math.max(document.documentElement.scrollWidth, document.body.scrollWidth);
+        const pageHeight = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
+        const category = width <= 480 ? 'mobile/narrow' : width <= 760 ? 'narrow' : 'desktop';
+        const orientation = width >= height ? 'landscape' : 'portrait';
+        return {{
+          category,
+          orientation,
+          viewport: `${{width}}x${{height}}`,
+          page: `${{pageWidth}}x${{pageHeight}}`,
+          capture: `${{category}} ${{orientation}}; page ${{pageWidth}}x${{pageHeight}}`,
+        }};
+      }}
       function smokeEvidence(status, error) {{
         const failed = checks.find((check) => !check.passed);
         const failureLabel = failed ? failed.name : String(error || 'unknown failure');
         const passed = status === 'pass';
+        const profile = viewportProfile();
         return [
           {{ label: 'State tested', value: 'blocked route, interact-ready slime, wrong-order retry, route clear, repaired interaction, smoke report' }},
           {{ label: 'Result', value: passed ? 'pass' : `fail with label: ${{failureLabel}}` }},
           {{ label: 'Control path', value: 'ArrowRight, WASD, on-screen movement, Interact, Return, rune swaps, Check order' }},
-          {{ label: 'Viewport', value: `${{window.innerWidth}}x${{window.innerHeight}}` }},
+          {{ label: 'Viewport', value: profile.viewport }},
+          {{ label: 'Viewport profile', value: profile.capture }},
           {{ label: 'Observed cause', value: passed ? 'self-smoke checks passed in this browser viewport' : failureLabel }},
           {{ label: 'Text/icon/collision agreement', value: passed ? 'cue text, smoke icons, blocked collision, and route clearing agreed' : 'review failed row against cue text, smoke icon, collision, or route state' }},
           {{ label: 'Likely owner', value: passed ? 'Agent 4 or Henry for live readability judgment' : 'Agent 3 if this is placement, timing, state pairing, button, or layout' }},
@@ -1129,10 +1146,13 @@ def render_game_shell() -> str:
         const evidenceText = smokeText(status, error);
         const failed = checks.find((check) => !check.passed);
         const failureLabel = failed ? failed.name : '';
+        const profile = viewportProfile();
         report.dataset.status = status;
         report.dataset.smokeResult = status;
         report.dataset.smokeLabel = failureLabel;
-        report.dataset.smokeViewport = `${{window.innerWidth}}x${{window.innerHeight}}`;
+        report.dataset.smokeViewport = profile.viewport;
+        report.dataset.smokeViewportProfile = profile.category;
+        report.dataset.smokePageSize = profile.page;
         report.setAttribute('aria-label', evidenceText);
         report.replaceChildren();
 

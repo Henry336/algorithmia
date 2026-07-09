@@ -38,6 +38,7 @@
 - Added a browser evidence intake card to the optional self-smoke report so live-browser results include tested states, pass/fail label, control path, viewport, observed cause, owner, and next action.
 - Fixed the optional browser self-smoke rune-swap script so the scripted visible spill stays sorted before the route-clear check.
 - Added copyable text and machine-readable result metadata to the optional browser self-smoke report so Agent 4 or Henry can capture live-browser evidence more reliably.
+- Added viewport profile and page-size metadata to the optional browser self-smoke report so narrow/mobile evidence is easier to classify.
 
 ## 0.1.0 - 2026-07-08
 
