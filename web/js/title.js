@@ -6,25 +6,31 @@ const screens = {
   options: document.getElementById("screen-options"),
 };
 
-export function initTitle({ onEnterChapter0, onEnterChapter1 }) {
+export function initTitle({ onEnterChapter0, onEnterChapter1, onEnterChapter2 }) {
   const continueBtn = document.querySelector('[data-action="continue"]');
   continueBtn.disabled = !hasSave();
 
   document.getElementById("title-build").textContent = `build ${buildStamp()}`;
 
   function resumeFurthest() {
-    const { queueworksGateOpen } = getState();
+    const { queueworksGateOpen, dispatcherDefeated } = getState();
     hideAll();
-    if (queueworksGateOpen) onEnterChapter1();
+    if (dispatcherDefeated) onEnterChapter2();
+    else if (queueworksGateOpen) onEnterChapter1();
     else onEnterChapter0();
   }
 
   function refreshChapterCards() {
-    const { queueworksGateOpen } = getState();
+    const { queueworksGateOpen, dispatcherDefeated } = getState();
     const ch1Card = document.querySelector('.chapter-card[data-chapter="1"]');
     if (ch1Card) {
       ch1Card.disabled = !queueworksGateOpen;
       ch1Card.classList.toggle("locked", !queueworksGateOpen);
+    }
+    const ch2Card = document.querySelector('.chapter-card[data-chapter="2"]');
+    if (ch2Card) {
+      ch2Card.disabled = !dispatcherDefeated;
+      ch2Card.classList.toggle("locked", !dispatcherDefeated);
     }
   }
   refreshChapterCards();
@@ -57,6 +63,7 @@ export function initTitle({ onEnterChapter0, onEnterChapter1 }) {
       hideAll();
       if (chapter === 0) onEnterChapter0();
       else if (chapter === 1) onEnterChapter1();
+      else if (chapter === 2) onEnterChapter2();
     });
   });
 
@@ -74,6 +81,7 @@ export function initTitle({ onEnterChapter0, onEnterChapter1 }) {
     btn.addEventListener("click", () => {
       document.getElementById("screen-room").classList.remove("active");
       document.getElementById("screen-room-ch1").classList.remove("active");
+      document.getElementById("screen-room-ch2").classList.remove("active");
       show(screens.title);
       continueBtn.disabled = !hasSave();
     });

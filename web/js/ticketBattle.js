@@ -1,5 +1,4 @@
 import { applyPixelArt } from "./pixelart.js";
-import { solveTriageOrder } from "./triagePolicy.js";
 
 const screenBattle = document.getElementById("screen-battle-ticket");
 const transition = document.getElementById("screen-transition");
@@ -37,7 +36,10 @@ function randomSealedTickets(count) {
   return list;
 }
 
-// { title, publicTickets, sealedCount, enemySprite, onWin, returnScreen }
+// { title, publicTickets, sealedCount, enemySprite, onWin, returnScreen,
+//   solve(items) -> [ids in order], generateSealed(count) -> items,
+//   flagLabel(item) -> string, flagClass(item) -> bool,
+//   wrongPublicHint, wrongSealedHint, wonPublicHint, wonHint }
 export function startTicketBattle(battleConfig) {
   config = battleConfig;
   round = 1;
@@ -66,23 +68,25 @@ function setupRound() {
   checkBtn.disabled = false;
   roundLabel.textContent = round === 1 ? "Public spill" : "Sealed check";
   hintEl.textContent = round === 1
-    ? "Click tickets in the order you would serve them."
-    : "The Archive tried a fresh line. Prove the policy still holds.";
+    ? (config.roundHint1 || "Click tickets in the order you would serve them.")
+    : (config.roundHint2 || "The Archive tried a fresh line. Prove the policy still holds.");
   renderTickets();
   renderOrder();
 }
 
 function renderTickets() {
   track.innerHTML = "";
+  const flagClass = config.flagClass || ((t) => t.urgent);
+  const flagLabel = config.flagLabel || ((t) => (t.urgent ? "URGENT" : "ticket"));
   tickets.forEach((t) => {
     const served = picked.includes(t.id);
     const card = document.createElement("div");
-    card.className = "ticket" + (t.urgent ? " urgent" : "") + (served ? " served" : "");
+    card.className = "ticket" + (flagClass(t) ? " urgent" : "") + (served ? " served" : "");
     card.dataset.id = t.id;
 
     const flag = document.createElement("div");
     flag.className = "ticket-flag";
-    flag.textContent = t.urgent ? "URGENT" : "ticket";
+    flag.textContent = flagLabel(t);
 
     const idEl = document.createElement("div");
     idEl.className = "ticket-id";
@@ -117,16 +121,16 @@ function onTicketClick(id) {
 checkBtn.addEventListener("click", () => {
   if (locked) return;
   if (picked.length !== tickets.length) {
-    feedbackEl.textContent = "Every ticket in the line needs a place in the order.";
+    feedbackEl.textContent = config.incompletePickHint || "Every item needs a place in the order.";
     feedbackEl.classList.add("error");
     return;
   }
 
-  const correct = solveTriageOrder(tickets).join(",") === picked.join(",");
+  const correct = config.solve(tickets).join(",") === picked.join(",");
   if (!correct) {
     feedbackEl.textContent = round === 1
-      ? "Not quite. Check urgency, stable ties, and the ordinary guard."
-      : "The visible line held, but the Archive tried a fresh mess and the policy guessed.";
+      ? (config.wrongPublicHint || "Not quite. Check the policy and try again.")
+      : (config.wrongSealedHint || "The visible order held, but a fresh mess exposed a guess.");
     feedbackEl.classList.add("error");
     return;
   }
@@ -134,9 +138,10 @@ checkBtn.addEventListener("click", () => {
   feedbackEl.classList.remove("error");
 
   if (round === 1) {
-    feedbackEl.textContent = "The line moves. But can it hold under a fresh rush?";
+    feedbackEl.textContent = config.wonPublicHint || "That holds. But can it survive a fresh mess?";
     round = 2;
-    tickets = randomSealedTickets(config.sealedCount || tickets.length);
+    const generateSealed = config.generateSealed || randomSealedTickets;
+    tickets = generateSealed(config.sealedCount || tickets.length);
     locked = true;
     window.setTimeout(() => {
       locked = false;
@@ -146,7 +151,7 @@ checkBtn.addEventListener("click", () => {
   }
 
   locked = true;
-  feedbackEl.textContent = "The counter breathes again. Policy confirmed.";
+  feedbackEl.textContent = config.wonHint || "Policy confirmed.";
   checkBtn.disabled = true;
   window.setTimeout(() => {
     wipeTo(() => {

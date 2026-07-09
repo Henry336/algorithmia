@@ -39,9 +39,9 @@
           <span class="chapter-num">Chapter 1</span>
           <span class="chapter-name">The Dispatcher's Line</span>
         </button>
-        <button class="chapter-card locked" disabled>
+        <button class="chapter-card locked" data-chapter="2" disabled>
           <span class="chapter-num">Chapter 2</span>
-          <span class="chapter-name">Coming soon</span>
+          <span class="chapter-name">Heaplight Foundry</span>
         </button>
         <button class="chapter-card locked" disabled>
           <span class="chapter-num">Chapter 3</span>
@@ -98,6 +98,23 @@
     <div id="room-viewport-ch1"></div>
     <div class="controls-hint">Move: Arrow keys / WASD &nbsp;&middot;&nbsp; Interact: Space / Enter</div>
     <div id="dpad-ch1" class="dpad" aria-hidden="false">
+      <button data-dir="up">&#9650;</button>
+      <button data-dir="left">&#9664;</button>
+      <button data-dir="interact">&#9679;</button>
+      <button data-dir="right">&#9654;</button>
+      <button data-dir="down">&#9660;</button>
+    </div>
+  </section>
+
+  <!-- CHAPTER 2 ROOM -->
+  <section id="screen-room-ch2" class="screen">
+    <div class="hud">
+      <span id="hud-chapter-ch2">Chapter 2 &middot; Heaplight Foundry</span>
+      <button class="hud-menu-btn" data-action="quit-to-title">Menu</button>
+    </div>
+    <div id="room-viewport-ch2"></div>
+    <div class="controls-hint">Move: Arrow keys / WASD &nbsp;&middot;&nbsp; Interact: Space / Enter</div>
+    <div id="dpad-ch2" class="dpad" aria-hidden="false">
       <button data-dir="up">&#9650;</button>
       <button data-dir="left">&#9664;</button>
       <button data-dir="interact">&#9679;</button>

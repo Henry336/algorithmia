@@ -93,6 +93,49 @@ export const SORTING_SLIME = {
 export const MIRA_PORTRAIT = MIRA_DOWN;
 export const PLAYER_PORTRAIT = PLAYER_DOWN;
 
+export const HEAP_WARDEN = {
+  palette: {
+    G: "#4a4a52", // stone plates
+    D: "#33333a", // shadow seam
+    O: "#e08a3f", // molten seam
+    M: "#ff7a3f", // top ember (max node)
+    L: "#c9522a", // lower embers
+    K: "#1a1a1a", // eye slits
+  },
+  matrix: [
+    "....MM....",
+    "...MMMM...",
+    "..GGGGGG..",
+    ".GGGOGOGG.",
+    "GGGGGGGGGG",
+    "GKGGGGGGKG",
+    "GLGGOGGLGG",
+    ".GGGGGGGG.",
+    ".GG....GG.",
+    ".GG....GG.",
+  ],
+};
+
+export const EMBER_SORTER = {
+  palette: {
+    G: "#4a4a52",
+    O: "#e08a3f",
+    L: "#c9522a",
+    S: "#ffb066",
+    K: "#1a1a1a",
+  },
+  matrix: [
+    "..GGGG..",
+    ".GOSSOG.",
+    ".GLGGLG.",
+    "GGGGGGGG",
+    "GKGGGGKG",
+    "GGGGGGGG",
+    ".GG..GG.",
+    ".GG..GG.",
+  ],
+};
+
 export const DISPATCHER = {
   palette: {
     D: "#3a3f45", // desk

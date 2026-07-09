@@ -2,7 +2,13 @@
 
 Algorithimia is a browser-based programming RPG. Data structures and algorithms are the physical rules of the world: the player is a junior Patchrunner repairing broken civic systems by writing and reasoning about code.
 
-The player-facing game lives in `web/` — a plain static site (no build step, no backend) with a title screen, Chapter 0 (Queueworks Intake) and Chapter 1 (The Dispatcher's Line) as tile-based explorable rooms, dialogue, and Pokémon-style battle-screen transitions into encounters: the Sorting Slime (rune ordering), a Line Cutter minor fight and The Dispatcher boss (both ticket-service-order puzzles mirroring the CLI's urgent/stable-tie/starvation-guard policy), plus one hidden secret. Art is currently hand-authored placeholder pixel art rendered to `<canvas>`, meant to be swapped for real exported sprites later without touching game logic.
+The player-facing game lives in `web/` — a plain static site (no build step, no backend) with a title screen and three tile-based explorable chapters so far, each with dialogue, hidden secrets, and Pokémon-style battle-screen transitions into encounters:
+
+- **Chapter 0 — Queueworks Intake**: the Sorting Slime (rune ordering, public + sealed rounds).
+- **Chapter 1 — The Dispatcher's Line**: a Line Cutter minor fight and The Dispatcher boss, both ticket-service-order puzzles mirroring the CLI's urgent/stable-tie/starvation-guard policy.
+- **Chapter 2 — Heaplight Foundry**: an Ember Sorter minor fight and The Heap Warden boss, both max-priority-first battles (a real priority-queue/heap-extraction rule, ties broken by arrival order) reusing the same battle-screen UI with a different policy plugged in.
+
+Art is currently hand-authored placeholder pixel art rendered to `<canvas>`, meant to be swapped for real exported sprites later without touching game logic.
 
 The Python package in `algorithimia/` is the original CLI prototype and encounter/validation engine. It is no longer the player-facing surface; it stays useful as an internal sandbox for deterministic encounter logic and for a future in-browser code-execution engine.
 
@@ -34,9 +40,12 @@ web/
     title.js             title/menu/chapter-select/options wiring
     room.js               tile-grid overworld engine + Chapter 0 map
     chapter1.js            tile-grid overworld engine + Chapter 1 map (Dispatcher's Line)
+    chapter2.js             tile-grid overworld engine + Chapter 2 map (Heaplight Foundry)
     battle.js              Sorting Slime battle screen (public + sealed rounds)
-    ticketBattle.js          ticket-service-order battle screen (Line Cutter + Dispatcher)
+    ticketBattle.js          generic pick-the-order battle screen (public + sealed rounds),
+                              driven by a pluggable `solve(items)` policy + display config
     triagePolicy.js           urgent/stable-tie/starvation-guard policy, ported from encounters.py
+    priorityPolicy.js          max-priority-first policy (stable ties by arrival), for Chapter 2
     dialogue.js             typewriter dialogue box
     sprites.js               placeholder pixel-art matrices + palettes
     pixelart.js               matrix -> <canvas> renderer

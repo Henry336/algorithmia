@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Added Chapter 2 (Heaplight Foundry): an Ember Sorter minor encounter, a hidden secret (forged priority-tag lore), and The Heap Warden boss, all using a new max-priority-first policy (`priorityPolicy.js`, stable ties by arrival) verified against hand-computed fixtures before wiring into UI.
+- Generalized `ticketBattle.js` from a Chapter-1-only ticket screen into a reusable pick-the-order battle screen: callers now pass their own `solve(items)` policy, sealed-round generator, and flag/hint text, so Chapter 2's heap battles reuse the exact same UI and public/sealed-round structure as Chapter 1's triage battles.
 - Added Chapter 1 (The Dispatcher's Line): a larger explorable room with a Line Cutter minor encounter, a hidden secret (sealed emergency-route lore), and The Dispatcher boss fight.
 - Added a ticket-service-order battle screen (public round + sealed round) shared by the Line Cutter and Dispatcher fights, driven by a JS port of the CLI's Triage Line policy (urgent tickets advance, ties keep arrival order, starvation guard after two urgent services) verified against all 5 of the Python engine's fixtures.
 - Fixed a title-screen regression (introduced while wiring Chapter 1) where entering a chapter left the title screen active underneath it.

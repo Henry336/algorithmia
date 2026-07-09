@@ -5,6 +5,8 @@ const defaults = {
   queueworksGateOpen: false,
   dispatcherDefeated: false,
   foundDispatcherSecret: false,
+  heapWardenDefeated: false,
+  foundHeaplightSecret: false,
   textSpeed: "normal",
 };
 
