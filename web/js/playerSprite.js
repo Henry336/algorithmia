@@ -2,6 +2,7 @@ const CHARACTER_BASES = {
   patchrunner: "assets/characters/patchrunner/A_young_field_technician_in/rotations",
   mira: "assets/characters/mira/A_woman_in_her_40s/rotations",
   sortingSlime: "assets/characters/sorting-slime/A_translucent_lime-green_gelatinous_blob/rotations",
+  bogolord: "assets/characters/bogolord/Style_16-bit_horror_pixel_art/rotations",
 };
 
 const FACING_TO_ASSET = {
@@ -97,6 +98,22 @@ export function placeSortingSlimeEntity(viewport, col, row, tileSize, facing = "
   el.style.left = `${col * tileSize}px`;
   el.style.top = `${row * tileSize}px`;
   updateCharacterFacing(el, "sortingSlime", "sorting-slime-sprite", facing);
+  return el;
+}
+
+export function placeBogolordEntity(viewport, col, row, tileSize, facing = "down") {
+  let el = viewport.querySelector('[data-entity="bogolord"]');
+  if (!el) {
+    el = document.createElement("div");
+    el.className = "entity bogolord-entity";
+    el.dataset.entity = "bogolord";
+    viewport.appendChild(el);
+  }
+  el.style.width = `${tileSize}px`;
+  el.style.height = `${tileSize}px`;
+  el.style.left = `${col * tileSize}px`;
+  el.style.top = `${row * tileSize}px`;
+  updateCharacterFacing(el, "bogolord", "bogolord-map-sprite", facing);
   return el;
 }
 

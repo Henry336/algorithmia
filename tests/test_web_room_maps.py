@@ -106,6 +106,23 @@ class WebRoomMapContracts(unittest.TestCase):
         reachable = flood(opened, start, blocking - {3})
         self.assertIn((12, 4), reachable, "Array court boss gate should be reachable after echo and mirrors")
 
+    def test_array_bogolord_room_boss_and_exit_are_reachable(self):
+        board = load_room_maps("chapter3.js")[3]
+        blocking = {1, 2, 3, 8, 10, 14, 17, 19, 20, 21, 5, 7, 9, 11, 16}
+        start = (1, 5)
+        self.assert_all_targets_interactable(board, start, blocking, 9, "Bogolord room boss")
+        self.assertIn((0, 5), flood(board, start, blocking), "Bogolord room return door should be reachable")
+
+        opened = clear_codes(board, 9)
+        opened[0][5] = 6
+        opened[0][6] = 6
+        opened[0][7] = 6
+        reachable = flood(opened, start, blocking - {3})
+        self.assertTrue(
+            {(5, 0), (6, 0), (7, 0)} & reachable,
+            "Bogolord room north exit should be reachable after boss defeat",
+        )
+
     def test_graphreach_crossing_required_interactions_and_boss_gate_are_reachable(self):
         board = load_room_maps("chapter4.js")[1]
         blocking = {1, 2, 3, 8, 10, 14, 17, 19, 20, 21, 22, 5, 7, 9, 11}

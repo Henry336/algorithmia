@@ -1,6 +1,6 @@
 import { applyPixelArt } from "./pixelart.js";
-import { ARRAY_MARKER_ICON, ARCHIVE_SHARD, BACKLOG_CLERK, GATE_ICON, LORD_BOGO, PIVOT_SHADE, PIXEL_SIZE as SPRITE_PX, SHUFFLE_IMP } from "./sprites.js";
-import { animatePatchrunnerStep, placePatchrunnerEntity, updatePatchrunnerFacing } from "./playerSprite.js";
+import { ARRAY_MARKER_ICON, ARCHIVE_SHARD, BACKLOG_CLERK, GATE_ICON, PIVOT_SHADE, PIXEL_SIZE as SPRITE_PX, SHUFFLE_IMP } from "./sprites.js";
+import { animatePatchrunnerStep, placeBogolordEntity, placePatchrunnerEntity, updatePatchrunnerFacing } from "./playerSprite.js";
 import { sayLines, isDialogueActive, advance as advanceDialogue } from "./dialogue.js";
 import { getState, setState } from "./state.js";
 import { startCodeBattle } from "./codeBattle.js";
@@ -88,8 +88,8 @@ const ROOM_MAPS = [
     [1, 20, 10, 0, 2, 0, 0, 0, 2, 0, 10, 20, 1],
     [1, 0, 2, 0, 10, 0, 9, 0, 10, 0, 2, 0, 1],
     [1, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 1],
-    [1, 2, 0, 0, 2, 10, 0, 10, 2, 0, 0, 2, 1],
-    [13, 0, 0, 10, 0, 0, 2, 0, 0, 10, 0, 0, 1],
+    [1, 2, 0, 0, 2, 0, 0, 10, 2, 0, 0, 2, 1],
+    [13, 0, 0, 0, 0, 0, 2, 0, 0, 10, 0, 0, 1],
     [1, 0, 2, 0, 0, 0, 0, 0, 0, 2, 0, 0, 1],
     [1, 20, 0, 0, 2, 0, 8, 0, 2, 0, 20, 0, 1],
     [1, 1, 20, 0, 0, 0, 0, 0, 0, 20, 1, 1, 1],
@@ -267,7 +267,7 @@ function render() {
     }
   }
 
-  placeCodeEntity("bogo", BOGO_CODE, LORD_BOGO, 5);
+  placeBogoEntity();
   placeCodeEntity("imp", SHUFFLE_IMP_CODE, SHUFFLE_IMP, SPRITE_PX);
   placeCodeEntity("pivot", PIVOT_SHADE_CODE, PIVOT_SHADE, SPRITE_PX);
   placeCodeEntity("null-echo", NULL_ECHO_CODE, PIVOT_SHADE, SPRITE_PX);
@@ -279,6 +279,11 @@ function render() {
 function placeCodeEntity(id, code, sprite, pixelSize) {
   const pos = findCode(code);
   if (pos) placeEntity(id, pos.col, pos.row, sprite, pixelSize);
+}
+
+function placeBogoEntity() {
+  const pos = findCode(BOGO_CODE);
+  if (pos) placeBogolordEntity(viewport, pos.col, pos.row, TILE, "down");
 }
 
 function tileClass(code, r, c) {

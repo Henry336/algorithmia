@@ -876,6 +876,40 @@ body.admin-mode .title-build {
   animation: slimeMapIdle 1.35s ease-in-out infinite;
 }
 
+.bogolord-entity {
+  align-items: flex-end;
+  overflow: visible;
+  z-index: 5;
+}
+
+.bogolord-entity::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -10px;
+  width: 94px;
+  height: 50px;
+  transform: translateX(-50%);
+  background: radial-gradient(circle, #8a4fc955 0 12%, #11101800 64%);
+  filter: blur(3px);
+  opacity: 0.75;
+  animation: bogoMapHalo 1.4s steps(3, end) infinite;
+}
+
+.bogolord-map-sprite {
+  --bogo-foot-offset: 31px;
+  position: relative;
+  z-index: 1;
+  width: 106px;
+  height: 106px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  transform: translateY(var(--bogo-foot-offset));
+  transform-origin: 50% 88%;
+  filter: drop-shadow(0 7px 4px #00000099) drop-shadow(0 0 10px #8a4fc988);
+  animation: bogoMapIdle 1.6s steps(4, end) infinite;
+}
+
 .sorting-slime-battle-sprite {
   width: clamp(130px, 18vw, 168px);
   height: clamp(130px, 18vw, 168px);
@@ -903,6 +937,16 @@ body.admin-mode .title-build {
   0%, 100% { transform: translateY(0) scale(1, 1); }
   35% { transform: translateY(-7px) scale(1.09, 0.9); }
   58% { transform: translateY(1px) scale(0.94, 1.12); }
+}
+
+@keyframes bogoMapIdle {
+  0%, 100% { transform: translateY(var(--bogo-foot-offset)) rotate(0deg); }
+  50% { transform: translateY(calc(var(--bogo-foot-offset) - 4px)) rotate(-1deg); }
+}
+
+@keyframes bogoMapHalo {
+  0%, 100% { opacity: 0.45; transform: translateX(-50%) scale(0.96); }
+  50% { opacity: 0.9; transform: translateX(-50%) scale(1.08); }
 }
 
 @keyframes roomTileBreathe {
@@ -1691,6 +1735,8 @@ body.admin-mode .admin-only {
   .tile-anchor,
   .sorting-slime-sprite,
   .sorting-slime-battle-sprite,
+  .bogolord-map-sprite,
+  .bogolord-entity::before,
   .battle-scene::before,
   .battle-scene::after,
   .battle-backdrop,
