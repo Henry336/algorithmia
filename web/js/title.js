@@ -6,23 +6,40 @@ const screens = {
   options: document.getElementById("screen-options"),
 };
 
-export function initTitle({ onEnterChapter0 }) {
+export function initTitle({ onEnterChapter0, onEnterChapter1 }) {
   const continueBtn = document.querySelector('[data-action="continue"]');
   continueBtn.disabled = !hasSave();
 
   document.getElementById("title-build").textContent = `build ${buildStamp()}`;
+
+  function resumeFurthest() {
+    const { queueworksGateOpen } = getState();
+    hideAll();
+    if (queueworksGateOpen) onEnterChapter1();
+    else onEnterChapter0();
+  }
+
+  function refreshChapterCards() {
+    const { queueworksGateOpen } = getState();
+    const ch1Card = document.querySelector('.chapter-card[data-chapter="1"]');
+    if (ch1Card) {
+      ch1Card.disabled = !queueworksGateOpen;
+      ch1Card.classList.toggle("locked", !queueworksGateOpen);
+    }
+  }
+  refreshChapterCards();
 
   document.getElementById("title-menu").addEventListener("click", (e) => {
     const action = e.target.dataset.action;
     if (!action) return;
     if (action === "new-game") {
       resetState();
-      go("title", null);
+      hideAll();
       onEnterChapter0();
     } else if (action === "continue" && hasSave()) {
-      go("title", null);
-      onEnterChapter0();
+      resumeFurthest();
     } else if (action === "chapter-select") {
+      refreshChapterCards();
       show(screens.chapterSelect);
     } else if (action === "options") {
       show(screens.options);
@@ -35,11 +52,11 @@ export function initTitle({ onEnterChapter0 }) {
 
   document.querySelectorAll(".chapter-card[data-chapter]").forEach((btn) => {
     btn.addEventListener("click", () => {
+      if (btn.disabled) return;
       const chapter = Number(btn.dataset.chapter);
-      if (chapter === 0) {
-        show(screens.title);
-        onEnterChapter0();
-      }
+      hideAll();
+      if (chapter === 0) onEnterChapter0();
+      else if (chapter === 1) onEnterChapter1();
     });
   });
 
@@ -50,22 +67,26 @@ export function initTitle({ onEnterChapter0 }) {
   document.getElementById("opt-reset").addEventListener("click", () => {
     resetState();
     continueBtn.disabled = true;
+    refreshChapterCards();
   });
 
-  document.querySelector('[data-action="quit-to-title"]').addEventListener("click", () => {
-    document.getElementById("screen-room").classList.remove("active");
-    show(screens.title);
-    continueBtn.disabled = !hasSave();
+  document.querySelectorAll('[data-action="quit-to-title"]').forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.getElementById("screen-room").classList.remove("active");
+      document.getElementById("screen-room-ch1").classList.remove("active");
+      show(screens.title);
+      continueBtn.disabled = !hasSave();
+    });
   });
-}
-
-function go(hideKey) {
-  Object.values(screens).forEach((s) => s.classList.remove("active"));
 }
 
 function show(screen) {
   Object.values(screens).forEach((s) => s.classList.remove("active"));
   screen.classList.add("active");
+}
+
+function hideAll() {
+  Object.values(screens).forEach((s) => s.classList.remove("active"));
 }
 
 function buildStamp() {

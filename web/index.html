@@ -35,7 +35,7 @@
           <span class="chapter-num">Chapter 0</span>
           <span class="chapter-name">Queueworks Intake</span>
         </button>
-        <button class="chapter-card locked" disabled>
+        <button class="chapter-card locked" data-chapter="1" disabled>
           <span class="chapter-num">Chapter 1</span>
           <span class="chapter-name">The Dispatcher's Line</span>
         </button>
@@ -89,6 +89,23 @@
     </div>
   </section>
 
+  <!-- CHAPTER 1 ROOM -->
+  <section id="screen-room-ch1" class="screen">
+    <div class="hud">
+      <span id="hud-chapter-ch1">Chapter 1 &middot; The Dispatcher's Line</span>
+      <button class="hud-menu-btn" data-action="quit-to-title">Menu</button>
+    </div>
+    <div id="room-viewport-ch1"></div>
+    <div class="controls-hint">Move: Arrow keys / WASD &nbsp;&middot;&nbsp; Interact: Space / Enter</div>
+    <div id="dpad-ch1" class="dpad" aria-hidden="false">
+      <button data-dir="up">&#9650;</button>
+      <button data-dir="left">&#9664;</button>
+      <button data-dir="interact">&#9679;</button>
+      <button data-dir="right">&#9654;</button>
+      <button data-dir="down">&#9660;</button>
+    </div>
+  </section>
+
   <!-- DIALOGUE BOX (overlay, shown on top of room) -->
   <div id="dialogue-box" class="dialogue-box hidden">
     <div class="dialogue-speaker" id="dialogue-speaker"></div>
@@ -115,6 +132,28 @@
       </div>
 
       <div class="battle-feedback" id="battle-feedback"></div>
+    </div>
+  </section>
+
+  <!-- TICKET BATTLE SCREEN (Line Cutter minor fight + Dispatcher boss) -->
+  <section id="screen-battle-ticket" class="screen">
+    <div class="battle-scene">
+      <div class="battle-backdrop"></div>
+      <div class="battle-enemy" id="ticket-battle-enemy-sprite"></div>
+      <h2 class="battle-title" id="ticket-battle-title">The Dispatcher</h2>
+      <p class="battle-subtitle" id="ticket-round-label">Public spill</p>
+
+      <div class="ticket-track" id="ticket-track"></div>
+      <div class="ticket-order-label">Service order: <span id="ticket-order-built"></span></div>
+
+      <p class="battle-hint" id="ticket-hint">Click tickets in the order you would serve them.</p>
+
+      <div class="battle-actions">
+        <button class="battle-btn primary" data-action="check-ticket-order">Check Order</button>
+        <button class="battle-btn" data-action="reset-tickets">Reset</button>
+      </div>
+
+      <div class="battle-feedback" id="ticket-battle-feedback"></div>
     </div>
   </section>
 

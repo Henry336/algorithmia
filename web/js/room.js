@@ -30,8 +30,10 @@ let playerEl;
 let hasGreeted = false;
 let hasWarnedGateOnce = false;
 let inputBusy = false;
+let onExitToChapter1 = null;
 
-export function initRoom() {
+export function initRoom({ onExitToChapter1: exitHandler } = {}) {
+  onExitToChapter1 = exitHandler || null;
   viewport = document.getElementById("room-viewport");
   viewport.style.width = `${COLS * TILE}px`;
   viewport.style.height = `${ROWS * TILE}px`;
@@ -216,10 +218,15 @@ function enterSortingSlimeBattle() {
 function onReachOpenGate() {
   if (hasWarnedGateOnce) return;
   hasWarnedGateOnce = true;
-  sayLines([
-    { speaker: "", text: "The stair leads onward, but the next intake hasn't been built yet." },
-    { speaker: "Mira Vale", text: "Chapter 1 is still being repaired. Good work on this one, Patchrunner." },
-  ]);
+  sayLines(
+    [
+      { speaker: "", text: "The stair accepts the repair. It leads up into the dispatch hall." },
+      { speaker: "Mira Vale", text: "That's the Dispatcher's line. Careful up there." },
+    ],
+    () => {
+      if (onExitToChapter1) onExitToChapter1();
+    }
+  );
 }
 
 function bindInput() {

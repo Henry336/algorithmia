@@ -93,6 +93,53 @@ export const SORTING_SLIME = {
 export const MIRA_PORTRAIT = MIRA_DOWN;
 export const PLAYER_PORTRAIT = PLAYER_DOWN;
 
+export const DISPATCHER = {
+  palette: {
+    D: "#3a3f45", // desk
+    B: "#25292e", // desk shadow
+    U: "#242f3a", // uniform navy
+    S: "#c98f5e", // skin
+    H: "#6b6458", // thinning hair
+    T: "#caa24a", // brass ticket badge
+    G: "#3fae6a", // dim desk-lamp glow
+    P: "#e8e6df", // paper ticket spool
+  },
+  matrix: [
+    "...HHHH....",
+    "..HSSSSS...",
+    "..SSSSSS...",
+    "..SEESEE...",
+    "..SSSSSS...",
+    "..USTUSU...",
+    ".UUUUUUUU..",
+    "PPDDDDDDDDP",
+    "PPDBBBBBBDP",
+    "..DBBGBBD..",
+    "..DBBBBBD..",
+    "..DDDDDDD..",
+  ],
+};
+
+export const LINE_CUTTER = {
+  palette: {
+    K: "#2a2a30", // dark coat
+    S: "#c98f5e",
+    E: "#c9524f", // angry eyes
+    R: "#c9524f", // stolen ticket red stripe
+    P: "#e8e6df",
+  },
+  matrix: [
+    "..KKKK..",
+    ".KSSSSK.",
+    ".KSEESK.",
+    ".KSSSSK.",
+    "KKKKKKKK",
+    "KKPRKKKK",
+    "KKKKKKKK",
+    ".KK..KK.",
+  ],
+};
+
 // Simple tile "icon" overlays drawn as small pixel glyphs on top of a floor tile.
 export const GATE_ICON = {
   palette: { M: "#8a6a3a", D: "#4a3620", L: "#d8b26a" },

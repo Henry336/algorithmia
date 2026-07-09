@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Added Chapter 1 (The Dispatcher's Line): a larger explorable room with a Line Cutter minor encounter, a hidden secret (sealed emergency-route lore), and The Dispatcher boss fight.
+- Added a ticket-service-order battle screen (public round + sealed round) shared by the Line Cutter and Dispatcher fights, driven by a JS port of the CLI's Triage Line policy (urgent tickets advance, ties keep arrival order, starvation guard after two urgent services) verified against all 5 of the Python engine's fixtures.
+- Fixed a title-screen regression (introduced while wiring Chapter 1) where entering a chapter left the title screen active underneath it.
+- Fixed the Chapter 1 "Menu" button silently doing nothing (duplicate `data-action` id only bound the first matching element).
+- Fixed placeholder sprites rendering with a 1px layout box (their real footprint was only visible via box-shadow overflow), which caused the Sorting Slime sprite to overlap the battle title; sprites now render to `<canvas>` sized to their real footprint.
+- Added responsive room-viewport scaling and doubled the manual-QA pass across desktop and narrow/touch viewports.
 - Replaced the single Python-generated HTML shell with a real static browser game under `web/` (title screen, chapter select, options, save/continue, tile-based Chapter 0 room, Pokemon-style battle transition, Sorting Slime public/sealed rune-swap encounter, dialogue system, mobile-responsive room scaling and d-pad).
 - Added hand-authored placeholder pixel-art sprites (Player, Mira, Sorting Slime, tile icons) rendered via canvas, meant to be swapped for real art later.
 - Added `vercel.json` so the repo deploys `web/` as a static site with no build step.

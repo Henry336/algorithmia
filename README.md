@@ -2,7 +2,7 @@
 
 Algorithimia is a browser-based programming RPG. Data structures and algorithms are the physical rules of the world: the player is a junior Patchrunner repairing broken civic systems by writing and reasoning about code.
 
-The player-facing game lives in `web/` — a plain static site (no build step, no backend) with a title screen, a tile-based explorable Chapter 0 room, dialogue, and a Pokémon-style battle-screen transition into the Sorting Slime encounter. Art is currently hand-authored placeholder pixel art rendered to `<canvas>`, meant to be swapped for real exported sprites later without touching game logic.
+The player-facing game lives in `web/` — a plain static site (no build step, no backend) with a title screen, Chapter 0 (Queueworks Intake) and Chapter 1 (The Dispatcher's Line) as tile-based explorable rooms, dialogue, and Pokémon-style battle-screen transitions into encounters: the Sorting Slime (rune ordering), a Line Cutter minor fight and The Dispatcher boss (both ticket-service-order puzzles mirroring the CLI's urgent/stable-tie/starvation-guard policy), plus one hidden secret. Art is currently hand-authored placeholder pixel art rendered to `<canvas>`, meant to be swapped for real exported sprites later without touching game logic.
 
 The Python package in `algorithimia/` is the original CLI prototype and encounter/validation engine. It is no longer the player-facing surface; it stays useful as an internal sandbox for deterministic encounter logic and for a future in-browser code-execution engine.
 
@@ -33,7 +33,10 @@ web/
     state.js             localStorage save/load
     title.js             title/menu/chapter-select/options wiring
     room.js               tile-grid overworld engine + Chapter 0 map
+    chapter1.js            tile-grid overworld engine + Chapter 1 map (Dispatcher's Line)
     battle.js              Sorting Slime battle screen (public + sealed rounds)
+    ticketBattle.js          ticket-service-order battle screen (Line Cutter + Dispatcher)
+    triagePolicy.js           urgent/stable-tie/starvation-guard policy, ported from encounters.py
     dialogue.js             typewriter dialogue box
     sprites.js               placeholder pixel-art matrices + palettes
     pixelart.js               matrix -> <canvas> renderer

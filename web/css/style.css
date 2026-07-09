@@ -512,6 +512,75 @@ html, body {
   font-size: 0.9rem;
 }
 
+.ticket-track {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin: 14px 0 4px;
+  max-width: 480px;
+}
+
+.ticket {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 62px;
+  border: 2px solid #4c6b7a;
+  background: #1a212b;
+  cursor: pointer;
+  gap: 4px;
+  transition: opacity 0.1s, border-color 0.1s;
+}
+
+.ticket.urgent {
+  border-color: #c9524f;
+}
+
+.ticket.urgent .ticket-flag {
+  color: #e07f7c;
+}
+
+.ticket .ticket-flag {
+  font-size: 0.6rem;
+  color: var(--text-dim);
+  letter-spacing: 0.05em;
+}
+
+.ticket .ticket-id {
+  font-size: 1.1rem;
+  color: var(--text-main);
+}
+
+.ticket.served {
+  opacity: 0.25;
+  cursor: not-allowed;
+  border-color: #33404a;
+}
+
+.ticket.served .ticket-order-num {
+  display: block;
+}
+
+.ticket-order-num {
+  display: none;
+  font-size: 0.6rem;
+  color: var(--accent);
+}
+
+.ticket-order-label {
+  color: var(--text-dim);
+  font-size: 0.8rem;
+  min-height: 1.4em;
+  text-align: center;
+}
+
+#ticket-order-built {
+  color: var(--accent);
+}
+
 .battle-hint {
   color: var(--text-dim);
   font-size: 0.8rem;

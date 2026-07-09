@@ -3,6 +3,8 @@ const SAVE_KEY = "algorithimia-save-v1";
 const defaults = {
   chapter: 0,
   queueworksGateOpen: false,
+  dispatcherDefeated: false,
+  foundDispatcherSecret: false,
   textSpeed: "normal",
 };
 
