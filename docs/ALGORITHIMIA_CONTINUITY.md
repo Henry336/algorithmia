@@ -8,6 +8,7 @@ This file records live direction that should survive context refreshes. Keep it 
 - "Chapters" should mean multi-room routes with multiple enemies before a boss, not one square room and one fight.
 - "Rooms" are connected spaces in a route graph, not stacked floors. They can branch left/right/up/down, allow backtracking, and may be outdoor fields, caves, archives, vents, courts, or other story-specific spaces.
 - Levels 0-1 are still prototype/tutorial-scale. Chapter 2 and beyond should increasingly feel like fuller chapter routes.
+- Room boards should use most of the available browser viewport; avoid fixed 1x rendering that leaves large empty space on desktop.
 - Battles should evaluate correctness and observed work cost, then affect HP/Focus through readable combat feedback.
 - Starting with Bogolord, major bosses should have their own HP, multiple phases, timed attacks, and battle-specific pressure mechanics. Later bosses should not feel like one generic code check.
 

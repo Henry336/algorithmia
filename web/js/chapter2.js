@@ -5,6 +5,7 @@ import { sayLines, isDialogueActive, advance as advanceDialogue } from "./dialog
 import { getState, setState } from "./state.js";
 import { startTicketBattle } from "./ticketBattle.js";
 import { solvePriorityOrder } from "./priorityPolicy.js";
+import { fitRoomViewportToScreen } from "./viewportScale.js";
 
 export const TILE = 42;
 const COLS = 13;
@@ -87,7 +88,7 @@ const ROOM_MAPS = [
     [1, 0, 2, 0, 10, 0, 9, 0, 10, 0, 2, 0, 1],
     [1, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 1],
     [1, 2, 0, 0, 2, 10, 0, 10, 2, 0, 0, 2, 1],
-    [13, 0, 0, 10, 0, 0, 2, 0, 0, 10, 0, 0, 1],
+    [13, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 1],
     [1, 0, 2, 0, 0, 0, 0, 0, 0, 2, 0, 0, 1],
     [1, 19, 0, 0, 2, 0, 8, 0, 2, 0, 19, 0, 1],
     [1, 1, 19, 0, 0, 0, 0, 0, 0, 19, 1, 1, 1],
@@ -197,10 +198,7 @@ function goToRoom(nextRoom, start, lines) {
 }
 
 function fitViewportToScreen() {
-  const naturalWidth = COLS * TILE;
-  const available = window.innerWidth - 24;
-  const scale = Math.min(1, available / naturalWidth);
-  viewport.style.transform = scale < 1 ? `scale(${scale})` : "";
+  fitRoomViewportToScreen(viewport, COLS, ROWS, TILE);
 }
 
 function render() {

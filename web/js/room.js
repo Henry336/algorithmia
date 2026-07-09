@@ -4,6 +4,7 @@ import { animatePatchrunnerStep, placeMiraEntity, placePatchrunnerEntity, placeS
 import { sayLines, isDialogueActive, advance as advanceDialogue } from "./dialogue.js";
 import { getState, setState } from "./state.js";
 import { startSortingSlimeBattle } from "./battle.js";
+import { fitRoomViewportToScreen } from "./viewportScale.js";
 
 export const TILE = 42;
 const COLS = 11;
@@ -73,10 +74,7 @@ export function initRoom({ onExitToChapter1: exitHandler } = {}) {
 }
 
 function fitViewportToScreen() {
-  const naturalWidth = COLS * TILE;
-  const available = window.innerWidth - 24;
-  const scale = Math.min(1, available / naturalWidth);
-  viewport.style.transform = scale < 1 ? `scale(${scale})` : "";
+  fitRoomViewportToScreen(viewport, COLS, ROWS, TILE);
 }
 
 function render() {

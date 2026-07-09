@@ -5,6 +5,7 @@ import { sayLines, isDialogueActive, advance as advanceDialogue } from "./dialog
 import { getState, setState } from "./state.js";
 import { startTicketBattle, makeTicket } from "./ticketBattle.js";
 import { solveTriageOrder } from "./triagePolicy.js";
+import { fitRoomViewportToScreen } from "./viewportScale.js";
 
 export const TILE = 42;
 const COLS = 13;
@@ -79,10 +80,7 @@ export function initChapter1Room({ onExitToChapter2: exitHandler } = {}) {
 }
 
 function fitViewportToScreen() {
-  const naturalWidth = COLS * TILE;
-  const available = window.innerWidth - 24;
-  const scale = Math.min(1, available / naturalWidth);
-  viewport.style.transform = scale < 1 ? `scale(${scale})` : "";
+  fitRoomViewportToScreen(viewport, COLS, ROWS, TILE);
 }
 
 function render() {

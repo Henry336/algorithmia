@@ -413,14 +413,15 @@ html, body {
 #screen-room,
 #screen-room-ch1,
 #screen-room-ch2,
-#screen-room-ch3 {
+#screen-room-ch3,
+#screen-room-ch4 {
   justify-content: flex-start;
   padding-top: 10px;
   gap: 8px;
 }
 
 .hud {
-  width: min(90vw, 720px);
+  width: min(96vw, 1100px);
   display: flex;
   justify-content: space-between;
   align-items: center;
