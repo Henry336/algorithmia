@@ -25,66 +25,84 @@ const SIDE_DOOR = 12;
 const RETURN_DOOR = 13;
 const VALVE = 14;
 const ASH_AUDITOR_CODE = 16;
+const SECRET_DOOR = 17;
+const ASH_FLOOR = 18;
+const MAGMA = 19;
+const BASALT = 20;
 
 const ROOM_INTAKE = 0;
 const ROOM_CORE = 1;
 const ROOM_ARCHIVE = 2;
 const ROOM_BOSS = 3;
+const ROOM_SECRET = 4;
 
 const ROOM_STARTS = [
   { col: 6, row: 8, facing: "up" },
   { col: 6, row: 8, facing: "up" },
+  { col: 1, row: 4, facing: "right" },
+  { col: 1, row: 5, facing: "right" },
   { col: 11, row: 5, facing: "left" },
-  { col: 6, row: 8, facing: "up" },
 ];
 
 const ROOM_MAPS = [
   [
-    [1, 1, 1, 1, 1, 1, 3, 3, 1, 1, 1, 1, 1],
-    [1, 0, 2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 1],
-    [1, 0, 2, 0, 2, 0, 0, 0, 2, 0, 2, 0, 1],
-    [1, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 12, 1],
-    [1, 2, 2, 0, 2, 2, 0, 2, 2, 0, 2, 0, 1],
-    [1, 0, 0, 7, 0, 0, 0, 0, 0, 5, 0, 0, 1],
-    [1, 0, 2, 2, 0, 2, 0, 2, 0, 2, 2, 0, 1],
-    [1, 0, 8, 0, 0, 2, 0, 2, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 1, 1, 1, 1, 3, 3, 3, 1, 1, 1, 1, 1],
+    [1, 18, 18, 1, 0, 0, 0, 0, 0, 2, 18, 18, 1],
+    [1, 18, 2, 1, 0, 2, 0, 2, 0, 2, 5, 0, 1],
+    [1, 0, 0, 0, 0, 2, 0, 2, 0, 0, 0, 12, 1],
+    [17, 0, 2, 2, 0, 0, 0, 0, 2, 2, 0, 0, 1],
+    [1, 0, 0, 7, 0, 2, 2, 0, 0, 0, 2, 0, 1],
+    [1, 2, 0, 0, 0, 0, 8, 0, 2, 0, 0, 0, 1],
+    [1, 18, 18, 2, 0, 0, 0, 0, 0, 0, 2, 18, 1],
+    [1, 18, 0, 0, 0, 0, 0, 0, 0, 18, 18, 18, 1],
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
   ],
   [
-    [1, 1, 1, 1, 1, 1, 3, 3, 1, 1, 1, 1, 1],
-    [1, 0, 0, 2, 0, 10, 0, 0, 2, 0, 0, 0, 1],
-    [1, 0, 2, 0, 2, 0, 14, 0, 2, 0, 10, 0, 1],
-    [1, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 1],
-    [1, 2, 10, 0, 14, 2, 11, 2, 14, 0, 2, 1, 1],
-    [1, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 1],
-    [1, 0, 2, 0, 0, 10, 0, 0, 0, 2, 0, 0, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 19, 19, 1, 0, 0, 14, 0, 1, 19, 19, 19, 1],
+    [1, 19, 0, 0, 0, 10, 0, 0, 0, 0, 14, 19, 1],
+    [1, 1, 0, 2, 0, 0, 0, 2, 0, 10, 0, 0, 1],
+    [1, 0, 0, 2, 14, 0, 11, 0, 0, 2, 0, 0, 3],
+    [1, 0, 10, 0, 0, 2, 0, 2, 0, 0, 0, 19, 1],
     [1, 0, 0, 0, 2, 0, 8, 0, 2, 0, 0, 0, 1],
-    [1, 0, 2, 0, 0, 0, 10, 0, 0, 0, 2, 0, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 19, 0, 10, 0, 0, 0, 0, 0, 0, 19, 0, 1],
+    [1, 19, 19, 0, 0, 0, 0, 0, 0, 0, 19, 19, 1],
+    [1, 1, 1, 1, 1, 1, 13, 1, 1, 1, 1, 1, 1],
   ],
   [
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 2, 0, 8, 0, 2, 0, 0, 0, 0, 1],
-    [1, 0, 2, 0, 0, 0, 0, 0, 0, 2, 0, 0, 1],
-    [1, 0, 0, 0, 16, 0, 2, 0, 0, 0, 8, 0, 1],
-    [1, 2, 0, 2, 0, 0, 0, 0, 2, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 2, 0, 2, 0, 0, 0, 13, 1],
-    [1, 0, 2, 0, 0, 0, 0, 0, 0, 2, 0, 0, 1],
-    [1, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 2, 0, 8, 0, 2, 0, 0, 0, 1, 1],
+    [1, 0, 2, 0, 0, 0, 0, 0, 16, 2, 0, 0, 1],
+    [1, 0, 0, 0, 2, 0, 2, 0, 0, 0, 8, 0, 1],
+    [13, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 2, 1],
+    [1, 0, 0, 0, 0, 2, 0, 2, 0, 0, 0, 1, 1],
+    [1, 2, 0, 8, 0, 0, 0, 0, 0, 2, 0, 0, 1],
+    [1, 0, 0, 0, 2, 0, 2, 0, 2, 0, 0, 0, 1],
+    [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1],
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
   ],
   [
-    [1, 1, 1, 1, 1, 1, 6, 6, 1, 1, 1, 1, 1],
-    [1, 0, 10, 0, 2, 0, 0, 0, 2, 0, 10, 0, 1],
+    [1, 1, 1, 1, 1, 3, 3, 3, 1, 1, 1, 1, 1],
+    [1, 19, 10, 0, 2, 0, 0, 0, 2, 0, 10, 19, 1],
     [1, 0, 2, 0, 10, 0, 9, 0, 10, 0, 2, 0, 1],
     [1, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 1],
     [1, 2, 0, 0, 2, 10, 0, 10, 2, 0, 0, 2, 1],
-    [1, 0, 0, 10, 0, 0, 2, 0, 0, 10, 0, 0, 1],
+    [13, 0, 0, 10, 0, 0, 2, 0, 0, 10, 0, 0, 1],
     [1, 0, 2, 0, 0, 0, 0, 0, 0, 2, 0, 0, 1],
-    [1, 0, 0, 0, 2, 0, 13, 0, 2, 0, 8, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 19, 0, 0, 2, 0, 8, 0, 2, 0, 19, 0, 1],
+    [1, 1, 19, 0, 0, 0, 0, 0, 0, 19, 1, 1, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+  ],
+  [
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 10, 10, 19, 1, 1, 1, 19, 10, 10, 10, 1, 1],
+    [1, 10, 0, 0, 0, 19, 0, 0, 0, 19, 10, 10, 1],
+    [1, 19, 0, 8, 0, 0, 0, 2, 0, 0, 0, 10, 1],
+    [1, 10, 0, 0, 2, 10, 0, 0, 0, 19, 0, 0, 1],
+    [1, 10, 10, 0, 0, 0, 0, 10, 0, 0, 0, 13, 1],
+    [1, 1, 10, 19, 0, 0, 2, 0, 0, 19, 10, 10, 1],
+    [1, 1, 10, 10, 0, 19, 0, 0, 10, 10, 10, 1, 1],
+    [1, 1, 1, 10, 10, 10, 19, 10, 10, 1, 1, 1, 1],
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
   ],
 ];
@@ -132,7 +150,7 @@ export function initChapter2Room({ onExitToChapter3: exitHandler } = {}) {
     window.setTimeout(() => {
       sayLines([
         { speaker: "", text: "Heat rolls off the furnace floor. Every ember here fights to be the one that matters most." },
-        { speaker: "Mira Vale", text: "This foundry has layers: intake floor, archive side-room, furnace core, then the Warden." },
+        { speaker: "Mira Vale", text: "This foundry branches: archive east, a cold vent west, core north, and the Warden past the crucible gate." },
       ]);
     }, 250);
   }
@@ -147,14 +165,19 @@ function buildCurrentMap() {
   if (state.heatSifterCleared) clearCode(next, HEAT_SIFTER_CODE);
   if (state.heapWardenDefeated) clearCode(next, HEAP_WARDEN_CODE);
   if (roomIndex === ROOM_INTAKE && state.emberSorterCleared && state.priorityForgerCleared) openNorthGate(next);
-  if (roomIndex === ROOM_CORE && state.heatSifterCleared && state.foundryCoreAligned) openNorthGate(next);
+  if (roomIndex === ROOM_CORE && state.heatSifterCleared && state.foundryCoreAligned) openEastGate(next);
   if (roomIndex === ROOM_BOSS && state.heapWardenDefeated) openNorthGate(next);
   return next;
 }
 
 function openNorthGate(targetMap) {
+  targetMap[0][5] = ROUTE_DOOR;
   targetMap[0][6] = ROUTE_DOOR;
   targetMap[0][7] = ROUTE_DOOR;
+}
+
+function openEastGate(targetMap) {
+  targetMap[4][12] = ROUTE_DOOR;
 }
 
 function clearCode(targetMap, code) {
@@ -217,8 +240,12 @@ function tileClass(code, r, c) {
   if (code === WALL) return "tile-wall";
   if (code === CLOSED_GATE) return "tile-gate";
   if (code === ROUTE_DOOR || code === SIDE_DOOR || code === RETURN_DOOR) return "tile-gate open";
+  if (code === SECRET_DOOR) return "tile-secret-door";
   if (code === NULL_ROT) return "tile-null-rot";
   if (code === VALVE) return "tile-valve";
+  if (code === ASH_FLOOR) return "tile-ash";
+  if (code === MAGMA) return "tile-magma";
+  if (code === BASALT) return "tile-basalt";
   if (code === CLUTTER || code === LORE) return "tile-ledger";
   return "tile-floor" + ((r + c) % 2 === 0 ? "" : " alt");
 }
@@ -267,6 +294,7 @@ function findCode(code) {
 
 function isBlocking(code) {
   return code === WALL || code === CLUTTER || code === CLOSED_GATE || code === LORE || code === NULL_ROT || code === VALVE ||
+    code === SECRET_DOOR || code === MAGMA || code === BASALT ||
     code === EMBER_SORTER_CODE || code === PRIORITY_FORGER_CODE || code === HEAP_WARDEN_CODE || code === HEAT_SIFTER_CODE ||
     code === ASH_AUDITOR_CODE;
 }
@@ -306,8 +334,9 @@ function handleSpecialTile(code, col, row) {
   if (code === HEAP_WARDEN_CODE) return enterHeapWardenBattle(), true;
   if (code === LORE) return inspectLore(col, row), true;
   if (code === VALVE) return alignFoundryValve(col, row), true;
-  if (code === ROUTE_DOOR) return onReachRouteDoor(), true;
+  if (code === ROUTE_DOOR) return onReachRouteDoor(col, row), true;
   if (code === SIDE_DOOR) return onReachSideDoor(), true;
+  if (code === SECRET_DOOR) return onReachSecretDoor(), true;
   if (code === RETURN_DOOR) return onReachReturnDoor(), true;
   return false;
 }
@@ -494,6 +523,16 @@ function inspectLore(col, row) {
     ]);
     return;
   }
+  if (roomIndex === ROOM_SECRET) {
+    const { foundHeaplightDarkSecret } = getState();
+    if (!foundHeaplightDarkSecret) setState({ foundHeaplightDarkSecret: true });
+    sayLines([
+      { speaker: "", text: "The vent is colder than the rest of the foundry. Your footsteps arrive in the ash before you do." },
+      { speaker: "The dark", text: "Three valves. Three clicks. You counted because the room told you counting was enough." },
+      { speaker: "", text: "No one is standing there." },
+    ]);
+    return;
+  }
   sayLines([{ speaker: "", text: "The Warden's old oath is carved here, but the last word has burned away." }]);
 }
 
@@ -533,7 +572,7 @@ function findSecret() {
 function onReachRouteDoor() {
   if (roomIndex === ROOM_INTAKE) {
     if (!(getState().emberSorterCleared && getState().priorityForgerCleared)) {
-      sayLines([{ speaker: "", text: "The north lift rattles, but the intake floor is still unstable." }]);
+      sayLines([{ speaker: "", text: "The north furnace gate rattles, but the intake floor is still unstable." }]);
       return;
     }
     goToRoom(ROOM_CORE, ROOM_STARTS[ROOM_CORE], [
@@ -544,11 +583,11 @@ function onReachRouteDoor() {
   }
   if (roomIndex === ROOM_CORE) {
     if (!(getState().heatSifterCleared && getState().foundryCoreAligned)) {
-      sayLines([{ speaker: "", text: "The boss lift rejects the route. Three valves and the Heat Sifter still matter." }]);
+      sayLines([{ speaker: "", text: "The east crucible gate rejects the route. Three reachable valves and the Heat Sifter still matter." }]);
       return;
     }
     goToRoom(ROOM_BOSS, ROOM_STARTS[ROOM_BOSS], [
-      { speaker: "", text: "The Warden's chamber is quieter than the core. The silence has weight." },
+      { speaker: "", text: "The east crucible narrows into the Warden's chamber. The silence has weight." },
     ]);
     return;
   }
@@ -563,12 +602,27 @@ function onReachSideDoor() {
   ]);
 }
 
+function onReachSecretDoor() {
+  goToRoom(ROOM_SECRET, ROOM_STARTS[ROOM_SECRET], [
+    { speaker: "", text: "A hairline crack behind the ash bins accepts you sideways." },
+    { speaker: "", text: "The foundry noise vanishes. Something in the dark keeps the rhythm without fire." },
+  ]);
+}
+
 function onReachReturnDoor() {
   if (roomIndex === ROOM_ARCHIVE) {
-    goToRoom(ROOM_INTAKE, { col: 11, row: 3, facing: "left" }, null);
-  } else {
-    goToRoom(ROOM_CORE, { col: 6, row: 7, facing: "up" }, null);
+    goToRoom(ROOM_INTAKE, { col: 10, row: 3, facing: "left" }, null);
+    return;
   }
+  if (roomIndex === ROOM_SECRET) {
+    goToRoom(ROOM_INTAKE, { col: 1, row: 4, facing: "right" }, null);
+    return;
+  }
+  if (roomIndex === ROOM_CORE) {
+    goToRoom(ROOM_INTAKE, { col: 6, row: 1, facing: "down" }, null);
+    return;
+  }
+  goToRoom(ROOM_CORE, { col: 11, row: 4, facing: "left" }, null);
 }
 
 function onExitToNextChapter() {

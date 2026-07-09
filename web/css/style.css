@@ -542,6 +542,61 @@ html, body {
   animation: mirrorSheen 3.6s ease-in-out infinite;
 }
 
+.tile-secret-door {
+  background:
+    linear-gradient(90deg, #141111 0 46%, #312224 47% 49%, #0d0c0d 50% 100%);
+  border: 1px solid #0e0c0c;
+  box-shadow: inset 0 0 12px #000000cc;
+  animation: hiddenCrackBreathe 5.5s ease-in-out infinite;
+}
+
+.tile-ash {
+  background:
+    radial-gradient(circle at 35% 40%, #5d5146 0 8%, transparent 9%),
+    linear-gradient(135deg, #2d2824, #41362e);
+  border: 1px solid #231d19;
+}
+
+.tile-magma {
+  background:
+    radial-gradient(circle at 45% 45%, #f6ce64 0 14%, #c0502b 24%, #27110d 58%, #0f0d0c 100%);
+  border: 1px solid #6a2c1a;
+  box-shadow: inset 0 0 10px #000000cc, 0 0 14px #e0723633;
+  animation: magmaGlow 2.2s ease-in-out infinite;
+}
+
+.tile-basalt,
+.tile-rock {
+  background:
+    linear-gradient(135deg, #20242a, #111418);
+  border: 1px solid #0b0d10;
+  box-shadow: inset 4px 4px 0 #2f3740, inset -4px -4px 0 #0a0c0e;
+}
+
+.tile-grass {
+  background:
+    linear-gradient(0deg, #1f3e35 0 40%, #285047 41% 100%);
+  border: 1px solid #183029;
+  animation: grassDrift 4.8s ease-in-out infinite;
+}
+
+.tile-tree {
+  background:
+    radial-gradient(circle at 50% 34%, #3f775f 0 26%, #214638 27% 52%, transparent 53%),
+    linear-gradient(90deg, transparent 0 42%, #4b2e1d 43% 57%, transparent 58% 100%),
+    #14251f;
+  border: 1px solid #0d1915;
+  box-shadow: inset 0 -6px 0 #111b18;
+}
+
+.tile-marsh {
+  background:
+    radial-gradient(circle at 55% 55%, #15151b 0 18%, #243547 34%, #15231f 70%, #0c1110 100%);
+  border: 1px solid #17231f;
+  box-shadow: inset 0 0 12px #000000aa, 0 0 10px #7a62ad22;
+  animation: marshGlimmer 3.4s ease-in-out infinite;
+}
+
 .theme-queueworks {
   border-color: #4c6b7a;
   background: #171f24;
@@ -811,6 +866,26 @@ html, body {
 @keyframes mirrorSheen {
   0%, 100% { transform: translateX(-22px) rotate(22deg); }
   55% { transform: translateX(24px) rotate(22deg); }
+}
+
+@keyframes hiddenCrackBreathe {
+  0%, 100% { filter: brightness(0.8); }
+  52% { filter: brightness(1.12); }
+}
+
+@keyframes magmaGlow {
+  0%, 100% { filter: brightness(0.9) saturate(1); }
+  50% { filter: brightness(1.28) saturate(1.25); }
+}
+
+@keyframes grassDrift {
+  0%, 100% { filter: brightness(0.95); }
+  50% { filter: brightness(1.08); }
+}
+
+@keyframes marshGlimmer {
+  0%, 100% { filter: brightness(0.78) hue-rotate(0deg); }
+  50% { filter: brightness(1.1) hue-rotate(12deg); }
 }
 
 .patchrunner-title-sprite {
@@ -1498,6 +1573,10 @@ html, body {
   .tile-valve::after,
   .tile-mirror,
   .tile-mirror::after,
+  .tile-secret-door,
+  .tile-magma,
+  .tile-grass,
+  .tile-marsh,
   .sorting-slime-sprite,
   .sorting-slime-battle-sprite,
   .battle-scene::before,

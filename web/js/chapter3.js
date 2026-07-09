@@ -24,66 +24,85 @@ const SIDE_DOOR = 12;
 const RETURN_DOOR = 13;
 const MIRROR = 14;
 const INDEX_GHOST_CODE = 16;
+const SECRET_DOOR = 17;
+const GRASS = 18;
+const ROCK = 19;
+const MARSH = 20;
+const TREE = 21;
 
 const ROOM_APPROACH = 0;
 const ROOM_COURT = 1;
 const ROOM_LIBRARY = 2;
 const ROOM_BOSS = 3;
+const ROOM_SECRET = 4;
 
 const ROOM_STARTS = [
   { col: 6, row: 8, facing: "up" },
   { col: 6, row: 8, facing: "up" },
+  { col: 1, row: 3, facing: "right" },
+  { col: 1, row: 5, facing: "right" },
   { col: 11, row: 5, facing: "left" },
-  { col: 6, row: 8, facing: "up" },
 ];
 
 const ROOM_MAPS = [
   [
-    [1, 1, 1, 1, 1, 1, 3, 3, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 2, 0, 0, 2, 0, 2, 0, 0, 2, 0, 1],
-    [1, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 12, 1],
-    [1, 2, 0, 0, 2, 0, 0, 0, 2, 0, 0, 2, 1],
-    [1, 0, 0, 5, 0, 0, 2, 0, 0, 7, 0, 0, 1],
-    [1, 0, 2, 0, 0, 0, 0, 0, 0, 2, 0, 0, 1],
-    [1, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-  ],
-  [
-    [1, 1, 1, 1, 1, 1, 3, 3, 1, 1, 1, 1, 1],
-    [1, 0, 10, 0, 0, 2, 0, 0, 2, 0, 10, 0, 1],
-    [1, 0, 2, 0, 10, 0, 14, 0, 10, 0, 2, 0, 1],
-    [1, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 1],
-    [1, 2, 0, 0, 14, 10, 11, 10, 14, 0, 0, 2, 1],
-    [1, 0, 0, 10, 0, 0, 2, 0, 0, 10, 0, 0, 1],
-    [1, 0, 2, 0, 0, 0, 0, 0, 0, 2, 0, 0, 1],
-    [1, 0, 0, 0, 2, 0, 8, 0, 2, 0, 0, 0, 1],
-    [1, 0, 10, 0, 0, 0, 2, 0, 0, 0, 10, 0, 1],
+    [1, 1, 1, 1, 1, 3, 3, 3, 1, 1, 1, 1, 1],
+    [1, 18, 18, 19, 0, 0, 0, 0, 0, 19, 18, 18, 1],
+    [1, 21, 0, 0, 0, 19, 18, 19, 0, 0, 0, 21, 1],
+    [1, 0, 19, 5, 0, 0, 0, 0, 0, 7, 0, 0, 12],
+    [1, 0, 0, 0, 21, 0, 19, 0, 21, 0, 0, 19, 1],
+    [1, 18, 19, 0, 0, 0, 8, 0, 0, 0, 19, 18, 1],
+    [17, 0, 0, 0, 19, 0, 0, 0, 19, 0, 0, 18, 1],
+    [1, 20, 20, 0, 0, 0, 0, 0, 0, 0, 20, 20, 1],
+    [1, 1, 18, 18, 0, 0, 0, 0, 0, 18, 18, 1, 1],
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
   ],
   [
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 2, 0, 8, 0, 2, 0, 0, 0, 0, 1],
+    [1, 20, 10, 0, 0, 2, 0, 0, 2, 0, 10, 20, 1],
+    [1, 0, 2, 14, 10, 0, 0, 0, 10, 14, 2, 0, 1],
+    [1, 0, 0, 2, 0, 0, 8, 0, 0, 2, 0, 0, 1],
+    [1, 2, 0, 0, 14, 10, 11, 10, 0, 0, 0, 2, 3],
+    [1, 0, 0, 10, 0, 0, 0, 0, 0, 10, 0, 0, 1],
+    [1, 0, 2, 0, 0, 19, 0, 19, 0, 2, 0, 0, 1],
+    [1, 20, 0, 0, 2, 0, 8, 0, 2, 0, 0, 20, 1],
+    [1, 20, 20, 0, 0, 0, 0, 0, 0, 0, 20, 20, 1],
+    [1, 1, 1, 1, 1, 1, 13, 1, 1, 1, 1, 1, 1],
+  ],
+  [
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 0, 0, 2, 0, 8, 0, 2, 0, 0, 1, 1, 1],
     [1, 0, 2, 0, 0, 0, 16, 0, 0, 2, 0, 0, 1],
-    [1, 0, 0, 0, 2, 0, 0, 0, 2, 0, 8, 0, 1],
+    [13, 0, 0, 0, 2, 0, 0, 0, 2, 0, 8, 0, 1],
     [1, 2, 0, 0, 0, 2, 0, 2, 0, 0, 0, 2, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 13, 1],
-    [1, 0, 2, 0, 0, 0, 8, 0, 0, 2, 0, 0, 1],
+    [1, 0, 0, 2, 0, 0, 8, 0, 0, 2, 0, 0, 1],
+    [1, 0, 2, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1],
     [1, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1],
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
   ],
   [
-    [1, 1, 1, 1, 1, 1, 6, 6, 1, 1, 1, 1, 1],
-    [1, 0, 10, 0, 2, 0, 0, 0, 2, 0, 10, 0, 1],
+    [1, 1, 1, 1, 1, 3, 3, 3, 1, 1, 1, 1, 1],
+    [1, 20, 10, 0, 2, 0, 0, 0, 2, 0, 10, 20, 1],
     [1, 0, 2, 0, 10, 0, 9, 0, 10, 0, 2, 0, 1],
     [1, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 1],
     [1, 2, 0, 0, 2, 10, 0, 10, 2, 0, 0, 2, 1],
-    [1, 0, 0, 10, 0, 0, 2, 0, 0, 10, 0, 0, 1],
+    [13, 0, 0, 10, 0, 0, 2, 0, 0, 10, 0, 0, 1],
     [1, 0, 2, 0, 0, 0, 0, 0, 0, 2, 0, 0, 1],
-    [1, 0, 0, 0, 2, 0, 13, 0, 2, 0, 8, 0, 1],
-    [1, 0, 10, 0, 0, 0, 2, 0, 0, 0, 10, 0, 1],
+    [1, 20, 0, 0, 2, 0, 8, 0, 2, 0, 20, 0, 1],
+    [1, 1, 20, 0, 0, 0, 0, 0, 0, 20, 1, 1, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+  ],
+  [
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 10, 20, 20, 1, 1, 1, 20, 10, 10, 10, 1, 1],
+    [1, 20, 0, 0, 0, 10, 0, 0, 0, 20, 10, 10, 1],
+    [1, 10, 0, 8, 0, 0, 0, 2, 0, 0, 0, 10, 1],
+    [1, 20, 0, 0, 2, 10, 0, 0, 0, 20, 0, 0, 1],
+    [1, 10, 10, 0, 0, 0, 0, 10, 0, 0, 0, 13, 1],
+    [1, 1, 10, 20, 0, 0, 2, 0, 0, 20, 10, 10, 1],
+    [1, 1, 10, 10, 0, 20, 0, 0, 10, 10, 10, 1, 1],
+    [1, 1, 1, 10, 10, 10, 20, 10, 10, 1, 1, 1, 1],
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
   ],
 ];
@@ -166,14 +185,19 @@ function buildCurrentMap() {
   if (state.nullEchoCleared) clearCode(next, NULL_ECHO_CODE);
   if (state.bogoDefeated) clearCode(next, BOGO_CODE);
   if (roomIndex === ROOM_APPROACH && state.shuffleImpCleared && state.pivotShadeCleared) openNorthGate(next);
-  if (roomIndex === ROOM_COURT && state.nullEchoCleared && state.arrayMirrorsAligned) openNorthGate(next);
+  if (roomIndex === ROOM_COURT && state.nullEchoCleared && state.arrayMirrorsAligned) openEastGate(next);
   if (roomIndex === ROOM_BOSS && state.bogoDefeated) openNorthGate(next);
   return next;
 }
 
 function openNorthGate(targetMap) {
+  targetMap[0][5] = ROUTE_DOOR;
   targetMap[0][6] = ROUTE_DOOR;
   targetMap[0][7] = ROUTE_DOOR;
+}
+
+function openEastGate(targetMap) {
+  targetMap[4][12] = ROUTE_DOOR;
 }
 
 function clearCode(targetMap, code) {
@@ -237,8 +261,13 @@ function tileClass(code, r, c) {
   if (code === WALL) return "tile-wall";
   if (code === CLOSED_GATE) return "tile-gate";
   if (code === ROUTE_DOOR || code === SIDE_DOOR || code === RETURN_DOOR) return "tile-gate open";
+  if (code === SECRET_DOOR) return "tile-secret-door";
   if (code === NULL_ROT) return "tile-null-rot";
   if (code === MIRROR) return "tile-mirror";
+  if (code === GRASS) return "tile-grass";
+  if (code === ROCK) return "tile-rock";
+  if (code === MARSH) return "tile-marsh";
+  if (code === TREE) return "tile-tree";
   if (code === CLUTTER || code === LORE) return "tile-ledger";
   return "tile-floor" + ((r + c) % 2 === 0 ? "" : " alt");
 }
@@ -287,6 +316,7 @@ function findCode(code) {
 
 function isBlocking(code) {
   return code === WALL || code === CLUTTER || code === CLOSED_GATE || code === LORE || code === NULL_ROT || code === MIRROR ||
+    code === SECRET_DOOR || code === ROCK || code === MARSH || code === TREE ||
     code === SHUFFLE_IMP_CODE || code === PIVOT_SHADE_CODE || code === BOGO_CODE || code === NULL_ECHO_CODE ||
     code === INDEX_GHOST_CODE;
 }
@@ -326,8 +356,9 @@ function handleSpecialTile(code, col, row) {
   if (code === BOGO_CODE) return enterLordBogoBattle(), true;
   if (code === LORE) return inspectLore(col, row), true;
   if (code === MIRROR) return alignArrayMirror(col, row), true;
-  if (code === ROUTE_DOOR) return onReachRouteDoor(), true;
+  if (code === ROUTE_DOOR) return onReachRouteDoor(col, row), true;
   if (code === SIDE_DOOR) return onReachSideDoor(), true;
+  if (code === SECRET_DOOR) return onReachSecretDoor(), true;
   if (code === RETURN_DOOR) return onReachReturnDoor(), true;
   return false;
 }
@@ -507,6 +538,16 @@ function inspectLore(col, row) {
     ]);
     return;
   }
+  if (roomIndex === ROOM_SECRET) {
+    const { foundArrayDarkSecret } = getState();
+    if (!foundArrayDarkSecret) setState({ foundArrayDarkSecret: true });
+    sayLines([
+      { speaker: "", text: "The marsh reflects the game board without reflecting you." },
+      { speaker: "The dark", text: "You found a room because you believed the edge was negotiable." },
+      { speaker: "", text: "There is no NPC here. The text appears anyway." },
+    ]);
+    return;
+  }
   sayLines([{ speaker: "", text: "The court record is blank, but the blankness feels deliberate." }]);
 }
 
@@ -557,11 +598,11 @@ function onReachRouteDoor() {
   }
   if (roomIndex === ROOM_COURT) {
     if (!(getState().nullEchoCleared && getState().arrayMirrorsAligned)) {
-      sayLines([{ speaker: "", text: "The court refuses the boss route. The echo and the mirrors still disagree." }]);
+      sayLines([{ speaker: "", text: "The east arch refuses the boss route. The echo and the mirrors still disagree." }]);
       return;
     }
     goToRoom(ROOM_BOSS, ROOM_STARTS[ROOM_BOSS], [
-      { speaker: "", text: "Bogo's chamber is all dice, royal fabric, and empty spaces pretending to be decoration." },
+      { speaker: "", text: "The east arch folds into Bogo's amphitheatre: dice, royal fabric, and empty spaces pretending to be decoration." },
     ]);
     return;
   }
@@ -576,12 +617,27 @@ function onReachSideDoor() {
   ]);
 }
 
+function onReachSecretDoor() {
+  goToRoom(ROOM_SECRET, ROOM_STARTS[ROOM_SECRET], [
+    { speaker: "", text: "The marsh grass parts where the map insists there is only edge." },
+    { speaker: "", text: "Beyond it, the Array Plains stop pretending to be outdoors." },
+  ]);
+}
+
 function onReachReturnDoor() {
   if (roomIndex === ROOM_LIBRARY) {
     goToRoom(ROOM_APPROACH, { col: 11, row: 3, facing: "left" }, null);
-  } else {
-    goToRoom(ROOM_COURT, { col: 6, row: 7, facing: "up" }, null);
+    return;
   }
+  if (roomIndex === ROOM_SECRET) {
+    goToRoom(ROOM_APPROACH, { col: 1, row: 6, facing: "right" }, null);
+    return;
+  }
+  if (roomIndex === ROOM_COURT) {
+    goToRoom(ROOM_APPROACH, { col: 6, row: 1, facing: "down" }, null);
+    return;
+  }
+  goToRoom(ROOM_COURT, { col: 11, row: 4, facing: "left" }, null);
 }
 
 function onExitToChapter4Route() {

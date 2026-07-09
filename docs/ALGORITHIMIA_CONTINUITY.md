@@ -6,6 +6,7 @@ This file records live direction that should survive context refreshes. Keep it 
 
 - Python-first remains the default player-code language.
 - "Chapters" should mean multi-room routes with multiple enemies before a boss, not one square room and one fight.
+- "Rooms" are connected spaces in a route graph, not stacked floors. They can branch left/right/up/down, allow backtracking, and may be outdoor fields, caves, archives, vents, courts, or other story-specific spaces.
 - Levels 0-1 are still prototype/tutorial-scale. Chapter 2 and beyond should increasingly feel like fuller chapter routes.
 - Battles should evaluate correctness and observed work cost, then affect HP/Focus through readable combat feedback.
 
@@ -30,7 +31,7 @@ This file records live direction that should survive context refreshes. Keep it 
 
 ## Current Implemented Route Notes
 
-- Chapter 2: Heaplight Foundry is a four-room route: intake floor, optional ash archive, furnace core, and Heap Warden boss chamber. Ember Sorter and Priority Forger gate the core; Heat Sifter plus three valves gate the boss; Ash Auditor is optional archive combat/lore.
-- Chapter 3: Array Plains is a four-room route: approach field, optional index library, Bogo's court, and Lord Bogo boss chamber. Shuffle Imp and Pivot Shade gate the court; Null Echo plus three array mirrors gate the boss; Index Ghost is optional library combat/lore.
-- Optional rooms may hold lore, optional enemies, hidden secrets, or quiet deco space. They should make chapters feel like places, not just combat queues.
+- Chapter 2: Heaplight Foundry is a connected route graph: intake floor branches east to the ash archive, west to a hidden cold vent, north to the furnace core, and east from the core into the Heap Warden crucible. Ember Sorter and Priority Forger gate the core; Heat Sifter plus three reachable valves gate the boss; Ash Auditor is optional archive combat/lore.
+- Chapter 3: Array Plains is a connected route graph: corrupted rowgrass approach branches east to the index library, west to a hidden null-marsh, north to Bogo's court, and east from the court into Lord Bogo's amphitheatre. Shuffle Imp and Pivot Shade gate the court; Null Echo plus three array mirrors gate the boss; Index Ghost is optional library combat/lore.
+- Optional rooms may hold lore, optional enemies, hidden secrets, creepy darkness dialogue, or quiet deco space. They should make chapters feel like places, not just combat queues.
 - Sorting Slime has a real exported asset and should idle on the map while acting more aggressive in battle.

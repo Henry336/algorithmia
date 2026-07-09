@@ -18,6 +18,7 @@ const defaults = {
   heapWardenDefeated: false,
   foundHeaplightSecret: false,
   foundHeaplightArchiveSecret: false,
+  foundHeaplightDarkSecret: false,
   shuffleImpCleared: false,
   pivotShadeCleared: false,
   indexGhostCleared: false,
@@ -26,6 +27,7 @@ const defaults = {
   bogoDefeated: false,
   foundArrayPlainsSecret: false,
   foundArrayLibrarySecret: false,
+  foundArrayDarkSecret: false,
   archiveFragmentAwake: false,
   textSpeed: "normal",
 };
