@@ -1,23 +1,175 @@
 import { applyPixelArt } from "./pixelart.js";
 
-// Player writes a real `solve(values)` function and it actually runs, in a
-// Web Worker so a hung/infinite-loop submission can be killed from outside
-// without freezing the page. This is a pedagogical guardrail (mirrors the
-// CLI's rejection of sorted()/.sort()), not a security sandbox — there is no
-// untrusted-multiplayer code execution here, just the local player's own
-// browser running their own code.
+// Player writes a Python-flavored `solve(values)` function. The static browser
+// build supports the small subset this first sorting lesson needs: def,
+// indentation, range/len loops, list copies, comparisons, swaps, and return.
+// It runs in a Web Worker so a hung submission can be killed without freezing
+// the page. This is a pedagogical guardrail, not a security sandbox.
 const WORKER_SOURCE = `
+function countIndent(line) {
+  const match = line.match(/^ */);
+  return match ? match[0].length : 0;
+}
+
+function withoutComment(line) {
+  const index = line.indexOf("#");
+  return index === -1 ? line : line.slice(0, index);
+}
+
+function splitRangeArgs(args) {
+  return args.split(",").map((part) => part.trim()).filter(Boolean);
+}
+
+function translateExpr(expr) {
+  return expr
+    .replace(/\\b([A-Za-z_]\\w*)\\s*\\[\\s*:\\s*\\]/g, "$1.slice()")
+    .replace(/\\b([A-Za-z_]\\w*)\\.copy\\(\\s*\\)/g, "$1.slice()")
+    .replace(/\\blist\\s*\\(\\s*([A-Za-z_]\\w*)\\s*\\)/g, "$1.slice()")
+    .replace(/\\blen\\s*\\(\\s*([A-Za-z_]\\w*)\\s*\\)/g, "$1.length")
+    .replace(/\\bTrue\\b/g, "true")
+    .replace(/\\bFalse\\b/g, "false")
+    .replace(/\\bNone\\b/g, "null")
+    .replace(/\\band\\b/g, "&&")
+    .replace(/\\bor\\b/g, "||")
+    .replace(/\\bnot\\b/g, "!");
+}
+
+function compilePythonSolve(source) {
+  const lines = source.replace(/\\t/g, "    ").split(/\\r?\\n/);
+  const defIndex = lines.findIndex((line) => /^\\s*def\\s+solve\\s*\\(\\s*values\\s*\\)\\s*:\\s*$/.test(withoutComment(line).trim()));
+  if (defIndex === -1) {
+    throw new Error("Define Python function: def solve(values):");
+  }
+
+  const defIndent = countIndent(lines[defIndex]);
+  const bodyLines = [];
+  for (let i = defIndex + 1; i < lines.length; i++) {
+    const raw = withoutComment(lines[i]);
+    if (!raw.trim()) continue;
+    const indent = countIndent(raw);
+    if (indent <= defIndent) break;
+    bodyLines.push({ indent, text: raw.trim(), lineNo: i + 1 });
+  }
+
+  if (!bodyLines.length) {
+    throw new Error("Add an indented body under def solve(values):");
+  }
+
+  const js = ["function solve(values) {"];
+  const stack = [];
+  const declared = new Set(["values"]);
+  let swapTemp = 0;
+
+  function closeTo(indent) {
+    while (stack.length && indent <= stack[stack.length - 1]) {
+      js.push("}");
+      stack.pop();
+    }
+  }
+
+  for (const item of bodyLines) {
+    closeTo(item.indent);
+    const line = item.text;
+
+    let match = line.match(/^for\\s+([A-Za-z_]\\w*)\\s+in\\s+range\\s*\\((.*)\\)\\s*:\\s*$/);
+    if (match) {
+      const name = match[1];
+      const args = splitRangeArgs(match[2]).map(translateExpr);
+      if (args.length < 1 || args.length > 3) {
+        throw new Error("range() needs one, two, or three arguments near line " + item.lineNo);
+      }
+      const start = args.length === 1 ? "0" : args[0];
+      const end = args.length === 1 ? args[0] : args[1];
+      const step = args.length === 3 ? args[2] : "1";
+      declared.add(name);
+      js.push("for (let " + name + " = " + start + "; " + name + " < " + end + "; " + name + " += " + step + ") {");
+      stack.push(item.indent);
+      continue;
+    }
+
+    match = line.match(/^if\\s+(.+)\\s*:\\s*$/);
+    if (match) {
+      js.push("if (" + translateExpr(match[1]) + ") {");
+      stack.push(item.indent);
+      continue;
+    }
+
+    match = line.match(/^while\\s+(.+)\\s*:\\s*$/);
+    if (match) {
+      js.push("while (" + translateExpr(match[1]) + ") {");
+      stack.push(item.indent);
+      continue;
+    }
+
+    match = line.match(/^return\\s+(.+)$/);
+    if (match) {
+      js.push("return " + translateExpr(match[1]) + ";");
+      continue;
+    }
+
+    match = line.match(/^(.+\\[[^\\]]+\\])\\s*,\\s*(.+\\[[^\\]]+\\])\\s*=\\s*(.+\\[[^\\]]+\\])\\s*,\\s*(.+\\[[^\\]]+\\])$/);
+    if (match) {
+      const leftA = translateExpr(match[1]);
+      const leftB = translateExpr(match[2]);
+      const rightA = translateExpr(match[3]);
+      const rightB = translateExpr(match[4]);
+      const tempA = "__swapA" + swapTemp;
+      const tempB = "__swapB" + swapTemp;
+      swapTemp += 1;
+      js.push("const " + tempA + " = " + rightA + ";");
+      js.push("const " + tempB + " = " + rightB + ";");
+      js.push(leftA + " = " + tempA + ";");
+      js.push(leftB + " = " + tempB + ";");
+      continue;
+    }
+
+    match = line.match(/^([A-Za-z_]\\w*)\\s*([+\\-])=\\s*(.+)$/);
+    if (match) {
+      const name = match[1];
+      const op = match[2];
+      const value = translateExpr(match[3]);
+      if (!declared.has(name)) {
+        throw new Error("Unknown variable near line " + item.lineNo + ": " + name);
+      }
+      js.push(name + " " + op + "= " + value + ";");
+      continue;
+    }
+
+    match = line.match(/^([A-Za-z_]\\w*)\\s*=\\s*(.+)$/);
+    if (match) {
+      const name = match[1];
+      const value = translateExpr(match[2]);
+      if (declared.has(name)) {
+        js.push(name + " = " + value + ";");
+      } else {
+        declared.add(name);
+        js.push("let " + name + " = " + value + ";");
+      }
+      continue;
+    }
+
+    match = line.match(/^(.+\\[[^\\]]+\\])\\s*=\\s*(.+)$/);
+    if (match) {
+      js.push(translateExpr(match[1]) + " = " + translateExpr(match[2]) + ";");
+      continue;
+    }
+
+    throw new Error("Unsupported Python near line " + item.lineNo + ": " + line);
+  }
+
+  closeTo(-1);
+  js.push("}");
+  return js.join("\\n");
+}
+
 self.onmessage = (e) => {
   const { source, cases } = e.data;
   let solve;
   try {
-    solve = new Function(source + "\\nreturn typeof solve === 'function' ? solve : null;")();
+    const compiled = compilePythonSolve(source);
+    solve = new Function(compiled + "\\nreturn solve;")();
   } catch (err) {
-    self.postMessage({ ok: false, error: "Could not read that code: " + (err && err.message || err) });
-    return;
-  }
-  if (typeof solve !== "function") {
-    self.postMessage({ ok: false, error: "Define a function named solve(values)." });
+    self.postMessage({ ok: false, error: "Could not read that Python: " + (err && err.message || err) });
     return;
   }
   try {
@@ -39,8 +191,8 @@ self.onmessage = (e) => {
 const WORKER_URL = URL.createObjectURL(new Blob([WORKER_SOURCE], { type: "application/javascript" }));
 
 const BANNED_PATTERNS = [
-  { pattern: /\.sort\s*\(/, message: "This encounter needs visible sorting logic — replace .sort(...) with your own comparisons." },
-  { pattern: /\bsorted\s*\(/, message: "This encounter needs visible sorting logic — replace sorted(...) with your own comparisons." },
+  { pattern: /\.sort\s*\(/, message: "This encounter needs visible Python sorting logic - replace .sort() with your own comparisons." },
+  { pattern: /\bsorted\s*\(/, message: "This encounter needs visible Python sorting logic - replace sorted(...) with your own comparisons." },
 ];
 
 function runInWorker(source, cases, timeoutMs = 2000) {
@@ -98,7 +250,7 @@ export function startCodeBattle(battleConfig) {
 
   activeScreen = document.getElementById(config.returnScreen);
   titleEl.textContent = config.title;
-  editor.value = config.starterCode || "function solve(values) {\n  \n}";
+  editor.value = config.starterCode || "def solve(values):\n    return values";
   enemySpriteHost.innerHTML = "";
   if (config.enemySprite) {
     applyPixelArt(enemySpriteHost, config.enemySprite.matrix, config.enemySprite.palette, config.enemyPixelSize || 5);
@@ -118,7 +270,7 @@ function setupRound() {
   runBtn.disabled = false;
   roundLabel.textContent = round === 1 ? "Public cases" : "Sealed check";
   hintEl.textContent = round === 1
-    ? (config.roundHint1 || "Write solve(values) and Run it against the visible cases.")
+    ? (config.roundHint1 || "Write Python def solve(values): and run it against the visible cases.")
     : (config.roundHint2 || "The Archive tried fresh input. Prove the repair still holds.");
 }
 
@@ -146,7 +298,7 @@ runBtn.addEventListener("click", async () => {
 
   runBtn.disabled = true;
   feedbackEl.classList.remove("error");
-  feedbackEl.textContent = "Running...";
+  feedbackEl.textContent = "Running Python...";
 
   const cases = round === 1 ? config.publicCases : config.generateSealed();
   const outcome = await runInWorker(source, cases);
@@ -197,7 +349,7 @@ runBtn.addEventListener("click", async () => {
 
 resetBtn.addEventListener("click", () => {
   if (locked) return;
-  editor.value = config.starterCode || "function solve(values) {\n  \n}";
+  editor.value = config.starterCode || "def solve(values):\n    return values";
   resultsEl.innerHTML = "";
   feedbackEl.textContent = "";
   feedbackEl.classList.remove("error");

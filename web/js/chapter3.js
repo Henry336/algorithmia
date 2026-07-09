@@ -13,11 +13,11 @@ const ROWS = 10;
 const BASE_MAP = [
   [1, 1, 1, 1, 1, 1, 3, 3, 1, 1, 1, 1, 1],
   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 1],
-  [1, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  [1, 0, 2, 0, 0, 2, 9, 2, 0, 0, 2, 0, 1],
+  [1, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 1],
+  [1, 2, 0, 0, 2, 0, 0, 0, 2, 0, 0, 2, 1],
+  [1, 0, 0, 5, 0, 0, 2, 0, 0, 0, 0, 0, 1],
+  [1, 0, 2, 0, 0, 0, 0, 0, 0, 2, 0, 0, 1],
   [1, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 1],
   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -25,12 +25,11 @@ const BASE_MAP = [
 
 const PLAYER_START = { col: 6, row: 8 };
 
-const STARTER_CODE = `function solve(values) {
-  const ordered = values.slice();
-  // Use loops and comparisons here (no .sort()/sorted()).
-  // Swap neighbors when they are out of order.
-  return ordered;
-}`;
+const STARTER_CODE = `def solve(values):
+    ordered = values[:]
+    # Use loops and comparisons here. No sorted() or .sort().
+    # Swap neighbors when they are out of order.
+    return ordered`;
 
 let viewport;
 let map;
@@ -224,6 +223,8 @@ function enterShuffleImpBattle() {
         enemySprite: SHUFFLE_IMP,
         enemyPixelSize: 6,
         returnScreen: "screen-room-ch3",
+        roundHint1: "Write Python def solve(values): and sort the visible formation.",
+        roundHint2: "The Archive reshuffled the input. Prove your Python still holds.",
         wonHint: "The formation holds its shape. The imp sulks off.",
         onWin: () => {
           setState({ shuffleImpCleared: true });
@@ -259,6 +260,8 @@ function enterLordBogoBattle() {
         enemySprite: LORD_BOGO,
         enemyPixelSize: 6,
         returnScreen: "screen-room-ch3",
+        roundHint1: "Write Python sorting logic. Lord Bogo is betting you only memorized the sample.",
+        roundHint2: "Fresh random formation. The same Python must survive it.",
         wonHint: "Order confirmed. Even Lord Bogo can't shuffle it loose.",
         onWin: () => {
           setState({ bogoDefeated: true, archiveFragmentAwake: true });

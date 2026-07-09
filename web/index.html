@@ -20,11 +20,11 @@
         <div class="title-sprite" id="title-sprite-shard"></div>
       </div>
       <h1 class="title-logo">ALGORITHIMIA</h1>
-      <p class="title-tagline">A programming RPG of broken systems and honest repairs.</p>
+      <p class="title-tagline">A Python-first programming RPG prototype of broken systems and honest repairs.</p>
       <nav class="title-menu" id="title-menu">
         <button class="title-option" data-action="new-game">New Game</button>
         <button class="title-option" data-action="continue">Continue</button>
-        <button class="title-option" data-action="chapter-select">Chapter Select</button>
+        <button class="title-option" data-action="chapter-select">Level Select</button>
         <button class="title-option" data-action="options">Options</button>
       </nav>
       <p class="title-build" id="title-build"></p>
@@ -34,22 +34,22 @@
   <!-- CHAPTER SELECT -->
   <section id="screen-chapter-select" class="screen">
     <div class="panel-frame">
-      <h2>Chapter Select</h2>
+      <h2>Prototype Levels</h2>
       <div class="chapter-list">
         <button class="chapter-card" data-chapter="0">
-          <span class="chapter-num">Chapter 0</span>
+          <span class="chapter-num">Level 0</span>
           <span class="chapter-name">Queueworks Intake</span>
         </button>
         <button class="chapter-card locked" data-chapter="1" disabled>
-          <span class="chapter-num">Chapter 1</span>
+          <span class="chapter-num">Level 1</span>
           <span class="chapter-name">The Dispatcher's Line</span>
         </button>
         <button class="chapter-card locked" data-chapter="2" disabled>
-          <span class="chapter-num">Chapter 2</span>
+          <span class="chapter-num">Level 2</span>
           <span class="chapter-name">Heaplight Foundry</span>
         </button>
         <button class="chapter-card locked" data-chapter="3" disabled>
-          <span class="chapter-num">Chapter 3</span>
+          <span class="chapter-num">Level 3</span>
           <span class="chapter-name">Array Plains</span>
         </button>
       </div>
@@ -80,7 +80,7 @@
   <!-- CHAPTER 0 ROOM -->
   <section id="screen-room" class="screen">
     <div class="hud">
-      <span id="hud-chapter">Chapter 0 &middot; Queueworks Intake</span>
+      <span id="hud-chapter">Level 0 &middot; Queueworks Intake</span>
       <button class="hud-menu-btn" data-action="quit-to-title">Menu</button>
     </div>
     <div id="room-viewport"></div>
@@ -97,7 +97,7 @@
   <!-- CHAPTER 1 ROOM -->
   <section id="screen-room-ch1" class="screen">
     <div class="hud">
-      <span id="hud-chapter-ch1">Chapter 1 &middot; The Dispatcher's Line</span>
+      <span id="hud-chapter-ch1">Level 1 &middot; The Dispatcher's Line</span>
       <button class="hud-menu-btn" data-action="quit-to-title">Menu</button>
     </div>
     <div id="room-viewport-ch1"></div>
@@ -114,7 +114,7 @@
   <!-- CHAPTER 2 ROOM -->
   <section id="screen-room-ch2" class="screen">
     <div class="hud">
-      <span id="hud-chapter-ch2">Chapter 2 &middot; Heaplight Foundry</span>
+      <span id="hud-chapter-ch2">Level 2 &middot; Heaplight Foundry</span>
       <button class="hud-menu-btn" data-action="quit-to-title">Menu</button>
     </div>
     <div id="room-viewport-ch2"></div>
@@ -131,7 +131,7 @@
   <!-- CHAPTER 3 ROOM -->
   <section id="screen-room-ch3" class="screen">
     <div class="hud">
-      <span id="hud-chapter-ch3">Chapter 3 &middot; Array Plains</span>
+      <span id="hud-chapter-ch3">Level 3 &middot; Array Plains</span>
       <button class="hud-menu-btn" data-action="quit-to-title">Menu</button>
     </div>
     <div id="room-viewport-ch3"></div>
@@ -204,7 +204,7 @@
       <h2 class="battle-title" id="code-battle-title">Lord Bogo</h2>
       <p class="battle-subtitle" id="code-round-label">Public cases</p>
 
-      <p class="battle-hint" id="code-hint">Write solve(values) and Run it against the visible cases.</p>
+      <p class="battle-hint" id="code-hint">Write Python def solve(values): and run it against the visible cases.</p>
 
       <textarea id="code-editor" class="code-editor" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea>
 
