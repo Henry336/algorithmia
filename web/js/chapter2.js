@@ -11,11 +11,13 @@ const COLS = 13;
 const ROWS = 10;
 
 // 1 wall, 0 floor, 2 furnace clutter, 3 gate closed, 6 gate open,
-// 5 Ember Sorter (minor), 7 Priority Forger (minor), 8 secret, 9 Heap Warden boss
-const BASE_MAP = [
+// 5 Ember Sorter, 7 Priority Forger, 8 secret, 9 Heap Warden boss,
+// 10 Null Rot, 11 Heat Sifter
+const ROOM_MAPS = [
+[
   [1, 1, 1, 1, 1, 1, 3, 3, 1, 1, 1, 1, 1],
   [1, 0, 2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 1],
-  [1, 0, 2, 0, 2, 0, 9, 0, 2, 0, 2, 0, 1],
+  [1, 0, 2, 0, 2, 0, 0, 0, 2, 0, 2, 0, 1],
   [1, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 1],
   [1, 2, 2, 0, 2, 2, 0, 2, 2, 0, 2, 2, 1],
   [1, 0, 0, 7, 0, 0, 0, 0, 0, 5, 0, 0, 1],
@@ -23,12 +25,23 @@ const BASE_MAP = [
   [1, 0, 8, 0, 0, 2, 0, 2, 0, 0, 0, 0, 1],
   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+],
+[
+  [1, 1, 1, 1, 1, 1, 3, 3, 1, 1, 1, 1, 1],
+  [1, 0, 0, 2, 0, 10, 0, 0, 2, 0, 0, 0, 1],
+  [1, 0, 2, 0, 2, 0, 9, 0, 2, 0, 10, 0, 1],
+  [1, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 1],
+  [1, 2, 10, 0, 0, 2, 11, 2, 0, 0, 2, 1, 1],
+  [1, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 1],
+  [1, 0, 2, 0, 0, 10, 0, 0, 0, 2, 0, 0, 1],
+  [1, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 1],
+  [1, 0, 2, 0, 0, 0, 10, 0, 0, 0, 2, 0, 1],
+  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+],
 ];
 
 const PLAYER_START = { col: 6, row: 8 };
-const HEAP_WARDEN_POS = { col: 6, row: 2 };
-const EMBER_SORTER_POS = { col: 9, row: 5 };
-const PRIORITY_FORGER_POS = { col: 3, row: 5 };
+const ROOM_ENTRY_START = { col: 6, row: 7 };
 
 let viewport;
 let map;
@@ -37,6 +50,7 @@ let playerEl;
 let hasGreeted = false;
 let hasWarnedGateOnce = false;
 let onExitToChapter3 = null;
+let roomIndex = 0;
 
 function priorityTicket(id, arrival, priority) {
   return { id, arrival, priority };
@@ -62,20 +76,8 @@ export function initChapter2Room({ onExitToChapter3: exitHandler } = {}) {
   fitViewportToScreen();
   window.removeEventListener("resize", fitViewportToScreen);
   window.addEventListener("resize", fitViewportToScreen);
-  map = BASE_MAP.map((row) => row.slice());
-
-  const { heapWardenDefeated, emberSorterCleared, priorityForgerCleared } = getState();
-  if (emberSorterCleared) {
-    map[EMBER_SORTER_POS.row][EMBER_SORTER_POS.col] = 0;
-  }
-  if (priorityForgerCleared) {
-    map[PRIORITY_FORGER_POS.row][PRIORITY_FORGER_POS.col] = 0;
-  }
-  if (heapWardenDefeated) {
-    map[HEAP_WARDEN_POS.row][HEAP_WARDEN_POS.col] = 0;
-    map[0][6] = 6;
-    map[0][7] = 6;
-  }
+  roomIndex = 0;
+  map = buildCurrentMap();
 
   player = { ...PLAYER_START, facing: "up" };
   render();
@@ -86,9 +88,35 @@ export function initChapter2Room({ onExitToChapter3: exitHandler } = {}) {
     window.setTimeout(() => {
       sayLines([
         { speaker: "", text: "Heat rolls off the furnace floor. Every ember here fights to be the one that matters most." },
-        { speaker: "Mira Vale", text: "The Heap Warden keeps the worst fires burning first. Show him priority needs rules, not just heat." },
+        { speaker: "Mira Vale", text: "This foundry has layers. Clear the intake floor before we step into the core." },
       ]);
     }, 250);
+  }
+}
+
+function buildCurrentMap() {
+  const next = ROOM_MAPS[roomIndex].map((row) => row.slice());
+  const { heapWardenDefeated, emberSorterCleared, priorityForgerCleared, heatSifterCleared } = getState();
+  if (emberSorterCleared) clearCode(next, 5);
+  if (priorityForgerCleared) clearCode(next, 7);
+  if (heatSifterCleared) clearCode(next, 11);
+  if (heapWardenDefeated) clearCode(next, 9);
+  if (roomIndex === 0 && emberSorterCleared && priorityForgerCleared) {
+    next[0][6] = 6;
+    next[0][7] = 6;
+  }
+  if (roomIndex === 1 && heapWardenDefeated) {
+    next[0][6] = 6;
+    next[0][7] = 6;
+  }
+  return next;
+}
+
+function clearCode(targetMap, code) {
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      if (targetMap[r][c] === code) targetMap[r][c] = 0;
+    }
   }
 }
 
@@ -119,17 +147,24 @@ function render() {
     }
   }
 
-  if (map[HEAP_WARDEN_POS.row][HEAP_WARDEN_POS.col] === 9) placeEntity("warden", HEAP_WARDEN_POS.col, HEAP_WARDEN_POS.row, HEAP_WARDEN, 5);
-  if (map[EMBER_SORTER_POS.row][EMBER_SORTER_POS.col] === 5) placeEntity("ember", EMBER_SORTER_POS.col, EMBER_SORTER_POS.row, EMBER_SORTER, SPRITE_PX);
-  if (map[PRIORITY_FORGER_POS.row][PRIORITY_FORGER_POS.col] === 7) placeEntity("forger", PRIORITY_FORGER_POS.col, PRIORITY_FORGER_POS.row, PRIORITY_FORGER, SPRITE_PX);
+  placeCodeEntity("warden", 9, HEAP_WARDEN, 5);
+  placeCodeEntity("ember", 5, EMBER_SORTER, SPRITE_PX);
+  placeCodeEntity("forger", 7, PRIORITY_FORGER, SPRITE_PX);
+  placeCodeEntity("sifter", 11, EMBER_SORTER, SPRITE_PX);
 
   playerEl = placePatchrunnerEntity(viewport, player.col, player.row, TILE, player.facing);
+}
+
+function placeCodeEntity(id, code, sprite, pixelSize) {
+  const pos = findCode(code);
+  if (pos) placeEntity(id, pos.col, pos.row, sprite, pixelSize);
 }
 
 function tileClass(code, r, c) {
   if (code === 1) return "tile-wall";
   if (code === 3) return "tile-gate";
   if (code === 6) return "tile-gate open";
+  if (code === 10) return "tile-null-rot";
   if (code === 2) return "tile-ledger";
   return "tile-floor" + ((r + c) % 2 === 0 ? "" : " alt");
 }
@@ -167,8 +202,17 @@ function tileAt(col, row) {
   return map[row][col];
 }
 
+function findCode(code) {
+  for (let row = 0; row < ROWS; row++) {
+    for (let col = 0; col < COLS; col++) {
+      if (map[row][col] === code) return { col, row };
+    }
+  }
+  return null;
+}
+
 function isBlocking(code) {
-  return code === 1 || code === 2 || code === 3 || code === 5 || code === 7 || code === 8 || code === 9;
+  return code === 1 || code === 2 || code === 3 || code === 5 || code === 7 || code === 8 || code === 9 || code === 10 || code === 11;
 }
 
 const DIR_OFFSET = {
@@ -189,6 +233,7 @@ function tryMove(dir) {
 
   if (code === 5) return enterEmberSorterBattle();
   if (code === 7) return enterPriorityForgerBattle();
+  if (code === 11) return enterHeatSifterBattle();
   if (code === 9) return enterHeapWardenBattle();
   if (code === 8) return findSecret();
   if (code === 6) return onReachOpenGate();
@@ -235,7 +280,11 @@ function enterEmberSorterBattle() {
         ...PRIORITY_BATTLE_TEXT,
         onWin: () => {
           setState({ emberSorterCleared: true });
-          map[EMBER_SORTER_POS.row][EMBER_SORTER_POS.col] = 0;
+          clearCode(map, 5);
+          if (getState().priorityForgerCleared) {
+            map[0][6] = 6;
+            map[0][7] = 6;
+          }
           render();
           sayLines([
             { speaker: "Mira Vale", text: "Good. The floor cools where it should." },
@@ -267,7 +316,11 @@ function enterPriorityForgerBattle() {
         roundHint1: "Audit the forged tags: highest priority first, stable ties by arrival.",
         onWin: () => {
           setState({ priorityForgerCleared: true });
-          map[PRIORITY_FORGER_POS.row][PRIORITY_FORGER_POS.col] = 0;
+          clearCode(map, 7);
+          if (getState().emberSorterCleared) {
+            map[0][6] = 6;
+            map[0][7] = 6;
+          }
           render();
           sayLines([
             { speaker: "Mira Vale", text: "Good catch. A priority queue is only fair if the tags are honest." },
@@ -279,10 +332,50 @@ function enterPriorityForgerBattle() {
   );
 }
 
+function enterHeatSifterBattle() {
+  sayLines(
+    [
+      { speaker: "", text: "A Heat Sifter jitters between honest priority and panic, letting Null Rot leak through the grate." },
+      { speaker: "Mira Vale", text: "Same rule, uglier room. Clear it before the Warden hears us." },
+    ],
+    () => {
+      startTicketBattle({
+        title: "Heat Sifter",
+        publicTickets: [
+          priorityTicket("A", 0, 6),
+          priorityTicket("B", 1, 9),
+          priorityTicket("C", 2, 3),
+          priorityTicket("D", 3, 9),
+        ],
+        sealedCount: 4,
+        enemySprite: EMBER_SORTER,
+        enemyPixelSize: 6,
+        returnScreen: "screen-room-ch2",
+        ...PRIORITY_BATTLE_TEXT,
+        roundHint1: "Sift the fires: highest priority first, stable ties by arrival, no panic jumps.",
+        wonHint: "The sifter locks into rhythm. The black seep pulls back from the grate.",
+        onWin: () => {
+          setState({ heatSifterCleared: true });
+          clearCode(map, 11);
+          render();
+          sayLines([
+            { speaker: "Mira Vale", text: "That black flicker is not heat. It eats the labels off things." },
+            { speaker: "", text: "The furnace core steadies, but the dark seams remain where the floor was weakest." },
+          ]);
+        },
+      });
+    }
+  );
+}
+
 function enterHeapWardenBattle() {
-  const { heapWardenDefeated } = getState();
+  const { heapWardenDefeated, heatSifterCleared } = getState();
   if (heapWardenDefeated) {
     sayLines([{ speaker: "The Heap Warden", text: "The hottest fire still rises first. As it should." }]);
+    return;
+  }
+  if (!heatSifterCleared) {
+    sayLines([{ speaker: "The Heap Warden", text: "No. First prove the core can tell urgency from decay." }]);
     return;
   }
   sayLines(
@@ -307,7 +400,7 @@ function enterHeapWardenBattle() {
         ...PRIORITY_BATTLE_TEXT,
         onWin: () => {
           setState({ heapWardenDefeated: true });
-          map[HEAP_WARDEN_POS.row][HEAP_WARDEN_POS.col] = 0;
+          clearCode(map, 9);
           map[0][6] = 6;
           map[0][7] = 6;
           render();
@@ -336,6 +429,18 @@ function findSecret() {
 }
 
 function onReachOpenGate() {
+  if (roomIndex === 0) {
+    if (!(getState().emberSorterCleared && getState().priorityForgerCleared)) return;
+    roomIndex = 1;
+    map = buildCurrentMap();
+    player = { ...ROOM_ENTRY_START, facing: "up" };
+    render();
+    sayLines([
+      { speaker: "", text: "The intake floor gives way to the Foundry core. The heat narrows into black seams." },
+      { speaker: "Mira Vale", text: "Null Rot. Only a trace, but traces spread." },
+    ]);
+    return;
+  }
   if (hasWarnedGateOnce) return;
   hasWarnedGateOnce = true;
   sayLines(
@@ -379,6 +484,7 @@ function interactFacing() {
   const code = tileAt(player.col + dc, player.row + dr);
   if (code === 5) enterEmberSorterBattle();
   else if (code === 7) enterPriorityForgerBattle();
+  else if (code === 11) enterHeatSifterBattle();
   else if (code === 9) enterHeapWardenBattle();
   else if (code === 8) findSecret();
   else if (code === 6) onReachOpenGate();

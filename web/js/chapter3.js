@@ -10,11 +10,13 @@ const COLS = 13;
 const ROWS = 10;
 
 // 1 wall, 0 floor, 2 marker-post clutter, 3 gate closed, 6 gate open,
-// 5 Shuffle Imp (minor), 7 Pivot Shade (minor), 8 secret, 9 Lord Bogo boss
-const BASE_MAP = [
+// 5 Shuffle Imp, 7 Pivot Shade, 8 secret, 9 Lord Bogo boss,
+// 10 Null Rot, 11 Null Echo
+const ROOM_MAPS = [
+[
   [1, 1, 1, 1, 1, 1, 3, 3, 1, 1, 1, 1, 1],
   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 2, 0, 0, 2, 9, 2, 0, 0, 2, 0, 1],
+  [1, 0, 2, 0, 0, 2, 0, 2, 0, 0, 2, 0, 1],
   [1, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 1],
   [1, 2, 0, 0, 2, 0, 0, 0, 2, 0, 0, 2, 1],
   [1, 0, 0, 5, 0, 0, 2, 0, 0, 7, 0, 0, 1],
@@ -22,12 +24,23 @@ const BASE_MAP = [
   [1, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 1],
   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+],
+[
+  [1, 1, 1, 1, 1, 1, 3, 3, 1, 1, 1, 1, 1],
+  [1, 0, 10, 0, 0, 2, 0, 0, 2, 0, 10, 0, 1],
+  [1, 0, 2, 0, 10, 0, 9, 0, 10, 0, 2, 0, 1],
+  [1, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 1],
+  [1, 2, 0, 0, 2, 10, 11, 10, 2, 0, 0, 2, 1],
+  [1, 0, 0, 10, 0, 0, 2, 0, 0, 10, 0, 0, 1],
+  [1, 0, 2, 0, 0, 0, 0, 0, 0, 2, 0, 0, 1],
+  [1, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 1],
+  [1, 0, 10, 0, 0, 0, 2, 0, 0, 0, 10, 0, 1],
+  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+],
 ];
 
 const PLAYER_START = { col: 6, row: 8 };
-const LORD_BOGO_POS = { col: 6, row: 2 };
-const SHUFFLE_IMP_POS = { col: 3, row: 5 };
-const PIVOT_SHADE_POS = { col: 9, row: 5 };
+const ROOM_ENTRY_START = { col: 6, row: 7 };
 
 const STARTER_CODE = `def solve(values):
     ordered = values[:]
@@ -41,6 +54,7 @@ let player = { ...PLAYER_START, facing: "up" };
 let playerEl;
 let hasGreeted = false;
 let onExitToChapter4 = null;
+let roomIndex = 0;
 
 function shuffledDistinct(count, max) {
   const pool = Array.from({ length: max }, (_, i) => i + 1);
@@ -87,20 +101,8 @@ export function initChapter3Room({ onExitToChapter4: exitHandler } = {}) {
   fitViewportToScreen();
   window.removeEventListener("resize", fitViewportToScreen);
   window.addEventListener("resize", fitViewportToScreen);
-  map = BASE_MAP.map((row) => row.slice());
-
-  const { bogoDefeated, shuffleImpCleared, pivotShadeCleared } = getState();
-  if (shuffleImpCleared) {
-    map[SHUFFLE_IMP_POS.row][SHUFFLE_IMP_POS.col] = 0;
-  }
-  if (pivotShadeCleared) {
-    map[PIVOT_SHADE_POS.row][PIVOT_SHADE_POS.col] = 0;
-  }
-  if (bogoDefeated) {
-    map[LORD_BOGO_POS.row][LORD_BOGO_POS.col] = 0;
-    map[0][6] = 6;
-    map[0][7] = 6;
-  }
+  roomIndex = 0;
+  map = buildCurrentMap();
 
   player = { ...PLAYER_START, facing: "up" };
   render();
@@ -111,9 +113,35 @@ export function initChapter3Room({ onExitToChapter4: exitHandler } = {}) {
     window.setTimeout(() => {
       sayLines([
         { speaker: "", text: "The Plains stretch out in restless rows, formations shifting whenever no one looks directly at them." },
-        { speaker: "Mira Vale", text: "Lord Bogo thinks disorder is freedom. You'll need code that holds even when he reshuffles it." },
+        { speaker: "Mira Vale", text: "These first fields are only the approach. Bogo's court is deeper, where the rows stop agreeing that they exist." },
       ]);
     }, 250);
+  }
+}
+
+function buildCurrentMap() {
+  const next = ROOM_MAPS[roomIndex].map((row) => row.slice());
+  const { bogoDefeated, shuffleImpCleared, pivotShadeCleared, nullEchoCleared } = getState();
+  if (shuffleImpCleared) clearCode(next, 5);
+  if (pivotShadeCleared) clearCode(next, 7);
+  if (nullEchoCleared) clearCode(next, 11);
+  if (bogoDefeated) clearCode(next, 9);
+  if (roomIndex === 0 && shuffleImpCleared && pivotShadeCleared) {
+    next[0][6] = 6;
+    next[0][7] = 6;
+  }
+  if (roomIndex === 1 && bogoDefeated) {
+    next[0][6] = 6;
+    next[0][7] = 6;
+  }
+  return next;
+}
+
+function clearCode(targetMap, code) {
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      if (targetMap[r][c] === code) targetMap[r][c] = 0;
+    }
   }
 }
 
@@ -144,18 +172,25 @@ function render() {
     }
   }
 
-  if (map[LORD_BOGO_POS.row][LORD_BOGO_POS.col] === 9) placeEntity("bogo", LORD_BOGO_POS.col, LORD_BOGO_POS.row, LORD_BOGO, 5);
-  if (map[SHUFFLE_IMP_POS.row][SHUFFLE_IMP_POS.col] === 5) placeEntity("imp", SHUFFLE_IMP_POS.col, SHUFFLE_IMP_POS.row, SHUFFLE_IMP, SPRITE_PX);
-  if (map[PIVOT_SHADE_POS.row][PIVOT_SHADE_POS.col] === 7) placeEntity("pivot", PIVOT_SHADE_POS.col, PIVOT_SHADE_POS.row, PIVOT_SHADE, SPRITE_PX);
+  placeCodeEntity("bogo", 9, LORD_BOGO, 5);
+  placeCodeEntity("imp", 5, SHUFFLE_IMP, SPRITE_PX);
+  placeCodeEntity("pivot", 7, PIVOT_SHADE, SPRITE_PX);
+  placeCodeEntity("null-echo", 11, PIVOT_SHADE, SPRITE_PX);
   if (getState().bogoDefeated) placeEntity("archive-shard", 6, 1, ARCHIVE_SHARD, 3);
 
   playerEl = placePatchrunnerEntity(viewport, player.col, player.row, TILE, player.facing);
+}
+
+function placeCodeEntity(id, code, sprite, pixelSize) {
+  const pos = findCode(code);
+  if (pos) placeEntity(id, pos.col, pos.row, sprite, pixelSize);
 }
 
 function tileClass(code, r, c) {
   if (code === 1) return "tile-wall";
   if (code === 3) return "tile-gate";
   if (code === 6) return "tile-gate open";
+  if (code === 10) return "tile-null-rot";
   if (code === 2) return "tile-ledger";
   return "tile-floor" + ((r + c) % 2 === 0 ? "" : " alt");
 }
@@ -193,8 +228,17 @@ function tileAt(col, row) {
   return map[row][col];
 }
 
+function findCode(code) {
+  for (let row = 0; row < ROWS; row++) {
+    for (let col = 0; col < COLS; col++) {
+      if (map[row][col] === code) return { col, row };
+    }
+  }
+  return null;
+}
+
 function isBlocking(code) {
-  return code === 1 || code === 2 || code === 3 || code === 5 || code === 7 || code === 8 || code === 9;
+  return code === 1 || code === 2 || code === 3 || code === 5 || code === 7 || code === 8 || code === 9 || code === 10 || code === 11;
 }
 
 const DIR_OFFSET = {
@@ -215,6 +259,7 @@ function tryMove(dir) {
 
   if (code === 5) return enterShuffleImpBattle();
   if (code === 7) return enterPivotShadeBattle();
+  if (code === 11) return enterNullEchoBattle();
   if (code === 9) return enterLordBogoBattle();
   if (code === 8) return findSecret();
   if (code === 6) return onReachOpenGate();
@@ -246,7 +291,11 @@ function enterShuffleImpBattle() {
         wonHint: "The formation holds its shape. The imp sulks off.",
         onWin: () => {
           setState({ shuffleImpCleared: true });
-          map[SHUFFLE_IMP_POS.row][SHUFFLE_IMP_POS.col] = 0;
+          clearCode(map, 5);
+          if (getState().pivotShadeCleared) {
+            map[0][6] = 6;
+            map[0][7] = 6;
+          }
           render();
           sayLines([
             { speaker: "Mira Vale", text: "Good. It didn't just work once - it works." },
@@ -275,7 +324,11 @@ function enterPivotShadeBattle() {
         wonHint: "The pivot stops flickering. Your ordering held through duplicates.",
         onWin: () => {
           setState({ pivotShadeCleared: true });
-          map[PIVOT_SHADE_POS.row][PIVOT_SHADE_POS.col] = 0;
+          clearCode(map, 7);
+          if (getState().shuffleImpCleared) {
+            map[0][6] = 6;
+            map[0][7] = 6;
+          }
           render();
           sayLines([
             { speaker: "Mira Vale", text: "Nice. Duplicates are where sloppy sorting starts lying." },
@@ -287,16 +340,56 @@ function enterPivotShadeBattle() {
   );
 }
 
+function enterNullEchoBattle() {
+  sayLines(
+    [
+      { speaker: "", text: "The dark seam repeats your footsteps one beat late, then asks for a sort in your own voice." },
+      { speaker: "Mira Vale", text: "Null Echo. It is not an enemy exactly. More like a missing answer wearing an enemy's outline." },
+    ],
+    () => {
+      startCodeBattle({
+        title: "Null Echo",
+        starterCode: STARTER_CODE,
+        publicCases: [sortedCase("public_gap", [2, 0, 2, 1])],
+        generateSealed: () => [
+          sortedCase("sealed_1", [0, 3, 0, 1, 2]),
+          sortedCase("sealed_2", [4, 0, 4, 1]),
+        ],
+        enemySprite: PIVOT_SHADE,
+        enemyPixelSize: 6,
+        returnScreen: "screen-room-ch3",
+        roundHint1: "Sort the formation even when zero-value gaps appear.",
+        roundHint2: "Fresh gaps. Keep every value; do not let the rot erase anything.",
+        wonHint: "The echo loses your voice and collapses back into a seam.",
+        onWin: () => {
+          setState({ nullEchoCleared: true });
+          clearCode(map, 11);
+          render();
+          sayLines([
+            { speaker: "Mira Vale", text: "Zero is a value. Null is a wound. The difference matters." },
+            { speaker: "", text: "The dark seam stops widening, but it does not fully close." },
+          ]);
+        },
+      });
+    }
+  );
+}
+
 function enterLordBogoBattle() {
-  const { bogoDefeated } = getState();
+  const { bogoDefeated, nullEchoCleared } = getState();
   if (bogoDefeated) {
-    sayLines([{ speaker: "Lord Bogo", text: "Order again? How dreadfully reliable of you." }]);
+    sayLines([{ speaker: "Lord Bogo", text: "Again and again, until again forgets the first time." }]);
+    return;
+  }
+  if (!nullEchoCleared) {
+    sayLines([{ speaker: "Lord Bogo", text: "Not yet. The hollow one has not taught you the shape of nothing." }]);
     return;
   }
   sayLines(
     [
-      { speaker: "Lord Bogo", text: "Order is just luck that hasn't run out yet!" },
-      { speaker: "Lord Bogo", text: "Prove your little rule survives a proper reshuffling." },
+      { speaker: "Lord Bogo", text: "Shuffle once, shuffle forever, shuffle until the last index bites its own tail." },
+      { speaker: "Lord Bogo", text: "The empty king counts upward from no number. He laughs when arrays ask how long." },
+      { speaker: "Mira Vale", text: "That sounds like nonsense. Which means we should remember it exactly." },
     ],
     () => {
       startCodeBattle({
@@ -312,15 +405,15 @@ function enterLordBogoBattle() {
         wonHint: "Order confirmed. Even Lord Bogo can't shuffle it loose.",
         onWin: () => {
           setState({ bogoDefeated: true, archiveFragmentAwake: true });
-          map[LORD_BOGO_POS.row][LORD_BOGO_POS.col] = 0;
+          clearCode(map, 9);
           map[0][6] = 6;
           map[0][7] = 6;
           render();
           sayLines([
-            { speaker: "Lord Bogo", text: "...Huh. Still ordered. That is - annoyingly consistent." },
-            { speaker: "", text: "The Plains settle. For the first time, the formations hold their shape." },
-            { speaker: "", text: "The Archive shard answers with a new route: bridges, missing villages, and a map that refuses to stay connected." },
-            { speaker: "Mira Vale", text: "Graphreach. Not ready, but it knows we're coming." },
+            { speaker: "Lord Bogo", text: "...Still ordered. Then the rot must learn to eat the rule, not the row." },
+            { speaker: "", text: "The Plains settle, but the black seams under them remain awake." },
+            { speaker: "", text: "The Archive shard answers with a route toward bridges, missing villages, and a map that refuses to stay connected." },
+            { speaker: "Mira Vale", text: "Graphreach is next. And Henry? Bogo was warning us, not threatening us." },
           ]);
         },
       });
@@ -343,6 +436,18 @@ function findSecret() {
 }
 
 function onReachOpenGate() {
+  if (roomIndex === 0) {
+    if (!(getState().shuffleImpCleared && getState().pivotShadeCleared)) return;
+    roomIndex = 1;
+    map = buildCurrentMap();
+    player = { ...ROOM_ENTRY_START, facing: "up" };
+    render();
+    sayLines([
+      { speaker: "", text: "The open field folds into a court of shifting arrays. Null Rot pools in the places where values should be." },
+      { speaker: "Mira Vale", text: "This is past ordinary disorder. Step carefully." },
+    ]);
+    return;
+  }
   sayLines(
     [
       { speaker: "", text: "The formation opens a clear path onward, but the next bridge is still only a signal in the shard." },
@@ -384,6 +489,7 @@ function interactFacing() {
   const code = tileAt(player.col + dc, player.row + dr);
   if (code === 5) enterShuffleImpBattle();
   else if (code === 7) enterPivotShadeBattle();
+  else if (code === 11) enterNullEchoBattle();
   else if (code === 9) enterLordBogoBattle();
   else if (code === 8) findSecret();
   else if (code === 6) onReachOpenGate();

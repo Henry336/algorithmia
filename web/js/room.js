@@ -1,6 +1,6 @@
 import { applyPixelArt } from "./pixelart.js";
-import { ARCHIVE_SHARD, GATE_ICON, QUEUE_RAIL_ICON, RUNE_SNARL, SORTING_SLIME, PIXEL_SIZE as SPRITE_PX } from "./sprites.js";
-import { animatePatchrunnerStep, placeMiraEntity, placePatchrunnerEntity, updatePatchrunnerFacing } from "./playerSprite.js";
+import { ARCHIVE_SHARD, GATE_ICON, QUEUE_RAIL_ICON, RUNE_SNARL, PIXEL_SIZE as SPRITE_PX } from "./sprites.js";
+import { animatePatchrunnerStep, placeMiraEntity, placePatchrunnerEntity, placeSortingSlimeEntity, updatePatchrunnerFacing } from "./playerSprite.js";
 import { sayLines, isDialogueActive, advance as advanceDialogue } from "./dialogue.js";
 import { getState, setState } from "./state.js";
 import { startSortingSlimeBattle } from "./battle.js";
@@ -101,7 +101,7 @@ function render() {
 
   const { queueworksGateOpen } = getState();
   if (map[SORTING_SLIME_POS.row][SORTING_SLIME_POS.col] === 5) {
-    placeEntity("slime", SORTING_SLIME_POS.col, SORTING_SLIME_POS.row, SORTING_SLIME);
+    placeSortingSlimeEntity(viewport, SORTING_SLIME_POS.col, SORTING_SLIME_POS.row, TILE, "down");
   }
   if (map[RUNE_SNARL_POS.row][RUNE_SNARL_POS.col] === 7) {
     placeEntity("rune-snarl", RUNE_SNARL_POS.col, RUNE_SNARL_POS.row, RUNE_SNARL);

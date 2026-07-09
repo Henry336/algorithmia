@@ -1,7 +1,7 @@
 import { applyPixelArt } from "./pixelart.js";
-import { SORTING_SLIME } from "./sprites.js";
 import { applyBattleCost } from "./combatState.js";
 import { describeCost, initBattleHud, logBattle, updateBattleVitals } from "./battleHud.js";
+import { renderSortingSlimeBattleSprite } from "./playerSprite.js";
 
 const RUNE_COLORS = ["#c94f4f", "#4f7fc9", "#d8c24a", "#8a4fc9", "#5fbf5f", "#e08a3f", "#4fc9b0"];
 
@@ -42,13 +42,17 @@ function shuffledSealedSet() {
   return picked;
 }
 
-export function startSortingSlimeBattle({ onWin, title = "Sorting Slime", enemySprite = SORTING_SLIME, publicValues = [5, 1, 4, 2, 3] }) {
+export function startSortingSlimeBattle({ onWin, title = "Sorting Slime", enemySprite = null, publicValues = [5, 1, 4, 2, 3] }) {
   onWinCallback = onWin;
   round = 1;
   values = publicValues.slice();
   locked = false;
   titleEl.textContent = title;
-  applyPixelArt(enemySpriteHost, enemySprite.matrix, enemySprite.palette, 6);
+  if (enemySprite) {
+    applyPixelArt(enemySpriteHost, enemySprite.matrix, enemySprite.palette, 6);
+  } else {
+    renderSortingSlimeBattleSprite(enemySpriteHost, "south");
+  }
   initBattleHud(screenBattle, {
     objective: "Sort the spill without wasting motion. Extra swaps drain Focus; wrong checks break HP.",
     enemyStatus: round === 1 ? "Public spill exposed" : "Sealed spill hidden",

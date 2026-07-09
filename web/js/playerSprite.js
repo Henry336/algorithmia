@@ -1,6 +1,7 @@
 const CHARACTER_BASES = {
   patchrunner: "assets/characters/patchrunner/A_young_field_technician_in/rotations",
   mira: "assets/characters/mira/A_woman_in_her_40s/rotations",
+  sortingSlime: "assets/characters/sorting-slime/A_translucent_lime-green_gelatinous_blob/rotations",
 };
 
 const FACING_TO_ASSET = {
@@ -81,6 +82,33 @@ export function renderPatchrunnerPortrait(host, direction = "south") {
 
 export function renderMiraPortrait(host, direction = "south") {
   renderCharacterPortrait(host, "mira", "mira-title-sprite", direction);
+}
+
+export function placeSortingSlimeEntity(viewport, col, row, tileSize, facing = "down") {
+  let el = viewport.querySelector('[data-entity="slime"]');
+  if (!el) {
+    el = document.createElement("div");
+    el.className = "entity sorting-slime-entity";
+    el.dataset.entity = "slime";
+    viewport.appendChild(el);
+  }
+  el.style.width = `${tileSize}px`;
+  el.style.height = `${tileSize}px`;
+  el.style.left = `${col * tileSize}px`;
+  el.style.top = `${row * tileSize}px`;
+  updateCharacterFacing(el, "sortingSlime", "sorting-slime-sprite", facing);
+  return el;
+}
+
+export function renderSortingSlimeBattleSprite(host, direction = "south") {
+  if (!host) return;
+  host.innerHTML = "";
+  const img = document.createElement("img");
+  img.className = "sorting-slime-battle-sprite";
+  img.alt = "";
+  img.draggable = false;
+  img.src = `${CHARACTER_BASES.sortingSlime}/${direction}.png`;
+  host.appendChild(img);
 }
 
 function renderCharacterPortrait(host, character, spriteClass, direction = "south") {

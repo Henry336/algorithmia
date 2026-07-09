@@ -1,0 +1,36 @@
+{
+  "group_id": null,
+  "states": [
+    {
+      "character": {
+        "id": "500856b8-cd89-42b0-b151-a5b6840f0a0d",
+        "name": "A translucent lime-green gelatinous blob",
+        "prompt": "A translucent lime-green gelatinous blob creature, roughly round with a slightly flattened base. Inside its jelly body float five vertical glass-like bar shapes of different heights and different solid colors (red, blue, yellow, purple, orange), arranged in visibly random/unsorted height order, each with a faint pale number etched on it. Thin glowing white seams connect the bars inside the slime. Two small simple round cartoon eyes peek out between two of the bars near the top. No arms or legs, simple bounce-ready blob shape.",
+        "size": {
+          "width": 80,
+          "height": 80
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-07-09T18:19:37.025949+00:00"
+      },
+      "folder": "A_translucent_lime-green_gelatinous_blob",
+      "frames": {
+        "rotations": {
+          "south": "A_translucent_lime-green_gelatinous_blob/rotations/south.png",
+          "south-east": "A_translucent_lime-green_gelatinous_blob/rotations/south-east.png",
+          "east": "A_translucent_lime-green_gelatinous_blob/rotations/east.png",
+          "north-east": "A_translucent_lime-green_gelatinous_blob/rotations/north-east.png",
+          "north": "A_translucent_lime-green_gelatinous_blob/rotations/north.png",
+          "north-west": "A_translucent_lime-green_gelatinous_blob/rotations/north-west.png",
+          "west": "A_translucent_lime-green_gelatinous_blob/rotations/west.png",
+          "south-west": "A_translucent_lime-green_gelatinous_blob/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    }
+  ],
+  "export_version": "3.0",
+  "export_date": "2026-07-09T18:22:58.401122"
+}

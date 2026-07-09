@@ -454,9 +454,18 @@ html, body {
   box-sizing: border-box;
 }
 
+.tile::after {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  pointer-events: none;
+  opacity: 0;
+}
+
 .tile-floor {
   background: #232b33;
   border: 1px solid #1b2127;
+  animation: roomTileBreathe 4.8s ease-in-out infinite;
 }
 
 .tile-floor.alt {
@@ -480,6 +489,23 @@ html, body {
 .tile-ledger {
   background: #201a12;
   border: 1px solid #14100a;
+}
+
+.tile-null-rot {
+  background:
+    radial-gradient(circle at 45% 40%, #000000 0 22%, #20142e 48%, #0b0d10 100%);
+  border: 1px solid #3c255a;
+  box-shadow: inset 0 0 12px #000000aa, 0 0 10px #8a4fc92a;
+  animation: nullRotPulse 1.8s ease-in-out infinite;
+}
+
+.tile-null-rot::after {
+  inset: 4px;
+  opacity: 0.75;
+  background:
+    linear-gradient(90deg, transparent 0 38%, #000000 48%, transparent 58%),
+    linear-gradient(0deg, transparent 0 42%, #8a4fc944 50%, transparent 60%);
+  animation: nullRotCrawl 2.7s linear infinite;
 }
 
 .theme-queueworks {
@@ -560,6 +586,7 @@ html, body {
 .theme-heaplight .tile-ledger {
   background: #342014;
   border-color: #1d100a;
+  animation: furnacePulse 2.4s ease-in-out infinite;
 }
 
 .theme-heaplight .tile-gate {
@@ -592,6 +619,7 @@ html, body {
 .theme-array .tile-ledger {
   background: #20243a;
   border-color: #121524;
+  animation: arrayMarkerShift 2.9s steps(2, end) infinite;
 }
 
 .theme-array .tile-gate {
@@ -659,11 +687,76 @@ html, body {
   filter: drop-shadow(0 5px 3px #00000066);
 }
 
+.sorting-slime-entity {
+  align-items: flex-end;
+  overflow: visible;
+  z-index: 4;
+}
+
+.sorting-slime-sprite {
+  --slime-foot-offset: 18px;
+  width: 76px;
+  height: 76px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  transform: translateY(var(--slime-foot-offset));
+  transform-origin: 50% 86%;
+  filter: drop-shadow(0 5px 4px #00000066) drop-shadow(0 0 8px #7fd86a55);
+  animation: slimeMapIdle 1.35s ease-in-out infinite;
+}
+
+.sorting-slime-battle-sprite {
+  width: clamp(130px, 18vw, 168px);
+  height: clamp(130px, 18vw, 168px);
+  object-fit: contain;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 12px 8px #00000088) drop-shadow(0 0 16px #7fd86a7a);
+  transform-origin: 50% 84%;
+  animation: slimeBattleAggro 0.95s ease-in-out infinite;
+}
+
 @keyframes patchrunnerStep {
   0% { transform: translateY(var(--patchrunner-foot-offset)) rotate(0deg); }
   35% { transform: translateY(calc(var(--patchrunner-foot-offset) - 3px)) rotate(-2deg); }
   70% { transform: translateY(var(--patchrunner-foot-offset)) rotate(2deg); }
   100% { transform: translateY(var(--patchrunner-foot-offset)) rotate(0deg); }
+}
+
+@keyframes slimeMapIdle {
+  0%, 100% { transform: translateY(var(--slime-foot-offset)) scale(1, 1); }
+  45% { transform: translateY(calc(var(--slime-foot-offset) - 4px)) scale(1.05, 0.94); }
+  70% { transform: translateY(var(--slime-foot-offset)) scale(0.96, 1.05); }
+}
+
+@keyframes slimeBattleAggro {
+  0%, 100% { transform: translateY(0) scale(1, 1); }
+  35% { transform: translateY(-7px) scale(1.09, 0.9); }
+  58% { transform: translateY(1px) scale(0.94, 1.12); }
+}
+
+@keyframes roomTileBreathe {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.05); }
+}
+
+@keyframes furnacePulse {
+  0%, 100% { box-shadow: inset 0 0 0 #e08a3f00; }
+  50% { box-shadow: inset 0 0 14px #e08a3f35; }
+}
+
+@keyframes arrayMarkerShift {
+  0%, 100% { filter: hue-rotate(0deg); }
+  50% { filter: hue-rotate(18deg); }
+}
+
+@keyframes nullRotPulse {
+  0%, 100% { filter: brightness(0.86); }
+  50% { filter: brightness(1.24); }
+}
+
+@keyframes nullRotCrawl {
+  0% { transform: translateX(-6px) translateY(0); }
+  100% { transform: translateX(6px) translateY(0); }
 }
 
 .patchrunner-title-sprite {
@@ -1343,6 +1436,12 @@ html, body {
   .title-tagline,
   .title-option,
   .title-build,
+  .tile-floor,
+  .tile-ledger,
+  .tile-null-rot,
+  .tile-null-rot::after,
+  .sorting-slime-sprite,
+  .sorting-slime-battle-sprite,
   .battle-scene::before,
   .battle-scene::after,
   .battle-backdrop,
