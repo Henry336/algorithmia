@@ -3,6 +3,7 @@ import { initRoom } from "./room.js";
 import { initChapter1Room } from "./chapter1.js";
 import { initChapter2Room } from "./chapter2.js";
 import { initChapter3Room } from "./chapter3.js";
+import { initChapter4Room } from "./chapter4.js";
 
 function enterChapter0() {
   document.getElementById("screen-room").classList.add("active");
@@ -24,7 +25,13 @@ function enterChapter2() {
 function enterChapter3() {
   document.getElementById("screen-room-ch2").classList.remove("active");
   document.getElementById("screen-room-ch3").classList.add("active");
-  initChapter3Room({});
+  initChapter3Room({ onExitToChapter4: enterChapter4 });
+}
+
+function enterChapter4() {
+  document.getElementById("screen-room-ch3").classList.remove("active");
+  document.getElementById("screen-room-ch4").classList.add("active");
+  initChapter4Room({});
 }
 
 initTitle({
@@ -32,4 +39,5 @@ initTitle({
   onEnterChapter1: enterChapter1,
   onEnterChapter2: enterChapter2,
   onEnterChapter3: enterChapter3,
+  onEnterChapter4: enterChapter4,
 });

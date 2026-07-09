@@ -9,7 +9,7 @@ const screens = {
   options: document.getElementById("screen-options"),
 };
 
-export function initTitle({ onEnterChapter0, onEnterChapter1, onEnterChapter2, onEnterChapter3 }) {
+export function initTitle({ onEnterChapter0, onEnterChapter1, onEnterChapter2, onEnterChapter3, onEnterChapter4 }) {
   const continueBtn = document.querySelector('[data-action="continue"]');
   continueBtn.disabled = !hasSave();
 
@@ -17,16 +17,17 @@ export function initTitle({ onEnterChapter0, onEnterChapter1, onEnterChapter2, o
   renderTitleSprites();
 
   function resumeFurthest() {
-    const { queueworksGateOpen, dispatcherDefeated, heapWardenDefeated } = getState();
+    const { queueworksGateOpen, dispatcherDefeated, heapWardenDefeated, bogoDefeated } = getState();
     hideAll();
-    if (heapWardenDefeated) onEnterChapter3();
+    if (bogoDefeated) onEnterChapter4();
+    else if (heapWardenDefeated) onEnterChapter3();
     else if (dispatcherDefeated) onEnterChapter2();
     else if (queueworksGateOpen) onEnterChapter1();
     else onEnterChapter0();
   }
 
   function refreshChapterCards() {
-    const { queueworksGateOpen, dispatcherDefeated, heapWardenDefeated } = getState();
+    const { queueworksGateOpen, dispatcherDefeated, heapWardenDefeated, bogoDefeated } = getState();
     const ch1Card = document.querySelector('.chapter-card[data-chapter="1"]');
     if (ch1Card) {
       ch1Card.disabled = !queueworksGateOpen;
@@ -41,6 +42,11 @@ export function initTitle({ onEnterChapter0, onEnterChapter1, onEnterChapter2, o
     if (ch3Card) {
       ch3Card.disabled = !heapWardenDefeated;
       ch3Card.classList.toggle("locked", !heapWardenDefeated);
+    }
+    const ch4Card = document.querySelector('.chapter-card[data-chapter="4"]');
+    if (ch4Card) {
+      ch4Card.disabled = !bogoDefeated;
+      ch4Card.classList.toggle("locked", !bogoDefeated);
     }
   }
   refreshChapterCards();
@@ -75,6 +81,7 @@ export function initTitle({ onEnterChapter0, onEnterChapter1, onEnterChapter2, o
       else if (chapter === 1) onEnterChapter1();
       else if (chapter === 2) onEnterChapter2();
       else if (chapter === 3) onEnterChapter3();
+      else if (chapter === 4) onEnterChapter4();
     });
   });
 
@@ -94,6 +101,7 @@ export function initTitle({ onEnterChapter0, onEnterChapter1, onEnterChapter2, o
       document.getElementById("screen-room-ch1").classList.remove("active");
       document.getElementById("screen-room-ch2").classList.remove("active");
       document.getElementById("screen-room-ch3").classList.remove("active");
+      document.getElementById("screen-room-ch4").classList.remove("active");
       show(screens.title);
       continueBtn.disabled = !hasSave();
     });

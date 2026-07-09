@@ -404,3 +404,117 @@ export const ARCHIVE_SHARD = {
     "...G...",
   ],
 };
+
+export const BRIDGE_WISP = {
+  palette: {
+    T: "#7fd8c9",
+    B: "#3a6f8f",
+    W: "#eef2f0",
+    P: "#8a4fc9",
+    K: "#10151a",
+  },
+  matrix: [
+    "...TT...",
+    "..TWWT..",
+    ".TWBBWT.",
+    "TWBPPBWT",
+    ".TWBBWT.",
+    "..TWWT..",
+    "..KTTK..",
+    ".K....K.",
+  ],
+};
+
+export const CYCLE_HOUND = {
+  palette: {
+    R: "#c9524f",
+    D: "#2a2028",
+    P: "#8a4fc9",
+    T: "#7fd8c9",
+    K: "#111111",
+  },
+  matrix: [
+    "..DDDD..",
+    ".DRRRD..",
+    "DDRKRRD.",
+    "DTRRRRTD",
+    ".DDPPDD.",
+    "..D..D..",
+    ".DD..DD.",
+    "D......D",
+  ],
+};
+
+export const COMPONENT_HERMIT = {
+  palette: {
+    C: "#6f6756",
+    G: "#3f5f55",
+    S: "#c98f5e",
+    E: "#2a2016",
+    P: "#8a4fc9",
+    T: "#7fd8c9",
+  },
+  matrix: [
+    "..CCCC..",
+    ".CGGGGC.",
+    ".CGSSGC.",
+    "..SEES..",
+    ".GGTTGG.",
+    "GGGPPGGG",
+    ".GG..GG.",
+    ".C....C.",
+  ],
+};
+
+export const NULL_FERRYMAN = {
+  palette: {
+    K: "#0b0b0f",
+    P: "#8a4fc9",
+    T: "#7fd8c9",
+    W: "#eef2f0",
+    B: "#243547",
+  },
+  matrix: [
+    "...PP....",
+    "..PKKP...",
+    ".PKWWKP..",
+    ".PKKKKP..",
+    "PPKTKTPP.",
+    "KPKKKKPK.",
+    "..BBBB...",
+    ".BBBBBB..",
+    "BBBBBBBB.",
+    "..B..B...",
+  ],
+};
+
+export const GRAPH_NODE_ICON = {
+  palette: {
+    T: "#7fd8c9",
+    B: "#2b5668",
+    W: "#eef2f0",
+  },
+  matrix: [
+    "..TT..",
+    ".TWWT.",
+    "TWBBWT",
+    "TWBBWT",
+    ".TWWT.",
+    "..TT..",
+  ],
+};
+
+export const BRIDGE_ICON = {
+  palette: {
+    W: "#8b6b4a",
+    L: "#c29a62",
+    D: "#4a3620",
+  },
+  matrix: [
+    "W..WW..W",
+    "WLLLLLLW",
+    "WDDDDDDW",
+    "WLLLLLLW",
+    "W..WW..W",
+  ],
+};
