@@ -1,6 +1,6 @@
 import { applyPixelArt } from "./pixelart.js";
-import { ARCHIVE_SHARD, GATE_ICON, MIRA_DOWN, QUEUE_RAIL_ICON, RUNE_SNARL, SORTING_SLIME, PIXEL_SIZE as SPRITE_PX } from "./sprites.js";
-import { animatePatchrunnerStep, placePatchrunnerEntity, updatePatchrunnerFacing } from "./playerSprite.js";
+import { ARCHIVE_SHARD, GATE_ICON, QUEUE_RAIL_ICON, RUNE_SNARL, SORTING_SLIME, PIXEL_SIZE as SPRITE_PX } from "./sprites.js";
+import { animatePatchrunnerStep, placeMiraEntity, placePatchrunnerEntity, updatePatchrunnerFacing } from "./playerSprite.js";
 import { sayLines, isDialogueActive, advance as advanceDialogue } from "./dialogue.js";
 import { getState, setState } from "./state.js";
 import { startSortingSlimeBattle } from "./battle.js";
@@ -109,7 +109,7 @@ function render() {
   if (queueworksGateOpen) {
     placeEntity("archive-shard", 5, 1, ARCHIVE_SHARD, 3);
   }
-  placeEntity("mira", 2, 5, MIRA_DOWN);
+  placeMiraEntity(viewport, 2, 5, TILE, "down");
 
   playerEl = placePatchrunnerEntity(viewport, player.col, player.row, TILE, player.facing);
 }
