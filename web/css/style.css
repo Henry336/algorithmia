@@ -886,28 +886,50 @@ body.admin-mode .title-build {
   content: "";
   position: absolute;
   left: 50%;
-  bottom: -10px;
-  width: 94px;
-  height: 50px;
+  bottom: -22px;
+  width: 178px;
+  height: 94px;
   transform: translateX(-50%);
-  background: radial-gradient(circle, #8a4fc955 0 12%, #11101800 64%);
-  filter: blur(3px);
-  opacity: 0.75;
-  animation: bogoMapHalo 1.4s steps(3, end) infinite;
+  background: radial-gradient(circle, #a65cff66 0 14%, #1b102b66 32%, #11101800 68%);
+  filter: blur(4px);
+  opacity: 0.9;
+  animation: bogoMapHalo 1.2s steps(3, end) infinite;
+}
+
+.bogolord-entity::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -18px;
+  width: 154px;
+  height: 188px;
+  transform: translateX(-50%);
+  background:
+    radial-gradient(circle at 35% 28%, #b8f2ff66 0 3px, transparent 4px),
+    radial-gradient(circle at 66% 18%, #8a4fc988 0 4px, transparent 5px),
+    radial-gradient(circle at 72% 62%, #d8a04a77 0 3px, transparent 4px),
+    radial-gradient(circle at 22% 70%, #8a4fc966 0 4px, transparent 5px),
+    radial-gradient(ellipse at 50% 62%, #6b35b533 0 22%, transparent 62%);
+  filter: blur(1px);
+  opacity: 0.7;
+  animation: bogoMapAura 0.9s steps(2, end) infinite;
 }
 
 .bogolord-map-sprite {
-  --bogo-foot-offset: 31px;
+  --bogo-foot-offset: 58px;
   position: relative;
-  z-index: 1;
-  width: 106px;
-  height: 106px;
+  z-index: 2;
+  width: 178px;
+  height: 178px;
   object-fit: contain;
   image-rendering: pixelated;
   transform: translateY(var(--bogo-foot-offset));
   transform-origin: 50% 88%;
-  filter: drop-shadow(0 7px 4px #00000099) drop-shadow(0 0 10px #8a4fc988);
-  animation: bogoMapIdle 1.6s steps(4, end) infinite;
+  filter:
+    drop-shadow(0 14px 8px #000000bb)
+    drop-shadow(0 0 16px #8a4fc9aa)
+    drop-shadow(0 0 4px #b8f2ff88);
+  animation: bogoMapIdle 1.35s steps(4, end) infinite;
 }
 
 .sorting-slime-battle-sprite {
@@ -940,13 +962,19 @@ body.admin-mode .title-build {
 }
 
 @keyframes bogoMapIdle {
-  0%, 100% { transform: translateY(var(--bogo-foot-offset)) rotate(0deg); }
-  50% { transform: translateY(calc(var(--bogo-foot-offset) - 4px)) rotate(-1deg); }
+  0%, 100% { transform: translateY(var(--bogo-foot-offset)) rotate(0deg) scale(1); }
+  50% { transform: translateY(calc(var(--bogo-foot-offset) - 6px)) rotate(-1deg) scale(1.035); }
 }
 
 @keyframes bogoMapHalo {
-  0%, 100% { opacity: 0.45; transform: translateX(-50%) scale(0.96); }
-  50% { opacity: 0.9; transform: translateX(-50%) scale(1.08); }
+  0%, 100% { opacity: 0.55; transform: translateX(-50%) scale(0.94); }
+  50% { opacity: 1; transform: translateX(-50%) scale(1.12); }
+}
+
+@keyframes bogoMapAura {
+  0% { opacity: 0.35; filter: blur(1px) brightness(0.9); }
+  50% { opacity: 0.9; filter: blur(0) brightness(1.35); }
+  100% { opacity: 0.55; filter: blur(1px) brightness(1); }
 }
 
 @keyframes roomTileBreathe {
@@ -1737,6 +1765,7 @@ body.admin-mode .admin-only {
   .sorting-slime-battle-sprite,
   .bogolord-map-sprite,
   .bogolord-entity::before,
+  .bogolord-entity::after,
   .battle-scene::before,
   .battle-scene::after,
   .battle-backdrop,
