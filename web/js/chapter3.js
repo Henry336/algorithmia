@@ -1,5 +1,6 @@
 import { applyPixelArt } from "./pixelart.js";
-import { PLAYER_DOWN, LORD_BOGO, SHUFFLE_IMP, GATE_ICON, ARRAY_MARKER_ICON, ARCHIVE_SHARD, PIXEL_SIZE as SPRITE_PX } from "./sprites.js";
+import { ARRAY_MARKER_ICON, ARCHIVE_SHARD, GATE_ICON, LORD_BOGO, PIVOT_SHADE, SHUFFLE_IMP, PIXEL_SIZE as SPRITE_PX } from "./sprites.js";
+import { animatePatchrunnerStep, placePatchrunnerEntity, updatePatchrunnerFacing } from "./playerSprite.js";
 import { sayLines, isDialogueActive, advance as advanceDialogue } from "./dialogue.js";
 import { getState, setState } from "./state.js";
 import { startCodeBattle } from "./codeBattle.js";
@@ -9,14 +10,14 @@ const COLS = 13;
 const ROWS = 10;
 
 // 1 wall, 0 floor, 2 marker-post clutter, 3 gate closed, 6 gate open,
-// 5 Shuffle Imp (minor), 8 secret, 9 Lord Bogo boss
+// 5 Shuffle Imp (minor), 7 Pivot Shade (minor), 8 secret, 9 Lord Bogo boss
 const BASE_MAP = [
   [1, 1, 1, 1, 1, 1, 3, 3, 1, 1, 1, 1, 1],
   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
   [1, 0, 2, 0, 0, 2, 9, 2, 0, 0, 2, 0, 1],
   [1, 0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 1],
   [1, 2, 0, 0, 2, 0, 0, 0, 2, 0, 0, 2, 1],
-  [1, 0, 0, 5, 0, 0, 2, 0, 0, 0, 0, 0, 1],
+  [1, 0, 0, 5, 0, 0, 2, 0, 0, 7, 0, 0, 1],
   [1, 0, 2, 0, 0, 0, 0, 0, 0, 2, 0, 0, 1],
   [1, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 1],
   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
@@ -24,6 +25,9 @@ const BASE_MAP = [
 ];
 
 const PLAYER_START = { col: 6, row: 8 };
+const LORD_BOGO_POS = { col: 6, row: 2 };
+const SHUFFLE_IMP_POS = { col: 3, row: 5 };
+const PIVOT_SHADE_POS = { col: 9, row: 5 };
 
 const STARTER_CODE = `def solve(values):
     ordered = values[:]
@@ -66,6 +70,13 @@ function generateSealedBogo() {
   ];
 }
 
+function generateSealedPivotShade() {
+  return [
+    sortedCase("sealed_1", [3, 1, 3, 2, 1]),
+    sortedCase("sealed_2", shuffledDistinct(5, 10)),
+  ];
+}
+
 export function initChapter3Room({ onExitToChapter4: exitHandler } = {}) {
   onExitToChapter4 = exitHandler || null;
   viewport = document.getElementById("room-viewport-ch3");
@@ -78,12 +89,15 @@ export function initChapter3Room({ onExitToChapter4: exitHandler } = {}) {
   window.addEventListener("resize", fitViewportToScreen);
   map = BASE_MAP.map((row) => row.slice());
 
-  const { bogoDefeated, shuffleImpCleared } = getState();
+  const { bogoDefeated, shuffleImpCleared, pivotShadeCleared } = getState();
   if (shuffleImpCleared) {
-    map[5][5] = 0;
+    map[SHUFFLE_IMP_POS.row][SHUFFLE_IMP_POS.col] = 0;
+  }
+  if (pivotShadeCleared) {
+    map[PIVOT_SHADE_POS.row][PIVOT_SHADE_POS.col] = 0;
   }
   if (bogoDefeated) {
-    map[2][6] = 0;
+    map[LORD_BOGO_POS.row][LORD_BOGO_POS.col] = 0;
     map[0][6] = 6;
     map[0][7] = 6;
   }
@@ -130,11 +144,12 @@ function render() {
     }
   }
 
-  if (map[2][6] === 9) placeEntity("bogo", 6, 2, LORD_BOGO, 5);
-  if (map[5][5] === 5) placeEntity("imp", 5, 5, SHUFFLE_IMP, SPRITE_PX);
+  if (map[LORD_BOGO_POS.row][LORD_BOGO_POS.col] === 9) placeEntity("bogo", LORD_BOGO_POS.col, LORD_BOGO_POS.row, LORD_BOGO, 5);
+  if (map[SHUFFLE_IMP_POS.row][SHUFFLE_IMP_POS.col] === 5) placeEntity("imp", SHUFFLE_IMP_POS.col, SHUFFLE_IMP_POS.row, SHUFFLE_IMP, SPRITE_PX);
+  if (map[PIVOT_SHADE_POS.row][PIVOT_SHADE_POS.col] === 7) placeEntity("pivot", PIVOT_SHADE_POS.col, PIVOT_SHADE_POS.row, PIVOT_SHADE, SPRITE_PX);
   if (getState().bogoDefeated) placeEntity("archive-shard", 6, 1, ARCHIVE_SHARD, 3);
 
-  playerEl = placeEntity("player", player.col, player.row, PLAYER_DOWN, SPRITE_PX);
+  playerEl = placePatchrunnerEntity(viewport, player.col, player.row, TILE, player.facing);
 }
 
 function tileClass(code, r, c) {
@@ -179,7 +194,7 @@ function tileAt(col, row) {
 }
 
 function isBlocking(code) {
-  return code === 1 || code === 2 || code === 3 || code === 5 || code === 8 || code === 9;
+  return code === 1 || code === 2 || code === 3 || code === 5 || code === 7 || code === 8 || code === 9;
 }
 
 const DIR_OFFSET = {
@@ -192,12 +207,14 @@ const DIR_OFFSET = {
 function tryMove(dir) {
   if (isDialogueActive()) return;
   player.facing = dir;
+  updatePatchrunnerFacing(playerEl, player.facing);
   const { dc, dr } = DIR_OFFSET[dir];
   const targetCol = player.col + dc;
   const targetRow = player.row + dr;
   const code = tileAt(targetCol, targetRow);
 
   if (code === 5) return enterShuffleImpBattle();
+  if (code === 7) return enterPivotShadeBattle();
   if (code === 9) return enterLordBogoBattle();
   if (code === 8) return findSecret();
   if (code === 6) return onReachOpenGate();
@@ -208,6 +225,7 @@ function tryMove(dir) {
   if (playerEl) {
     playerEl.style.left = `${player.col * TILE}px`;
     playerEl.style.top = `${player.row * TILE}px`;
+    animatePatchrunnerStep(playerEl);
   }
 }
 
@@ -228,11 +246,40 @@ function enterShuffleImpBattle() {
         wonHint: "The formation holds its shape. The imp sulks off.",
         onWin: () => {
           setState({ shuffleImpCleared: true });
-          map[5][5] = 0;
+          map[SHUFFLE_IMP_POS.row][SHUFFLE_IMP_POS.col] = 0;
           render();
           sayLines([
             { speaker: "Mira Vale", text: "Good. It didn't just work once - it works." },
             { speaker: "", text: "The marker posts stop sliding around the path, at least while your invariant holds." },
+          ]);
+        },
+      });
+    }
+  );
+}
+
+function enterPivotShadeBattle() {
+  sayLines(
+    [{ speaker: "", text: "A Pivot Shade splits the formation around a bad guess and dares your code to recover." }],
+    () => {
+      startCodeBattle({
+        title: "Pivot Shade",
+        starterCode: STARTER_CODE,
+        publicCases: [sortedCase("public_duplicates", [3, 1, 3, 2])],
+        generateSealed: generateSealedPivotShade,
+        enemySprite: PIVOT_SHADE,
+        enemyPixelSize: 6,
+        returnScreen: "screen-room-ch3",
+        roundHint1: "Write Python sorting logic that handles duplicates, not just one lucky shuffle.",
+        roundHint2: "Fresh formation with repeats. Stability starts by not losing values.",
+        wonHint: "The pivot stops flickering. Your ordering held through duplicates.",
+        onWin: () => {
+          setState({ pivotShadeCleared: true });
+          map[PIVOT_SHADE_POS.row][PIVOT_SHADE_POS.col] = 0;
+          render();
+          sayLines([
+            { speaker: "Mira Vale", text: "Nice. Duplicates are where sloppy sorting starts lying." },
+            { speaker: "", text: "The split marker locks into the ground, leaving the path less slippery." },
           ]);
         },
       });
@@ -265,7 +312,7 @@ function enterLordBogoBattle() {
         wonHint: "Order confirmed. Even Lord Bogo can't shuffle it loose.",
         onWin: () => {
           setState({ bogoDefeated: true, archiveFragmentAwake: true });
-          map[2][6] = 0;
+          map[LORD_BOGO_POS.row][LORD_BOGO_POS.col] = 0;
           map[0][6] = 6;
           map[0][7] = 6;
           render();
@@ -336,6 +383,7 @@ function interactFacing() {
   const { dc, dr } = DIR_OFFSET[player.facing];
   const code = tileAt(player.col + dc, player.row + dr);
   if (code === 5) enterShuffleImpBattle();
+  else if (code === 7) enterPivotShadeBattle();
   else if (code === 9) enterLordBogoBattle();
   else if (code === 8) findSecret();
   else if (code === 6) onReachOpenGate();

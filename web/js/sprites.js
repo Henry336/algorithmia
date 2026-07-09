@@ -90,6 +90,27 @@ export const SORTING_SLIME = {
   ],
 };
 
+export const RUNE_SNARL = {
+  palette: {
+    R: "#c94f4f",
+    U: "#4f7fc9",
+    Y: "#d8c24a",
+    P: "#8a4fc9",
+    T: "#7fd8c9",
+    K: "#1a1a1a",
+  },
+  matrix: [
+    "..R..U..",
+    ".RRTTUU.",
+    "RTPPPTYU",
+    ".TYYPPT.",
+    "..TPPT..",
+    ".UTTTYR.",
+    "UUP..RR.",
+    "..K..K..",
+  ],
+};
+
 export const MIRA_PORTRAIT = MIRA_DOWN;
 export const PLAYER_PORTRAIT = PLAYER_DOWN;
 
@@ -180,6 +201,67 @@ export const LINE_CUTTER = {
     "KKPRKKKK",
     "KKKKKKKK",
     ".KK..KK.",
+  ],
+};
+
+export const BACKLOG_CLERK = {
+  palette: {
+    C: "#6f6756",
+    P: "#e8e6df",
+    S: "#c98f5e",
+    E: "#2a2016",
+    R: "#c9524f",
+    B: "#25292e",
+  },
+  matrix: [
+    "..CCCC..",
+    ".CSSSSC.",
+    ".CSEESC.",
+    ".CSSSSC.",
+    "PPCCCCPP",
+    "PPRRCCPP",
+    ".BBBBBB.",
+    ".BB..BB.",
+  ],
+};
+
+export const PRIORITY_FORGER = {
+  palette: {
+    M: "#4a4a52",
+    O: "#e08a3f",
+    Y: "#ffb066",
+    S: "#c98f5e",
+    K: "#1a1a1a",
+    T: "#7fd8c9",
+  },
+  matrix: [
+    "..MMMM..",
+    ".MSYYS.",
+    ".MSKKS.",
+    ".MSSSS.",
+    "MMOTOMMM",
+    "MMOOOOOM",
+    ".MM..MM.",
+    ".MM..MM.",
+  ],
+};
+
+export const PIVOT_SHADE = {
+  palette: {
+    P: "#8a4fc9",
+    D: "#3d275f",
+    T: "#7fd8c9",
+    K: "#17151f",
+  },
+  matrix: [
+    "...TT...",
+    "..TPPT..",
+    ".TPDDPT.",
+    "TPDKKDPT",
+    ".TPDDPT.",
+    "..DPPD..",
+    ".DD..DD.",
+    "D......D",
   ],
 };
 

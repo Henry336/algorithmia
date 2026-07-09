@@ -14,6 +14,7 @@ const checkBtn = document.querySelector('[data-action="check-order"]');
 const resetBtn = document.querySelector('[data-action="reset-runes"]');
 const swapHintBtn = document.querySelector('[data-action="swap-hint"]');
 const enemySpriteHost = document.getElementById("battle-enemy-sprite");
+const titleEl = document.getElementById("battle-title");
 
 let round = 1; // 1 = public spill, 2 = sealed check
 let values = [];
@@ -21,8 +22,6 @@ let originalValues = [];
 let selectedIndex = null;
 let onWinCallback = null;
 let locked = false;
-
-applyPixelArt(enemySpriteHost, SORTING_SLIME.matrix, SORTING_SLIME.palette, 6);
 
 function shuffledSealedSet() {
   const pool = [1, 2, 3, 4, 5, 6, 7, 8, 9];
@@ -38,11 +37,13 @@ function shuffledSealedSet() {
   return picked;
 }
 
-export function startSortingSlimeBattle({ onWin }) {
+export function startSortingSlimeBattle({ onWin, title = "Sorting Slime", enemySprite = SORTING_SLIME, publicValues = [5, 1, 4, 2, 3] }) {
   onWinCallback = onWin;
   round = 1;
-  values = [5, 1, 4, 2, 3];
+  values = publicValues.slice();
   locked = false;
+  titleEl.textContent = title;
+  applyPixelArt(enemySpriteHost, enemySprite.matrix, enemySprite.palette, 6);
   wipeTo(() => {
     screenRoom.classList.remove("active");
     screenBattle.classList.add("active");

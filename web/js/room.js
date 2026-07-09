@@ -1,5 +1,6 @@
 import { applyPixelArt } from "./pixelart.js";
-import { PLAYER_DOWN, MIRA_DOWN, SORTING_SLIME, GATE_ICON, QUEUE_RAIL_ICON, ARCHIVE_SHARD, PIXEL_SIZE as SPRITE_PX } from "./sprites.js";
+import { ARCHIVE_SHARD, GATE_ICON, MIRA_DOWN, QUEUE_RAIL_ICON, RUNE_SNARL, SORTING_SLIME, PIXEL_SIZE as SPRITE_PX } from "./sprites.js";
+import { animatePatchrunnerStep, placePatchrunnerEntity, updatePatchrunnerFacing } from "./playerSprite.js";
 import { sayLines, isDialogueActive, advance as advanceDialogue } from "./dialogue.js";
 import { getState, setState } from "./state.js";
 import { startSortingSlimeBattle } from "./battle.js";
@@ -8,20 +9,22 @@ export const TILE = 42;
 const COLS = 11;
 const ROWS = 9;
 
-// Tile legend: 1 wall, 0 floor, 2 ledger clutter, 3 gate, 4 mira, 5 sorting slime, 6 gate-floor-once-open
+// Tile legend: 1 wall, 0 floor, 2 ledger clutter, 3 gate, 4 mira, 5 sorting slime, 6 gate-floor-once-open, 7 rune snarl
 const BASE_MAP = [
   [1, 1, 1, 1, 3, 3, 1, 1, 1, 1, 1],
   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
   [1, 0, 2, 0, 0, 0, 0, 0, 2, 0, 1],
   [1, 0, 0, 0, 0, 5, 0, 0, 0, 0, 1],
   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-  [1, 0, 4, 0, 0, 0, 0, 0, 0, 0, 1],
+  [1, 0, 4, 0, 0, 0, 0, 0, 7, 0, 1],
   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
   [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 ];
 
 const PLAYER_START = { col: 5, row: 7 };
+const SORTING_SLIME_POS = { col: 5, row: 3 };
+const RUNE_SNARL_POS = { col: 8, row: 5 };
 
 let viewport;
 let map;
@@ -44,9 +47,12 @@ export function initRoom({ onExitToChapter1: exitHandler } = {}) {
   window.addEventListener("resize", fitViewportToScreen);
   map = BASE_MAP.map((row) => row.slice());
 
-  const { queueworksGateOpen } = getState();
+  const { queueworksGateOpen, runeSnarlCleared } = getState();
+  if (runeSnarlCleared) {
+    map[RUNE_SNARL_POS.row][RUNE_SNARL_POS.col] = 0;
+  }
   if (queueworksGateOpen) {
-    map[3][5] = 0; // slime cleared
+    map[SORTING_SLIME_POS.row][SORTING_SLIME_POS.col] = 0; // slime cleared
     map[0][4] = 6;
     map[0][5] = 6;
   }
@@ -94,15 +100,18 @@ function render() {
   }
 
   const { queueworksGateOpen } = getState();
-  if (map[3][5] === 5) {
-    placeEntity("slime", 5, 3, SORTING_SLIME);
+  if (map[SORTING_SLIME_POS.row][SORTING_SLIME_POS.col] === 5) {
+    placeEntity("slime", SORTING_SLIME_POS.col, SORTING_SLIME_POS.row, SORTING_SLIME);
+  }
+  if (map[RUNE_SNARL_POS.row][RUNE_SNARL_POS.col] === 7) {
+    placeEntity("rune-snarl", RUNE_SNARL_POS.col, RUNE_SNARL_POS.row, RUNE_SNARL);
   }
   if (queueworksGateOpen) {
     placeEntity("archive-shard", 5, 1, ARCHIVE_SHARD, 3);
   }
   placeEntity("mira", 2, 5, MIRA_DOWN);
 
-  playerEl = placeEntity("player", player.col, player.row, PLAYER_DOWN);
+  playerEl = placePatchrunnerEntity(viewport, player.col, player.row, TILE, player.facing);
 }
 
 function tileClass(code, r, c) {
@@ -147,7 +156,7 @@ function tileAt(col, row) {
 }
 
 function isBlocking(code) {
-  return code === 1 || code === 2 || code === 3 || code === 4 || code === 5;
+  return code === 1 || code === 2 || code === 3 || code === 4 || code === 5 || code === 7;
 }
 
 const DIR_OFFSET = {
@@ -160,6 +169,7 @@ const DIR_OFFSET = {
 function tryMove(dir) {
   if (isDialogueActive() || inputBusy) return;
   player.facing = dir;
+  updatePatchrunnerFacing(playerEl, player.facing);
   const { dc, dr } = DIR_OFFSET[dir];
   const targetCol = player.col + dc;
   const targetRow = player.row + dr;
@@ -173,6 +183,10 @@ function tryMove(dir) {
     enterSortingSlimeBattle();
     return;
   }
+  if (code === 7) {
+    enterRuneSnarlBattle();
+    return;
+  }
   if (code === 6) {
     onReachOpenGate();
     return;
@@ -184,6 +198,7 @@ function tryMove(dir) {
   if (playerEl) {
     playerEl.style.left = `${player.col * TILE}px`;
     playerEl.style.top = `${player.row * TILE}px`;
+    animatePatchrunnerStep(playerEl);
   }
 }
 
@@ -214,6 +229,28 @@ function enterSortingSlimeBattle() {
             { speaker: "Mira Vale", text: "Good. It works when the mess changes. That is a repair." },
             { speaker: "", text: "A small Archive shard wakes above the intake, bright as a remembered route." },
             { speaker: "", text: "The stair accepts the repair and the intake starts moving again." },
+          ]);
+        },
+      });
+    }
+  );
+}
+
+function enterRuneSnarlBattle() {
+  sayLines(
+    [{ speaker: "", text: "Loose routing runes knot into a sparking snarl across the side lane." }],
+    () => {
+      startSortingSlimeBattle({
+        title: "Rune Snarl",
+        enemySprite: RUNE_SNARL,
+        publicValues: [4, 2, 5, 1],
+        onWin: () => {
+          setState({ runeSnarlCleared: true });
+          map[RUNE_SNARL_POS.row][RUNE_SNARL_POS.col] = 0;
+          render();
+          sayLines([
+            { speaker: "Mira Vale", text: "Good. Same ordering rule, smaller mess. That is how repairs become habits." },
+            { speaker: "", text: "The side lane stops spitting loose runes." },
           ]);
         },
       });
@@ -265,6 +302,7 @@ function interactFacing() {
   const code = tileAt(player.col + dc, player.row + dr);
   if (code === 4) talkToMira();
   else if (code === 5) enterSortingSlimeBattle();
+  else if (code === 7) enterRuneSnarlBattle();
   else if (code === 6) onReachOpenGate();
 }
 

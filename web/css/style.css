@@ -490,6 +490,40 @@ html, body {
   pointer-events: none;
 }
 
+.patchrunner-entity {
+  align-items: flex-end;
+  overflow: visible;
+  z-index: 6;
+}
+
+.patchrunner-sprite {
+  width: 58px;
+  height: 58px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  transform-origin: 50% 88%;
+  filter: drop-shadow(0 5px 3px #00000066);
+}
+
+.patchrunner-entity.is-walking .patchrunner-sprite {
+  animation: patchrunnerStep 0.18s ease-out;
+}
+
+@keyframes patchrunnerStep {
+  0% { transform: translateY(0) rotate(0deg); }
+  35% { transform: translateY(-3px) rotate(-2deg); }
+  70% { transform: translateY(0) rotate(2deg); }
+  100% { transform: translateY(0) rotate(0deg); }
+}
+
+.patchrunner-title-sprite {
+  width: 76px;
+  height: 76px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 8px 6px #00000077);
+}
+
 .entity-glow {
   position: absolute;
   border-radius: 50%;

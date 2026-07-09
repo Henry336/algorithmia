@@ -1,6 +1,7 @@
 import { getState, setState, hasSave, resetState } from "./state.js";
 import { applyPixelArt } from "./pixelart.js";
-import { MIRA_DOWN, PLAYER_DOWN, ARCHIVE_SHARD } from "./sprites.js";
+import { MIRA_DOWN, ARCHIVE_SHARD } from "./sprites.js";
+import { renderPatchrunnerPortrait } from "./playerSprite.js";
 
 const screens = {
   title: document.getElementById("screen-title"),
@@ -100,16 +101,15 @@ export function initTitle({ onEnterChapter0, onEnterChapter1, onEnterChapter2, o
 }
 
 function renderTitleSprites() {
-  const sprites = [
-    ["title-sprite-mira", MIRA_DOWN, 4],
-    ["title-sprite-player", PLAYER_DOWN, 4],
-    ["title-sprite-shard", ARCHIVE_SHARD, 5],
-  ];
-  sprites.forEach(([id, sprite, pixelSize]) => {
-    const host = document.getElementById(id);
-    if (!host || host.childElementCount) return;
-    applyPixelArt(host, sprite.matrix, sprite.palette, pixelSize);
-  });
+  const miraHost = document.getElementById("title-sprite-mira");
+  if (miraHost && !miraHost.childElementCount) {
+    applyPixelArt(miraHost, MIRA_DOWN.matrix, MIRA_DOWN.palette, 4);
+  }
+  renderPatchrunnerPortrait(document.getElementById("title-sprite-player"), "south");
+  const shardHost = document.getElementById("title-sprite-shard");
+  if (shardHost && !shardHost.childElementCount) {
+    applyPixelArt(shardHost, ARCHIVE_SHARD.matrix, ARCHIVE_SHARD.palette, 5);
+  }
 }
 
 function show(screen) {

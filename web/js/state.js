@@ -2,14 +2,18 @@ const SAVE_KEY = "algorithimia-save-v1";
 
 const defaults = {
   chapter: 0,
+  runeSnarlCleared: false,
   queueworksGateOpen: false,
   lineCutterCleared: false,
+  backlogClerkCleared: false,
   dispatcherDefeated: false,
   foundDispatcherSecret: false,
   emberSorterCleared: false,
+  priorityForgerCleared: false,
   heapWardenDefeated: false,
   foundHeaplightSecret: false,
   shuffleImpCleared: false,
+  pivotShadeCleared: false,
   bogoDefeated: false,
   foundArrayPlainsSecret: false,
   archiveFragmentAwake: false,

@@ -1,0 +1,36 @@
+{
+  "group_id": null,
+  "states": [
+    {
+      "character": {
+        "id": "2d7e7a62-b034-4abc-a276-3b46fd201275",
+        "name": "A young field technician in",
+        "prompt": "A young field technician in their late teens/early twenties, medium skin tone, short messy dark brown hair. Wears an olive-green work jacket covered in mismatched teal and rust-orange fabric patches with faint circuit-line stitching, over a faded denim-blue shirt. Rolled-up sleeve on right arm shows a small stitched patch of binary digits \"01001\". Brown leather tool belt with a pouch and a coiled gray cable hanging off it. Holds a small silver soldering-iron-shaped tool with a glowing pale cyan cursor tip. Round aviator goggles with green-tinted lenses pushed up on forehead. Brown work boots, dark blue trousers. Determined, slightly scrappy expression.",
+        "size": {
+          "width": 92,
+          "height": 92
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-07-09T08:55:17.453875+00:00"
+      },
+      "folder": "A_young_field_technician_in",
+      "frames": {
+        "rotations": {
+          "south": "A_young_field_technician_in/rotations/south.png",
+          "south-east": "A_young_field_technician_in/rotations/south-east.png",
+          "east": "A_young_field_technician_in/rotations/east.png",
+          "north-east": "A_young_field_technician_in/rotations/north-east.png",
+          "north": "A_young_field_technician_in/rotations/north.png",
+          "north-west": "A_young_field_technician_in/rotations/north-west.png",
+          "west": "A_young_field_technician_in/rotations/west.png",
+          "south-west": "A_young_field_technician_in/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    }
+  ],
+  "export_version": "3.0",
+  "export_date": "2026-07-09T15:58:37.597611"
+}
