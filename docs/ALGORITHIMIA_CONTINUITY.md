@@ -30,6 +30,7 @@ This file records live direction that should survive context refreshes. Keep it 
 
 ## Current Implemented Route Notes
 
-- Chapter 2: Heaplight Foundry is now split into an intake floor and a furnace core. Heat Sifter appears before Heap Warden and introduces visible Null Rot.
-- Chapter 3: Array Plains is now split into an approach field and Bogo's court. Null Echo appears before Lord Bogo and makes the `0` versus `null` distinction explicit.
+- Chapter 2: Heaplight Foundry is a four-room route: intake floor, optional ash archive, furnace core, and Heap Warden boss chamber. Ember Sorter and Priority Forger gate the core; Heat Sifter plus three valves gate the boss; Ash Auditor is optional archive combat/lore.
+- Chapter 3: Array Plains is a four-room route: approach field, optional index library, Bogo's court, and Lord Bogo boss chamber. Shuffle Imp and Pivot Shade gate the court; Null Echo plus three array mirrors gate the boss; Index Ghost is optional library combat/lore.
+- Optional rooms may hold lore, optional enemies, hidden secrets, or quiet deco space. They should make chapters feel like places, not just combat queues.
 - Sorting Slime has a real exported asset and should idle on the map while acting more aggressive in battle.
