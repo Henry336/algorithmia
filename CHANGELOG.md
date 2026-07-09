@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Replaced the single Python-generated HTML shell with a real static browser game under `web/` (title screen, chapter select, options, save/continue, tile-based Chapter 0 room, Pokemon-style battle transition, Sorting Slime public/sealed rune-swap encounter, dialogue system, mobile-responsive room scaling and d-pad).
+- Added hand-authored placeholder pixel-art sprites (Player, Mira, Sorting Slime, tile icons) rendered via canvas, meant to be swapped for real art later.
+- Added `vercel.json` so the repo deploys `web/` as a static site with no build step.
+- Reframed the Python CLI/package as the internal encounter-validation engine rather than the player-facing surface.
 - Reframed Sorting Slime as a Queueworks intake-ordering repair.
 - Replaced the demo solution with manual insertion-sort logic.
 - Rejected `sorted(...)` and `.sort()` for Sorting Slime submissions.

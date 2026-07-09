@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Algorithimia</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%230d1117'/%3E%3Crect x='3' y='3' width='4' height='4' fill='%237fd8c9'/%3E%3Crect x='9' y='3' width='4' height='4' fill='%23d8a04a'/%3E%3Crect x='3' y='9' width='4' height='4' fill='%23d8a04a'/%3E%3Crect x='9' y='9' width='4' height='4' fill='%237fd8c9'/%3E%3C/svg%3E" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<div id="game">
+
+  <!-- TITLE SCREEN -->
+  <section id="screen-title" class="screen active">
+    <div class="title-scene">
+      <div class="title-stars" aria-hidden="true"></div>
+      <h1 class="title-logo">ALGORITHIMIA</h1>
+      <p class="title-tagline">A programming RPG of broken systems and honest repairs.</p>
+      <nav class="title-menu" id="title-menu">
+        <button class="title-option" data-action="new-game">New Game</button>
+        <button class="title-option" data-action="continue">Continue</button>
+        <button class="title-option" data-action="chapter-select">Chapter Select</button>
+        <button class="title-option" data-action="options">Options</button>
+      </nav>
+      <p class="title-build" id="title-build"></p>
+    </div>
+  </section>
+
+  <!-- CHAPTER SELECT -->
+  <section id="screen-chapter-select" class="screen">
+    <div class="panel-frame">
+      <h2>Chapter Select</h2>
+      <div class="chapter-list">
+        <button class="chapter-card" data-chapter="0">
+          <span class="chapter-num">Chapter 0</span>
+          <span class="chapter-name">Queueworks Intake</span>
+        </button>
+        <button class="chapter-card locked" disabled>
+          <span class="chapter-num">Chapter 1</span>
+          <span class="chapter-name">The Dispatcher's Line</span>
+        </button>
+        <button class="chapter-card locked" disabled>
+          <span class="chapter-num">Chapter 2</span>
+          <span class="chapter-name">Coming soon</span>
+        </button>
+        <button class="chapter-card locked" disabled>
+          <span class="chapter-num">Chapter 3</span>
+          <span class="chapter-name">Coming soon</span>
+        </button>
+      </div>
+      <button class="back-button" data-action="back-to-title">Back</button>
+    </div>
+  </section>
+
+  <!-- OPTIONS -->
+  <section id="screen-options" class="screen">
+    <div class="panel-frame">
+      <h2>Options</h2>
+      <label class="option-row">
+        <span>Text speed</span>
+        <select id="opt-text-speed">
+          <option value="slow">Slow</option>
+          <option value="normal" selected>Normal</option>
+          <option value="fast">Fast</option>
+        </select>
+      </label>
+      <label class="option-row">
+        <span>Reset save data</span>
+        <button id="opt-reset" class="danger-button">Reset</button>
+      </label>
+      <button class="back-button" data-action="back-to-title">Back</button>
+    </div>
+  </section>
+
+  <!-- CHAPTER 0 ROOM -->
+  <section id="screen-room" class="screen">
+    <div class="hud">
+      <span id="hud-chapter">Chapter 0 &middot; Queueworks Intake</span>
+      <button class="hud-menu-btn" data-action="quit-to-title">Menu</button>
+    </div>
+    <div id="room-viewport"></div>
+    <div class="controls-hint">Move: Arrow keys / WASD &nbsp;&middot;&nbsp; Interact: Space / Enter</div>
+    <div id="dpad" class="dpad" aria-hidden="false">
+      <button data-dir="up">&#9650;</button>
+      <button data-dir="left">&#9664;</button>
+      <button data-dir="interact">&#9679;</button>
+      <button data-dir="right">&#9654;</button>
+      <button data-dir="down">&#9660;</button>
+    </div>
+  </section>
+
+  <!-- DIALOGUE BOX (overlay, shown on top of room) -->
+  <div id="dialogue-box" class="dialogue-box hidden">
+    <div class="dialogue-speaker" id="dialogue-speaker"></div>
+    <div class="dialogue-text" id="dialogue-text"></div>
+    <div class="dialogue-next" id="dialogue-next">&#9660;</div>
+  </div>
+
+  <!-- BATTLE SCREEN -->
+  <section id="screen-battle" class="screen">
+    <div class="battle-scene">
+      <div class="battle-backdrop"></div>
+      <div class="battle-enemy" id="battle-enemy-sprite"></div>
+      <h2 class="battle-title" id="battle-title">Sorting Slime</h2>
+      <p class="battle-subtitle" id="battle-round-label">Public spill</p>
+
+      <div class="rune-track" id="rune-track"></div>
+
+      <p class="battle-hint" id="battle-hint">Select two runes to swap them into ascending order.</p>
+
+      <div class="battle-actions">
+        <button class="battle-btn" data-action="swap-hint">Swap</button>
+        <button class="battle-btn primary" data-action="check-order">Check Order</button>
+        <button class="battle-btn" data-action="reset-runes">Reset</button>
+      </div>
+
+      <div class="battle-feedback" id="battle-feedback"></div>
+    </div>
+  </section>
+
+  <div id="screen-transition" class="screen-transition"></div>
+</div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
