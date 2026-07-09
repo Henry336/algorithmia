@@ -36,6 +36,7 @@
 - Strengthened the optional browser self-smoke so it dispatches Arrow/WASD keydown movement, checks on-screen movement reaches interact range, and confirms repaired interaction cannot reopen the cleared room.
 - Extended the optional browser self-smoke with horizontal-overflow checks, 40px control-target checks, cue text-fit checks, and smoke-report row readability checks across the room, Sorting Slime, retry, cleared, and report states.
 - Added a browser evidence intake card to the optional self-smoke report so live-browser results include tested states, pass/fail label, control path, viewport, observed cause, owner, and next action.
+- Fixed the optional browser self-smoke rune-swap script so the scripted visible spill stays sorted before the route-clear check.
 
 ## 0.1.0 - 2026-07-08
 

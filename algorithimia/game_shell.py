@@ -1188,8 +1188,6 @@ def render_game_shell() -> str:
         click('[data-rune-index="1"]');
         click('[data-rune-index="1"]');
         click('[data-rune-index="3"]');
-        click('[data-rune-index="2"]');
-        click('[data-rune-index="3"]');
         click('[data-check-order]');
         record('visible spill clears after swaps', document.querySelector('[data-sorting-slime-playfield]').dataset.state === 'cleared', 'route_open_pass');
         click('[data-return-room]');

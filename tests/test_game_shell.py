@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import unittest
 
 from algorithimia.game_shell import render_game_shell
@@ -198,6 +199,27 @@ class GameShellTests(unittest.TestCase):
         self.assertIn("playerGridPosition().x === '8'", html)
         self.assertIn("Game shell smoke: ${status.toUpperCase()}", html)
         self.assertIn("document.querySelector('[data-queueworks-room]').dataset.roomState === 'cleared_intake'", html)
+
+    def test_browser_smoke_scripted_rune_swaps_clear_visible_spill(self) -> None:
+        html = render_game_shell()
+
+        sequence_start = html.index("viewportStable('retry room has no horizontal overflow'")
+        sequence_end = html.index("record('visible spill clears after swaps'", sequence_start)
+        smoke_sequence = html[sequence_start:sequence_end]
+        rune_clicks = [int(match) for match in re.findall(r'data-rune-index="(\d)"', smoke_sequence)]
+
+        values = [5, 1, 4, 2]
+        selected_index: int | None = None
+        for index in rune_clicks:
+            if selected_index is None:
+                selected_index = index
+            elif selected_index == index:
+                selected_index = None
+            else:
+                values[selected_index], values[index] = values[index], values[selected_index]
+                selected_index = None
+
+        self.assertEqual([1, 2, 4, 5], values)
 
     def test_render_game_shell_seals_certification_values(self) -> None:
         html = render_game_shell()
