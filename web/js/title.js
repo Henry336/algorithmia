@@ -6,11 +6,12 @@ import { isAdminMode, syncAdminModeFromUrl } from "./admin.js";
 
 const screens = {
   title: document.getElementById("screen-title"),
+  arcade: document.getElementById("screen-arcade-select"),
   chapterSelect: document.getElementById("screen-chapter-select"),
   options: document.getElementById("screen-options"),
 };
 
-export function initTitle({ onEnterChapter0, onEnterChapter1, onEnterChapter2, onEnterChapter3, onEnterChapter4 }) {
+export function initTitle({ onEnterChapter0, onEnterChapter1, onEnterChapter2, onEnterChapter3, onEnterChapter4, onEnterArcadeEncounter }) {
   syncAdminModeFromUrl();
   const continueBtn = document.querySelector('[data-action="continue"]');
   continueBtn.disabled = !hasSave();
@@ -63,6 +64,8 @@ export function initTitle({ onEnterChapter0, onEnterChapter1, onEnterChapter2, o
       onEnterChapter0();
     } else if (action === "continue" && hasSave()) {
       resumeFurthest();
+    } else if (action === "arcade") {
+      show(screens.arcade);
     } else if (action === "chapter-select") {
       refreshChapterCards();
       show(screens.chapterSelect);
@@ -85,6 +88,12 @@ export function initTitle({ onEnterChapter0, onEnterChapter1, onEnterChapter2, o
       else if (chapter === 2) onEnterChapter2();
       else if (chapter === 3) onEnterChapter3();
       else if (chapter === 4) onEnterChapter4();
+    });
+  });
+
+  document.querySelectorAll("[data-arcade-encounter]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      if (onEnterArcadeEncounter) onEnterArcadeEncounter(btn.dataset.arcadeEncounter);
     });
   });
 

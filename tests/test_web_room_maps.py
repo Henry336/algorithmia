@@ -73,6 +73,8 @@ class WebRoomMapContracts(unittest.TestCase):
 
         self.assertIn('src="vendor/phaser.min.js"', html)
         self.assertIn('id="slime-arena-host"', html)
+        self.assertIn('data-action="arcade"', html)
+        self.assertIn('data-arcade-encounter="sorting-slime"', html)
         self.assertIn("startSortingSlimeArenaBattle", battle)
         self.assertIn("new Phaser.Game", engine)
         self.assertIn("spawnColumn", engine)

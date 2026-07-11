@@ -19,6 +19,8 @@ Implemented in the first migration slice:
 - Code-editor Tab indentation, Shift+Tab unindentation, and normal Space input while Phaser keyboard capture is suspended.
 - Successful repairs reorganize the live attack patterns and increase weak-point damage.
 - Direct admin launch through `?admin=1&encounter=sorting-slime`.
+- Player-facing Arcade Mode entry and Sorting Slime encounter selection from the title menu.
+- Immediate campaign collision handoff from the Queueworks slime into the Phaser encounter.
 - Desktop and mobile browser smoke coverage.
 
 ## Migration Boundary

@@ -363,6 +363,115 @@ body.admin-mode .title-build {
   cursor: not-allowed;
 }
 
+.arcade-select-panel {
+  width: min(92vw, 820px);
+}
+
+.arcade-select-heading {
+  margin-bottom: 18px;
+  text-align: left;
+}
+
+.arcade-select-heading h2 {
+  margin: 4px 0 0;
+}
+
+.arcade-kicker {
+  color: #75d8c7;
+  font-size: 0.68rem;
+}
+
+.arcade-encounter-list {
+  display: grid;
+  gap: 10px;
+}
+
+.arcade-encounter {
+  width: 100%;
+  min-height: 148px;
+  display: grid;
+  grid-template-columns: 132px minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: center;
+  padding: 10px 18px;
+  border: 2px solid #3e6870;
+  background: #101920;
+  color: #dce7e5;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 100ms linear, background 100ms linear, transform 100ms steps(2, end);
+}
+
+.arcade-encounter:hover,
+.arcade-encounter:focus-visible {
+  border-color: #f0b94e;
+  background: #17252a;
+  transform: translateX(3px);
+  outline: none;
+}
+
+.arcade-encounter img {
+  width: 128px;
+  height: 128px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 10px 7px #00000088) drop-shadow(0 0 14px #9be66c55);
+  animation: arcadeSlimeIdle 1.5s steps(4, end) infinite;
+}
+
+.arcade-encounter-copy {
+  min-width: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.arcade-encounter-copy strong {
+  color: #f0b94e;
+  font-size: 1rem;
+}
+
+.arcade-encounter-copy span {
+  color: #9fb3b0;
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
+.arcade-battle-label {
+  padding: 8px 12px;
+  border-left: 3px solid #75d8c7;
+  color: #75d8c7;
+  font-size: 0.74rem;
+}
+
+@keyframes arcadeSlimeIdle {
+  0%, 100% { transform: translateY(0) scaleX(1) scaleY(1); }
+  50% { transform: translateY(-5px) scaleX(1.04) scaleY(0.96); }
+}
+
+@media (max-width: 620px) {
+  .arcade-encounter {
+    grid-template-columns: 92px minmax(0, 1fr);
+    padding: 10px;
+  }
+
+  .arcade-encounter img {
+    width: 88px;
+    height: 88px;
+  }
+
+  .arcade-battle-label {
+    grid-column: 2;
+    padding: 4px 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arcade-encounter img {
+    animation: none;
+  }
+}
+
 .chapter-num {
   color: var(--accent-warm);
   font-size: 0.85rem;

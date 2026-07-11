@@ -90,6 +90,32 @@ async function main() {
     });
     await page.waitForFunction(() => document.body.dataset.slimeSmokeWin === "true", null, { timeout: 5000 });
 
+    const arcade = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+    arcade.on("pageerror", (error) => errors.push(`arcade: ${String(error)}`));
+    await arcade.goto(`${baseUrl}/`, { waitUntil: "networkidle" });
+    await arcade.locator('[data-action="arcade"]').click();
+    await arcade.locator("#screen-arcade-select.active").waitFor();
+    await arcade.screenshot({ path: path.resolve("build", "arcade-select.png"), fullPage: true });
+    await arcade.locator('[data-arcade-encounter="sorting-slime"]').click();
+    await arcade.locator("#slime-arena-host canvas").waitFor({ state: "visible", timeout: 10000 });
+    await arcade.screenshot({ path: path.resolve("build", "arcade-sorting-slime.png"), fullPage: true });
+
+    const campaign = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+    campaign.on("pageerror", (error) => errors.push(`campaign: ${String(error)}`));
+    await campaign.goto(`${baseUrl}/?admin=0`, { waitUntil: "networkidle" });
+    await campaign.locator('[data-action="new-game"]').click();
+    await campaign.locator("#dialogue-box:not(.hidden)").waitFor({ timeout: 3000 });
+    for (let attempt = 0; attempt < 6; attempt += 1) {
+      if (await campaign.locator("#dialogue-box").evaluate((element) => element.classList.contains("hidden"))) break;
+      await campaign.locator("#dialogue-box").click();
+      await campaign.waitForTimeout(40);
+    }
+    await campaign.keyboard.press("ArrowUp");
+    await campaign.keyboard.press("ArrowUp");
+    await campaign.keyboard.press("ArrowUp");
+    await campaign.keyboard.press("ArrowUp");
+    await campaign.locator("#screen-battle.phaser-slime-active #slime-arena-host canvas").waitFor({ state: "visible", timeout: 10000 });
+
     const mobile = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true });
     mobile.on("pageerror", (error) => errors.push(`mobile: ${String(error)}`));
     await openArena(mobile);

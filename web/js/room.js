@@ -213,25 +213,23 @@ function talkToMira() {
 }
 
 function enterSortingSlimeBattle() {
-  sayLines(
-    [{ speaker: "Mira Vale", text: "That's the slime. Sort the runes and test the repair?" }],
-    () => {
-      startSortingSlimeBattle({
-        onWin: () => {
-          setState({ queueworksGateOpen: true });
-          map[3][5] = 0;
-          map[0][4] = 6;
-          map[0][5] = 6;
-          render();
-          sayLines([
-            { speaker: "Mira Vale", text: "Good. It works when the mess changes. That is a repair." },
-            { speaker: "", text: "A small Archive shard wakes above the intake, bright as a remembered route." },
-            { speaker: "", text: "The stair accepts the repair and the intake starts moving again." },
-          ]);
-        },
-      });
-    }
-  );
+  if (inputBusy) return;
+  inputBusy = true;
+  startSortingSlimeBattle({
+    onWin: () => {
+      inputBusy = false;
+      setState({ queueworksGateOpen: true });
+      map[3][5] = 0;
+      map[0][4] = 6;
+      map[0][5] = 6;
+      render();
+      sayLines([
+        { speaker: "Mira Vale", text: "Good. It works when the mess changes. That is a repair." },
+        { speaker: "", text: "A small Archive shard wakes above the intake, bright as a remembered route." },
+        { speaker: "", text: "The stair accepts the repair and the intake starts moving again." },
+      ]);
+    },
+  });
 }
 
 function enterRuneSnarlBattle() {

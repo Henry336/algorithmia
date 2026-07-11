@@ -36,12 +36,24 @@ function enterChapter4() {
   initChapter4Room({});
 }
 
+function enterArcadeEncounter(encounter) {
+  if (encounter !== "sorting-slime") return;
+  document.getElementById("screen-arcade-select").classList.remove("active");
+  startSortingSlimeArenaBattle({
+    onWin: () => {
+      document.getElementById("screen-room").classList.remove("active");
+      document.getElementById("screen-arcade-select").classList.add("active");
+    },
+  });
+}
+
 initTitle({
   onEnterChapter0: enterChapter0,
   onEnterChapter1: enterChapter1,
   onEnterChapter2: enterChapter2,
   onEnterChapter3: enterChapter3,
   onEnterChapter4: enterChapter4,
+  onEnterArcadeEncounter: enterArcadeEncounter,
 });
 
 const launchEncounter = new URLSearchParams(window.location.search).get("encounter");

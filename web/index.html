@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Algorithimia</title>
+<title>Algorithmia</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%230d1117'/%3E%3Crect x='3' y='3' width='4' height='4' fill='%237fd8c9'/%3E%3Crect x='9' y='3' width='4' height='4' fill='%23d8a04a'/%3E%3Crect x='3' y='9' width='4' height='4' fill='%23d8a04a'/%3E%3Crect x='9' y='9' width='4' height='4' fill='%237fd8c9'/%3E%3C/svg%3E" />
 <link rel="stylesheet" href="css/style.css" />
 </head>
@@ -19,15 +19,38 @@
         <div class="title-sprite title-sprite-main" id="title-sprite-player"></div>
         <div class="title-sprite" id="title-sprite-shard"></div>
       </div>
-      <h1 class="title-logo">ALGORITHIMIA</h1>
+      <h1 class="title-logo">ALGORITHMIA</h1>
       <p class="title-tagline">A Python-first programming RPG prototype of broken systems and honest repairs.</p>
       <nav class="title-menu" id="title-menu">
         <button class="title-option" data-action="new-game">New Game</button>
         <button class="title-option" data-action="continue">Continue</button>
+        <button class="title-option" data-action="arcade">Arcade</button>
         <button class="title-option" data-action="chapter-select">Level Select</button>
         <button class="title-option" data-action="options">Options</button>
       </nav>
       <p class="title-build" id="title-build"></p>
+    </div>
+  </section>
+
+  <!-- ARCADE ENCOUNTER SELECT -->
+  <section id="screen-arcade-select" class="screen">
+    <div class="panel-frame arcade-select-panel">
+      <div class="arcade-select-heading">
+        <span class="arcade-kicker">COMBAT LAB</span>
+        <h2>Arcade Encounters</h2>
+      </div>
+      <div class="arcade-encounter-list">
+        <button class="arcade-encounter" data-arcade-encounter="sorting-slime">
+          <img src="assets/characters/sorting-slime/A_translucent_lime-green_gelatinous_blob/rotations/south.png" alt="Sorting Slime" />
+          <span class="arcade-encounter-copy">
+            <strong>Sorting Slime</strong>
+            <span>Introductory / Ordering</span>
+            <span>Prerequisites: loops, list indexing, swaps</span>
+          </span>
+          <span class="arcade-battle-label">Battle</span>
+        </button>
+      </div>
+      <button class="back-button" data-action="back-to-title">Back</button>
     </div>
   </section>
 
