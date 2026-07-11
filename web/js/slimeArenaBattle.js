@@ -13,17 +13,53 @@ import {
   stopSlimeArena,
 } from "./slimeArenaEngine.js";
 
-const STARTER_CODE = `def solve(values):
+const REPAIRS = {
+  1: {
+    title: "Stabilize the insertion march",
+    requirement: "Return a new ascending list. Built-in sorting shortcuts are disabled.",
+    starter: `def solve(values):
     ordered = values[:]
     # Compare neighboring values and swap them when needed.
-    return ordered`;
-
-const REPAIR_CASES = [
-  { name: "visible_spill", input: [5, 1, 4, 2, 3], expected: [1, 2, 3, 4, 5], sealed: false },
-  { name: "visible_duplicates", input: [3, 1, 3, 2], expected: [1, 2, 3, 3], sealed: false },
-  { name: "sealed_reverse", input: [7, 6, 4, 2, 1], expected: [1, 2, 4, 6, 7], sealed: true },
-  { name: "sealed_edges", input: [0, -2, 8, -2, 5], expected: [-2, -2, 0, 5, 8], sealed: true },
-];
+    return ordered`,
+    cases: [
+      { name: "visible_spill", input: [5, 1, 4, 2, 3], expected: [1, 2, 3, 4, 5], sealed: false },
+      { name: "visible_duplicates", input: [3, 1, 3, 2], expected: [1, 2, 3, 3], sealed: false },
+      { name: "sealed_reverse", input: [7, 6, 4, 2, 1], expected: [1, 2, 4, 6, 7], sealed: true },
+      { name: "sealed_edges", input: [0, -2, 8, -2, 5], expected: [-2, -2, 0, 5, 8], sealed: true },
+    ],
+    success: "Column heights now rise 1-2-3-4-5 and descend predictably.",
+  },
+  2: {
+    title: "Merge the split allocations",
+    requirement: "The first and second halves are sorted runs. Merge them without sorting shortcuts.",
+    starter: `def solve(values):
+    merged = values[:]
+    # Merge the two sorted halves into merged.
+    return merged`,
+    cases: [
+      { name: "visible_even_runs", input: [1, 4, 7, 2, 3, 9], expected: [1, 2, 3, 4, 7, 9], sealed: false },
+      { name: "visible_overlap", input: [0, 5, 8, 1, 5, 6], expected: [0, 1, 5, 5, 6, 8], sealed: false },
+      { name: "sealed_negative", input: [-7, -1, 4, -5, 2, 8], expected: [-7, -5, -1, 2, 4, 8], sealed: true },
+      { name: "sealed_tight", input: [2, 4, 6, 1, 3, 5], expected: [1, 2, 3, 4, 5, 6], sealed: true },
+    ],
+    success: "Scattered allocations now merge at one readable locus.",
+  },
+  3: {
+    title: "Reverse the overflow direction",
+    requirement: "Reverse the copied list in place. Swap mirrored positions without shortcuts.",
+    starter: `def solve(values):
+    reversed_values = values[:]
+    # Swap the outer values, then move inward.
+    return reversed_values`,
+    cases: [
+      { name: "visible_odd", input: [1, 2, 3, 4, 5], expected: [5, 4, 3, 2, 1], sealed: false },
+      { name: "visible_even", input: [8, 6, 4, 2], expected: [2, 4, 6, 8], sealed: false },
+      { name: "sealed_single", input: [9], expected: [9], sealed: true },
+      { name: "sealed_symbols", input: [-2, 0, 7, 7, 3, 1], expected: [1, 3, 7, 7, 0, -2], sealed: true },
+    ],
+    success: "The overflow spiral is now clockwise and leaves one stable spoke.",
+  },
+};
 
 const screenBattle = document.getElementById("screen-battle");
 const screenRoom = document.getElementById("screen-room");
@@ -32,6 +68,9 @@ const shell = document.getElementById("slime-arena-shell");
 const host = document.getElementById("slime-arena-host");
 const bossHpFill = document.getElementById("slime-boss-hp-fill");
 const bossHpText = document.getElementById("slime-boss-hp-text");
+const shieldRow = document.getElementById("slime-null-shield-row");
+const shieldFill = document.getElementById("slime-null-shield-fill");
+const shieldText = document.getElementById("slime-null-shield-text");
 const phaseLabel = document.getElementById("slime-phase-label");
 const waveLabel = document.getElementById("slime-wave-label");
 const statusEl = document.getElementById("slime-arena-status");
@@ -52,13 +91,16 @@ const editor = document.getElementById("slime-repair-editor");
 const repairTimerEl = document.getElementById("slime-repair-timer");
 const repairResultsEl = document.getElementById("slime-repair-results");
 const repairFeedbackEl = document.getElementById("slime-repair-feedback");
+const repairTitleEl = document.getElementById("slime-repair-title");
+const repairRequirementEl = document.getElementById("slime-repair-requirement");
 
 let onWinCallback = null;
-let savedCode = STARTER_CODE;
+const savedCodeByPhase = new Map();
 let repairTimer = null;
 let repairDeadline = 0;
 let finishing = false;
 let commandIndex = 0;
+let activePhase = 1;
 
 const commandSelectAudio = new Audio("assets/audio/ui-command-select.wav");
 commandSelectAudio.preload = "auto";
@@ -156,19 +198,28 @@ function updateBossHp(hp, maxHp, phase) {
   phaseLabel.textContent = `Phase ${phase}`;
 }
 
+function updateBossShield(hp, maxHp, active) {
+  const percent = Math.max(0, Math.min(100, (hp / maxHp) * 100));
+  shieldFill.style.width = `${percent}%`;
+  shieldText.textContent = active ? `${hp}/${maxHp}` : "BREACHED";
+  shieldRow.classList.toggle("active", active);
+  shieldRow.classList.toggle("breached", !active);
+}
+
 function hideOverlays() {
   setHidden(commandPanel, true);
   setHidden(repairPanel, true);
   setHidden(defeatPanel, true);
 }
 
-function showCommandWindow({ repaired }) {
+function showCommandWindow({ repaired, phase }) {
+  activePhase = phase;
   setHidden(commandPanel, false);
   setHidden(repairPanel, true);
-  attackBtn.textContent = repaired ? "Attack 15" : "Attack 5";
+  attackBtn.textContent = "Attack 5";
   statusEl.textContent = repaired
-    ? "The repaired ordering exposes a clean weak point."
-    : "The core is exposed, but the unsorted shell absorbs most of the hit.";
+    ? "The Null shield is breached. A direct strike will damage the core."
+    : "The 100 HP Null shield is still compiled. Repair is the clean breach.";
   setPointerLocked(true);
   selectCommand(0);
 }
@@ -180,17 +231,20 @@ function clearRepairTimer() {
 
 function closeRepair(repaired = false, quality = "none") {
   clearRepairTimer();
-  savedCode = editor.value;
+  savedCodeByPhase.set(activePhase, editor.value);
   setHidden(repairPanel, true);
   setPointerLocked(true);
   slimeArenaResumeRepair({ repaired, quality });
 }
 
 function openRepair() {
+  const repair = REPAIRS[activePhase];
   setHidden(commandPanel, true);
   setHidden(repairPanel, false);
   setPointerLocked(false);
-  editor.value = savedCode;
+  editor.value = savedCodeByPhase.get(activePhase) || repair.starter;
+  repairTitleEl.textContent = repair.title;
+  repairRequirementEl.textContent = repair.requirement;
   repairResultsEl.innerHTML = "";
   repairFeedbackEl.textContent = "Sorting Slime is stunned. Your progress is saved when it wakes.";
   repairFeedbackEl.classList.remove("error", "success");
@@ -220,8 +274,10 @@ function renderRepairResults(results) {
 
 async function runRepair() {
   if (runRepairBtn.disabled) return;
-  savedCode = editor.value;
-  if (/\.sort\s*\(|\bsorted\s*\(/.test(savedCode)) {
+  const repair = REPAIRS[activePhase];
+  const savedCode = editor.value;
+  savedCodeByPhase.set(activePhase, savedCode);
+  if (/\.sort\s*\(|\bsorted\s*\(|\.reverse\s*\(/.test(savedCode)) {
     repairFeedbackEl.textContent = "Sorting Slime swallowed the shortcut. Show the ordering logic itself.";
     repairFeedbackEl.classList.add("error");
     return;
@@ -230,7 +286,7 @@ async function runRepair() {
   runRepairBtn.disabled = true;
   repairFeedbackEl.classList.remove("error", "success");
   repairFeedbackEl.textContent = "Running Python repair...";
-  const outcome = await runPythonRepair(savedCode, REPAIR_CASES);
+  const outcome = await runPythonRepair(savedCode, repair.cases);
   runRepairBtn.disabled = false;
 
   if (!outcome.ok) {
@@ -250,7 +306,7 @@ async function runRepair() {
   const metrics = summarizeRepairMetrics(outcome.results);
   const quality = metrics.steps <= 120 ? "stable" : "strained";
   repairFeedbackEl.textContent = quality === "stable"
-    ? `Repair stable: ${metrics.steps} loop steps. The columns lock into readable order.`
+    ? `Repair stable: ${metrics.steps} loop steps. ${repair.success}`
     : `Repair holds, but ${metrics.steps} loop steps make it strain under pressure.`;
   repairFeedbackEl.classList.add("success");
   runRepairBtn.disabled = true;
@@ -302,36 +358,40 @@ function finishBattle() {
 
 const callbacks = {
   onBossHp: updateBossHp,
+  onBossShield: updateBossShield,
   onStatus(message) {
     statusEl.textContent = message;
   },
   onWave({ phase, wave, name, repaired }) {
+    activePhase = phase;
     hideOverlays();
     setPointerLocked(true);
     phaseLabel.textContent = `Phase ${phase}`;
     waveLabel.textContent = `${name} / Wave ${wave}${repaired ? " / REPAIRED" : ""}`;
   },
-  onAccessOpen() {
-    waveLabel.textContent = "Access window open";
-  },
   onCommandWindow: showCommandWindow,
-  onDamage(amount) {
+  onDamage(amount, guarded) {
     const cost = applyBattleCost({ hp: amount });
-    statusEl.textContent = `Minion collision: -${cost.hpLost} HP. Knockback applied.`;
+    statusEl.textContent = guarded
+      ? `Guard halves the collision: -${cost.hpLost} HP.`
+      : `Minion collision: -${cost.hpLost} HP. Knockback applied.`;
     return updateVitals();
   },
-  onAttack(amount, repaired) {
+  onAttack(amount, repaired, shielded) {
     setHidden(commandPanel, true);
-    statusEl.textContent = repaired
-      ? `Repair-assisted strike: ${amount} damage.`
-      : `Unrepaired strike: ${amount} damage. The shell absorbs the rest.`;
+    statusEl.textContent = shielded
+      ? `The strike removes ${amount} shield HP. Repair can breach all 100 at once.`
+      : `Direct strike: ${amount} core damage. Sorting Slime launches Patchrunner away.`;
   },
-  onGuard() {
+  onGuard(duration) {
     setHidden(commandPanel, true);
-    statusEl.textContent = "Guard armed. The next collision will be absorbed.";
+    statusEl.textContent = `Guard compiled for ${duration / 1000} seconds: incoming damage halved.`;
   },
-  onGuardBlocked() {
-    statusEl.textContent = "Guard absorbed the collision. No HP lost.";
+  onGuardBlocked(amount) {
+    statusEl.textContent = `Guard holds: collision reduced to ${amount} HP.`;
+  },
+  onGuardExpired() {
+    statusEl.textContent = "Guard shield expired.";
   },
   onRepairOpened: openRepair,
   onDefeat: handleDefeat,
@@ -360,6 +420,8 @@ export function startSortingSlimeArenaBattle({ onWin }) {
   hideOverlays();
   updateVitals();
   updateBossHp(45, 45, 1);
+  updateBossShield(100, 100, true);
+  activePhase = 1;
   phaseLabel.textContent = "Phase 1";
   waveLabel.textContent = "Room sealed";
   statusEl.textContent = "Sorting Slime is entering the execution space.";

@@ -5,6 +5,9 @@ const FLOOR_BOTTOM = HEIGHT - 52;
 const PLAYER_START_X = 70;
 const BOSS_X = WIDTH - 92;
 const ROWS = 7;
+const BOSS_MAX_HP = 45;
+const NULL_SHIELD_MAX = 100;
+const GUARD_DURATION = 5000;
 
 const PLAYER_IMAGE = "assets/characters/patchrunner/A_young_field_technician_in/rotations/east.png";
 const SLIME_IMAGE = "assets/characters/sorting-slime/A_translucent_lime-green_gelatinous_blob/rotations/west.png";
@@ -29,15 +32,17 @@ function createSceneClass(Phaser, callbacks) {
     constructor() {
       super("sorting-slime-arena");
       this.mode = "intro";
-      this.bossHp = 45;
+      this.bossHp = BOSS_MAX_HP;
       this.phase = 1;
       this.repaired = false;
       this.repairQuality = "none";
-      this.guardCharge = 0;
+      this.nullShieldHp = NULL_SHIELD_MAX;
+      this.guardUntil = 0;
       this.lastGap = 3;
       this.invulnerableUntil = 0;
       this.waveEvents = [];
       this.waveNumber = 0;
+      this.patternStep = 0;
     }
 
     preload() {
@@ -58,10 +63,20 @@ function createSceneClass(Phaser, callbacks) {
       this.boss.setDisplaySize(198, 198).setDepth(7);
       this.boss.body.setSize(88, 98).setOffset(34, 28);
 
-      this.shield = this.add.rectangle(BOSS_X - 70, HEIGHT / 2, 8, FLOOR_BOTTOM - FLOOR_TOP + 18, 0x9df4df, 0.35)
-        .setStrokeStyle(2, 0xd8fff7, 0.85)
-        .setDepth(6);
-      this.shield.visible = false;
+      this.bossShield = this.add.circle(BOSS_X, HEIGHT / 2, 100, 0x7b2cff, 0.12)
+        .setStrokeStyle(8, 0xc66cff, 0.9)
+        .setBlendMode(Phaser.BlendModes.ADD)
+        .setDepth(6)
+        .setVisible(false);
+      this.bossShieldInner = this.add.circle(BOSS_X, HEIGHT / 2, 88, 0x17052d, 0.08)
+        .setStrokeStyle(3, 0x8f5cff, 0.8)
+        .setDepth(6)
+        .setVisible(false);
+      this.playerShield = this.add.circle(PLAYER_START_X, HEIGHT / 2, 54, 0x5cdcff, 0.09)
+        .setStrokeStyle(5, 0x8eeaff, 0.9)
+        .setBlendMode(Phaser.BlendModes.ADD)
+        .setDepth(7)
+        .setVisible(false);
 
       this.physics.add.overlap(this.player, this.minions, (_player, minion) => this.hitPlayer(minion));
       this.keys = this.input.keyboard.addKeys({
@@ -95,7 +110,17 @@ function createSceneClass(Phaser, callbacks) {
         ease: "Sine.easeInOut",
       });
 
-      callbacks.onBossHp(this.bossHp, 45, this.phase);
+      this.tweens.add({
+        targets: [this.bossShield, this.bossShieldInner],
+        alpha: { from: 0.55, to: 1 },
+        duration: 560,
+        yoyo: true,
+        repeat: -1,
+        ease: "Sine.easeInOut",
+      });
+
+      callbacks.onBossHp(this.bossHp, BOSS_MAX_HP, this.phase);
+      callbacks.onBossShield(this.nullShieldHp, NULL_SHIELD_MAX, true);
       callbacks.onStatus("Sorting Slime seals the room and gathers itself.");
       this.playEntrance();
     }
@@ -129,22 +154,37 @@ function createSceneClass(Phaser, callbacks) {
     }
 
     playEntrance() {
+      this.boss.setPosition(BOSS_X, FLOOR_TOP - 180);
       this.tweens.add({
         targets: this.boss,
-        x: BOSS_X,
-        duration: 650,
-        ease: "Back.easeOut",
+        y: HEIGHT / 2,
+        duration: 760,
+        ease: "Bounce.easeOut",
         onComplete: () => {
-          this.cameras.main.shake(260, 0.012);
-          const impact = this.add.circle(BOSS_X, HEIGHT / 2 + 48, 16, 0x8eea70, 0.5).setDepth(5);
-          this.tweens.add({ targets: impact, scaleX: 7, scaleY: 2.4, alpha: 0, duration: 520, onComplete: () => impact.destroy() });
-          this.time.delayedCall(650, () => this.startWave());
+          this.bossShield.setVisible(true).setAlpha(1).setScale(1);
+          this.bossShieldInner.setVisible(true).setAlpha(1).setScale(1);
+          this.cameras.main.shake(420, 0.02);
+          const impact = this.add.circle(BOSS_X, HEIGHT / 2 + 52, 18, 0xa94dff, 0.65).setDepth(5);
+          this.tweens.add({ targets: impact, scaleX: 10, scaleY: 3.2, alpha: 0, duration: 680, ease: "Quad.easeOut", onComplete: () => impact.destroy() });
+          for (let index = 0; index < 18; index += 1) {
+            const shard = this.add.rectangle(BOSS_X, HEIGHT / 2 + 52, 5, 5, index % 2 ? 0xc66cff : 0x8eea70, 0.9).setDepth(8);
+            const angle = Phaser.Math.FloatBetween(Math.PI, Math.PI * 2);
+            const distance = Phaser.Math.Between(70, 240);
+            this.tweens.add({ targets: shard, x: BOSS_X + Math.cos(angle) * distance, y: HEIGHT / 2 + 52 + Math.sin(angle) * distance * 0.45, alpha: 0, duration: Phaser.Math.Between(430, 760), onComplete: () => shard.destroy() });
+          }
+          callbacks.onStatus("Sorting Slime crashes into the execution space. NULL SHIELD: 100.");
+          this.time.delayedCall(700, () => this.startWave({ resetPlayer: false }));
         },
       });
     }
 
     update(time) {
-      if (!this.player || !["dodge", "access"].includes(this.mode)) return;
+      if (!this.player) return;
+      this.playerShield.setPosition(this.player.x, this.player.y);
+      this.bossShield.setPosition(this.boss.x, this.boss.y);
+      this.bossShieldInner.setPosition(this.boss.x, this.boss.y);
+      if (this.guardUntil && time >= this.guardUntil) this.expireGuard();
+      if (this.mode !== "dodge") return;
       const speed = 245;
       let vx = 0;
       let vy = 0;
@@ -157,9 +197,8 @@ function createSceneClass(Phaser, callbacks) {
         vy *= 0.707;
       }
       this.player.setVelocity(vx, vy);
-      this.player.x = Phaser.Math.Clamp(this.player.x, 44, this.mode === "dodge" ? BOSS_X - 112 : BOSS_X - 24);
+      this.player.x = Phaser.Math.Clamp(this.player.x, 44, BOSS_X - 24);
       this.player.y = Phaser.Math.Clamp(this.player.y, FLOOR_TOP - 2, FLOOR_BOTTOM + 2);
-
       if (vx || vy) {
         this.player.setFlipX(vx < 0);
         this.player.setAngle(Math.sin(time / 75) * 1.5);
@@ -169,23 +208,31 @@ function createSceneClass(Phaser, callbacks) {
 
       this.minions.children.each((minion) => {
         if (!minion || !minion.active) return;
+        if (minion.getData("spiral")) {
+          const age = time - minion.getData("bornAt");
+          const repairedBias = minion.getData("repairedBias");
+          const angle = minion.getData("angle") + age * minion.getData("turnRate");
+          const radius = 28 + age * minion.getData("radialSpeed");
+          minion.setPosition(BOSS_X + Math.cos(angle) * radius, HEIGHT / 2 + Math.sin(angle) * radius * 0.62 + repairedBias);
+          minion.setRotation(angle);
+        }
         if (minion.x < -60 || minion.x > WIDTH + 60 || minion.y < 0 || minion.y > HEIGHT) minion.destroy();
       });
 
-      if (this.mode === "access" && Phaser.Math.Distance.Between(this.player.x, this.player.y, this.boss.x, this.boss.y) < 104) {
+      if (Phaser.Math.Distance.Between(this.player.x, this.player.y, this.boss.x, this.boss.y) < 104) {
         this.openCommandWindow();
       }
     }
 
-    startWave() {
+    startWave({ resetPlayer = true } = {}) {
       if (this.mode === "finished") return;
       this.clearWave();
       this.mode = "dodge";
       this.waveNumber += 1;
-      this.player.setPosition(PLAYER_START_X, HEIGHT / 2).setVelocity(0, 0).clearTint();
-      this.shield.visible = true;
+      if (resetPlayer) this.player.setPosition(PLAYER_START_X, HEIGHT / 2);
+      this.player.setVelocity(0, 0).clearTint();
       this.phase = phaseForHp(this.bossHp);
-      callbacks.onBossHp(this.bossHp, 45, this.phase);
+      callbacks.onBossHp(this.bossHp, BOSS_MAX_HP, this.phase);
 
       const names = ["Insertion March", "Merge Flood", "Overflow Spiral"];
       callbacks.onWave({
@@ -194,24 +241,29 @@ function createSceneClass(Phaser, callbacks) {
         name: names[this.phase - 1],
         repaired: this.repaired,
       });
-      callbacks.onStatus(this.repaired
-        ? "Your repair holds. The columns now advertise a stable route."
-        : "The columns are unsorted. Read each opening before it reaches you.");
+      const status = this.phase === 1
+        ? (this.repaired ? "REPAIRED: column heights now rise and fall in sorted order." : "Insertion March is unstable. The columns refuse to stop.")
+        : this.phase === 2
+          ? (this.repaired ? "REPAIRED: merge clusters now resolve at one readable locus." : "Merge Flood is scattering one-second allocations across the floor.")
+          : (this.repaired ? "REPAIRED: the spiral is clockwise, periodic, and leaves a stable spoke." : "Overflow Spiral changes direction without warning.");
+      callbacks.onStatus(status);
 
-      const interval = this.phase === 1 ? 1250 : this.phase === 2 ? 1080 : 930;
-      this.spawnColumn();
-      this.waveEvents.push(this.time.addEvent({ delay: interval, loop: true, callback: () => this.spawnColumn() }));
-      if (this.phase >= 2) {
-        this.waveEvents.push(this.time.addEvent({ delay: this.phase === 2 ? 2450 : 1800, loop: true, callback: () => this.spawnCrossStream() }));
+      if (this.phase === 1) {
+        this.spawnColumn();
+        this.waveEvents.push(this.time.addEvent({ delay: this.repaired ? 760 : 620, loop: true, callback: () => this.spawnColumn() }));
+      } else if (this.phase === 2) {
+        this.spawnMergeBurst();
+        this.waveEvents.push(this.time.addEvent({ delay: this.repaired ? 980 : 720, loop: true, callback: () => this.spawnMergeBurst() }));
+      } else {
+        this.spawnSpiralBurst();
+        this.waveEvents.push(this.time.addEvent({ delay: this.repaired ? 1120 : 760, loop: true, callback: () => this.spawnSpiralBurst() }));
       }
-      const duration = this.phase === 1 ? 10500 : this.phase === 2 ? 11200 : 11800;
-      this.waveEvents.push(this.time.delayedCall(duration, () => this.openAccess()));
     }
 
     chooseGap() {
       if (this.repaired) {
-        const movement = Phaser.Math.Between(-1, 1);
-        this.lastGap = Phaser.Math.Clamp(this.lastGap + movement, 1, ROWS - 2);
+        const orderedGaps = [1, 2, 3, 4, 5, 4, 3, 2];
+        this.lastGap = orderedGaps[this.patternStep % orderedGaps.length];
       } else {
         this.lastGap = Phaser.Math.Between(1, ROWS - 2);
       }
@@ -220,10 +272,29 @@ function createSceneClass(Phaser, callbacks) {
 
     spawnColumn() {
       if (this.mode !== "dodge") return;
+      if (this.repaired) {
+        const heights = [1, 2, 3, 4, 5, 4, 3, 2];
+        const sequenceIndex = this.patternStep % heights.length;
+        const height = heights[sequenceIndex];
+        const fromTop = Math.floor(this.patternStep / heights.length) % 2 === 0;
+        this.patternStep += 1;
+        const warningY = fromTop ? rowY((height - 1) / 2) : rowY(ROWS - 1 - (height - 1) / 2);
+        const warning = this.add.rectangle(WIDTH - 46, warningY, 12, Math.max(42, height * 58), 0x8eeaff, 0.22).setDepth(2);
+        this.tweens.add({ targets: warning, alpha: 0.72, duration: 150, yoyo: true, repeat: 2, onComplete: () => warning.destroy() });
+        for (let index = 0; index < height; index += 1) {
+          const row = fromTop ? index : ROWS - 1 - index;
+          const minion = this.minions.create(WIDTH + 44, rowY(row), "sorting-slime");
+          minion.setDisplaySize(56, 56).setDepth(5).setVelocityX(-220).setAlpha(0.8);
+          minion.body.setSize(34, 34).setOffset(23, 23);
+          this.tweens.add({ targets: minion, scaleY: minion.scaleY * 0.82, duration: 340, yoyo: true, repeat: -1 });
+        }
+        return;
+      }
       const gap = this.chooseGap();
-      const gapRadius = this.repaired || this.phase === 1 ? 1 : 0;
-      const speed = this.phase === 1 ? 172 : this.phase === 2 ? 194 : 218;
-      const warning = this.add.rectangle(WIDTH - 46, rowY(gap), 12, gapRadius ? 110 : 58, 0xf6d77a, 0.2).setDepth(2);
+      this.patternStep += 1;
+      const gapRadius = 0;
+      const speed = 252;
+      const warning = this.add.rectangle(WIDTH - 46, rowY(gap), 12, 58, 0xc66cff, 0.24).setDepth(2);
       this.tweens.add({ targets: warning, alpha: 0.75, duration: 180, yoyo: true, repeat: 2, onComplete: () => warning.destroy() });
 
       for (let row = 0; row < ROWS; row += 1) {
@@ -231,72 +302,101 @@ function createSceneClass(Phaser, callbacks) {
         const minion = this.minions.create(WIDTH + 44, rowY(row), "sorting-slime");
         minion.setDisplaySize(56, 56).setDepth(5).setVelocityX(-speed);
         minion.body.setSize(34, 34).setOffset(23, 23);
-        minion.setAlpha(this.repaired ? 0.82 : 0.94);
+        minion.setAlpha(0.96);
         this.tweens.add({ targets: minion, scaleY: minion.scaleY * 0.82, duration: 340, yoyo: true, repeat: -1 });
       }
     }
 
-    spawnCrossStream() {
+    spawnMergeBurst() {
       if (this.mode !== "dodge") return;
-      const fromTop = this.waveNumber % 2 === 0;
-      const laneX = Phaser.Math.Between(280, 690);
-      const minion = this.minions.create(laneX, fromTop ? FLOOR_TOP - 70 : FLOOR_BOTTOM + 70, "sorting-slime");
-      minion.setDisplaySize(this.phase === 3 ? 66 : 54, this.phase === 3 ? 66 : 54).setDepth(5);
-      minion.body.setSize(34, 34).setOffset(23, 23);
-      minion.setVelocityY((fromTop ? 1 : -1) * (this.phase === 3 ? 185 : 150));
-      minion.setTint(this.phase === 3 ? 0xc67bff : 0x9eeaff);
+      const count = this.repaired ? 3 : Phaser.Math.Between(5, 7);
+      const anchorX = Phaser.Math.Between(250, 690);
+      const anchorY = rowY(Phaser.Math.Between(1, ROWS - 2));
+      for (let index = 0; index < count; index += 1) {
+        const x = this.repaired ? anchorX + (index - 1) * 44 : Phaser.Math.Between(170, 730);
+        const y = this.repaired ? anchorY : Phaser.Math.Between(FLOOR_TOP, FLOOR_BOTTOM);
+        const warning = this.add.circle(x, y, 24, 0xc66cff, 0.2).setStrokeStyle(2, 0xf0b2ff, 0.8).setDepth(3);
+        this.tweens.add({ targets: warning, scaleX: 1.35, scaleY: 1.35, alpha: 0.8, duration: 240, yoyo: true, repeat: 1 });
+        this.waveEvents.push(this.time.delayedCall(420, () => {
+          warning.destroy();
+          if (this.mode !== "dodge") return;
+          const minion = this.minions.create(x, y, "sorting-slime");
+          minion.setDisplaySize(62, 62).setDepth(5).setTint(this.repaired ? 0x9eeaff : 0xd174ff);
+          minion.body.setSize(36, 36).setOffset(22, 22);
+          minion.setAlpha(0);
+          this.tweens.add({ targets: minion, alpha: 0.96, scaleX: minion.scaleX * 1.12, scaleY: minion.scaleY * 0.88, duration: 100, yoyo: true, repeat: 1 });
+          this.waveEvents.push(this.time.delayedCall(1000, () => {
+            if (!minion.active) return;
+            this.tweens.add({ targets: minion, alpha: 0, duration: 130, onComplete: () => minion.destroy() });
+          }));
+        }));
+      }
     }
 
-    openAccess() {
+    spawnSpiralBurst() {
       if (this.mode !== "dodge") return;
-      this.clearWaveEvents();
-      this.mode = "access";
-      this.shield.visible = false;
-      this.minions.children.each((minion) => {
-        if (!minion || !minion.active) return;
-        this.tweens.add({ targets: minion, alpha: 0, duration: 420, onComplete: () => minion.destroy() });
-      });
-      callbacks.onStatus("ACCESS OPEN: reach Sorting Slime before it reforms.");
-      callbacks.onAccessOpen();
-      this.waveEvents.push(this.time.delayedCall(6000, () => {
-        if (this.mode === "access") {
-          callbacks.onStatus("The opening closes. Sorting Slime resumes the march.");
-          this.startWave();
-        }
-      }));
+      const count = this.repaired ? 6 : 9;
+      const base = this.repaired ? (this.patternStep % 8) * (Math.PI / 4) : Phaser.Math.FloatBetween(0, Math.PI * 2);
+      const direction = this.repaired ? 1 : Phaser.Math.RND.pick([-1, 1]);
+      this.patternStep += 1;
+      for (let index = 0; index < count; index += 1) {
+        if (this.repaired && index === 3) continue;
+        const angle = base + (index / count) * Math.PI * 2;
+        const minion = this.minions.create(BOSS_X, HEIGHT / 2, "sorting-slime");
+        minion.setDisplaySize(this.repaired ? 50 : 58, this.repaired ? 50 : 58).setDepth(5).setTint(0xc66cff);
+        minion.body.setSize(32, 32).setOffset(24, 24);
+        minion.setData({ spiral: true, bornAt: this.time.now, angle, turnRate: direction * (this.repaired ? 0.0014 : Phaser.Math.FloatBetween(0.0018, 0.0032)), radialSpeed: this.repaired ? 0.115 : Phaser.Math.FloatBetween(0.13, 0.18), repairedBias: this.repaired ? Math.sin(base) * 18 : Phaser.Math.Between(-36, 36) });
+      }
     }
 
     openCommandWindow() {
-      if (this.mode !== "access") return;
+      if (this.mode !== "dodge") return;
       this.mode = "command";
       this.player.setVelocity(0, 0);
       this.clearWaveEvents();
+      this.minions.children.each((minion) => {
+        if (!minion?.active) return;
+        this.tweens.add({ targets: minion, alpha: 0, duration: 180, onComplete: () => minion.destroy() });
+      });
       callbacks.onCommandWindow({ repaired: this.repaired, bossHp: this.bossHp, phase: this.phase });
     }
 
     attack() {
       if (this.mode !== "command") return;
-      const damage = this.repaired ? 15 : 5;
+      const damage = 5;
+      if (this.nullShieldHp > 0) {
+        this.nullShieldHp = Math.max(0, this.nullShieldHp - damage);
+        callbacks.onBossShield(this.nullShieldHp, NULL_SHIELD_MAX, true);
+        callbacks.onAttack(damage, false, true);
+        this.bumpPlayerAway();
+        return;
+      }
+      const oldPhase = this.phase;
       this.bossHp = Math.max(0, this.bossHp - damage);
-      this.cameras.main.shake(180, this.repaired ? 0.014 : 0.007);
+      this.cameras.main.shake(180, 0.014);
       this.boss.setTintFill(0xffffff);
       this.time.delayedCall(120, () => this.boss.clearTint());
-      callbacks.onBossHp(this.bossHp, 45, phaseForHp(this.bossHp));
-      callbacks.onAttack(damage, this.repaired);
+      const nextPhase = phaseForHp(this.bossHp);
+      callbacks.onBossHp(this.bossHp, BOSS_MAX_HP, nextPhase);
+      callbacks.onAttack(damage, true, false);
       if (this.bossHp <= 0) {
         this.win();
         return;
       }
-      this.mode = "transition";
-      this.time.delayedCall(650, () => this.startWave());
+      if (nextPhase !== oldPhase) this.installPhaseShield(nextPhase);
+      this.bumpPlayerAway();
     }
 
     guard() {
       if (this.mode !== "command") return;
-      this.guardCharge = 1;
-      callbacks.onGuard();
+      this.guardUntil = this.time.now + GUARD_DURATION;
+      this.playerShield.setVisible(true).setAlpha(1).setScale(0.3);
+      this.tweens.killTweensOf(this.playerShield);
+      this.tweens.add({ targets: this.playerShield, scaleX: 1, scaleY: 1, duration: 240, ease: "Back.easeOut" });
+      this.tweens.add({ targets: this.playerShield, alpha: 0.55, duration: 420, yoyo: true, repeat: 5 });
+      callbacks.onGuard(GUARD_DURATION);
       this.mode = "transition";
-      this.time.delayedCall(450, () => this.startWave());
+      this.bumpPlayerAway({ delay: 320 });
     }
 
     freezeForRepair() {
@@ -310,8 +410,13 @@ function createSceneClass(Phaser, callbacks) {
 
     resumeFromRepair({ repaired = false, quality = "none" } = {}) {
       if (this.mode !== "repair") return;
-      this.repaired = this.repaired || repaired;
-      if (repaired) this.repairQuality = quality;
+      if (repaired) {
+        this.repaired = true;
+        this.repairQuality = quality;
+        this.nullShieldHp = 0;
+        callbacks.onBossShield(0, NULL_SHIELD_MAX, false);
+        this.popBossShield();
+      }
       this.boss.clearTint();
       this.input.keyboard.enabled = true;
       this.physics.resume();
@@ -322,21 +427,89 @@ function createSceneClass(Phaser, callbacks) {
     hitPlayer(minion) {
       if (this.mode !== "dodge" || this.time.now < this.invulnerableUntil) return;
       this.invulnerableUntil = this.time.now + 900;
-      if (this.guardCharge > 0) {
-        this.guardCharge = 0;
-        callbacks.onGuardBlocked();
-      } else {
-        const vitals = callbacks.onDamage(this.phase === 3 ? 4 : 3);
-        if (vitals.hp <= 0) {
-          this.defeat();
-          return;
-        }
+      const baseDamage = this.phase === 3 ? 4 : 3;
+      const guarded = this.time.now < this.guardUntil;
+      const damage = guarded ? Math.ceil(baseDamage * 0.5) : baseDamage;
+      const vitals = callbacks.onDamage(damage, guarded);
+      if (guarded) callbacks.onGuardBlocked(damage);
+      if (vitals.hp <= 0) {
+        this.defeat();
+        return;
       }
       this.player.x = Math.max(PLAYER_START_X, this.player.x - 68);
       this.player.setTintFill(0xffffff);
       this.cameras.main.shake(120, 0.009);
       this.time.delayedCall(130, () => this.player.clearTint());
       if (minion && minion.active) minion.destroy();
+    }
+
+    expireGuard() {
+      if (!this.guardUntil) return;
+      this.guardUntil = 0;
+      this.tweens.killTweensOf(this.playerShield);
+      this.tweens.add({ targets: this.playerShield, scaleX: 1.7, scaleY: 1.7, alpha: 0, duration: 320, ease: "Quad.easeOut", onComplete: () => this.playerShield.setVisible(false).setScale(1) });
+      callbacks.onGuardExpired();
+    }
+
+    bumpPlayerAway({ delay = 180 } = {}) {
+      this.mode = "transition";
+      const startX = this.player.x;
+      const targetX = Math.max(PLAYER_START_X, startX - Phaser.Math.Between(5, 7) * 64);
+      const targetY = Phaser.Math.Clamp(this.player.y + Phaser.Math.Between(-70, 70), FLOOR_TOP, FLOOR_BOTTOM);
+      this.tweens.add({
+        targets: this.boss,
+        x: BOSS_X - 34,
+        duration: 110,
+        yoyo: true,
+        ease: "Quad.easeOut",
+      });
+      this.time.delayedCall(delay, () => {
+        const trail = this.add.line(0, 0, startX, this.player.y, targetX, targetY, 0x8eeaff, 0.55).setOrigin(0).setDepth(6);
+        this.cameras.main.shake(150, 0.012);
+        this.tweens.add({
+          targets: this.player,
+          x: targetX,
+          y: targetY,
+          angle: -18,
+          duration: 430,
+          ease: "Cubic.easeOut",
+          onComplete: () => {
+            trail.destroy();
+            this.player.setAngle(0);
+          },
+        });
+      });
+      this.time.delayedCall(delay + 500, () => {
+        if (this.mode !== "transition") return;
+        this.player.setAngle(0);
+        this.startWave({ resetPlayer: false });
+      });
+    }
+
+    installPhaseShield(nextPhase) {
+      this.phase = nextPhase;
+      this.repaired = false;
+      this.repairQuality = "none";
+      this.nullShieldHp = NULL_SHIELD_MAX;
+      this.patternStep = 0;
+      this.bossShield.setVisible(true).setAlpha(0).setScale(1.7);
+      this.bossShieldInner.setVisible(true).setAlpha(0).setScale(1.5);
+      this.tweens.add({ targets: [this.bossShield, this.bossShieldInner], scaleX: 1, scaleY: 1, alpha: 1, duration: 460, ease: "Back.easeOut" });
+      callbacks.onBossShield(this.nullShieldHp, NULL_SHIELD_MAX, true);
+      callbacks.onStatus(`PHASE ${nextPhase}: Null Rot recompiles a fresh 100 HP shield.`);
+    }
+
+    popBossShield() {
+      const ring = this.add.circle(this.boss.x, this.boss.y, 96, 0x8f3cff, 0.08).setStrokeStyle(10, 0xe5a4ff, 1).setBlendMode(Phaser.BlendModes.ADD).setDepth(10);
+      this.tweens.add({ targets: ring, scaleX: 1.9, scaleY: 1.9, alpha: 0, duration: 520, ease: "Quad.easeOut", onComplete: () => ring.destroy() });
+      for (let index = 0; index < 20; index += 1) {
+        const pixel = this.add.rectangle(this.boss.x, this.boss.y, 6, 6, index % 2 ? 0xc66cff : 0x6eeaff, 1).setDepth(10);
+        const angle = (index / 20) * Math.PI * 2;
+        this.tweens.add({ targets: pixel, x: this.boss.x + Math.cos(angle) * Phaser.Math.Between(110, 190), y: this.boss.y + Math.sin(angle) * Phaser.Math.Between(80, 150), angle: 180, alpha: 0, duration: Phaser.Math.Between(360, 650), onComplete: () => pixel.destroy() });
+      }
+      this.bossShield.setVisible(false);
+      this.bossShieldInner.setVisible(false);
+      this.cameras.main.flash(180, 138, 73, 255, false);
     }
 
     defeat() {
@@ -355,16 +528,31 @@ function createSceneClass(Phaser, callbacks) {
       this.phase = 1;
       this.repaired = false;
       this.repairQuality = "none";
+      this.nullShieldHp = NULL_SHIELD_MAX;
+      this.guardUntil = 0;
       this.waveNumber = 0;
-      callbacks.onBossHp(this.bossHp, 45, 1);
+      this.bossShield.setVisible(true).setAlpha(1).setScale(1);
+      this.bossShieldInner.setVisible(true).setAlpha(1).setScale(1);
+      this.playerShield.setVisible(false);
+      callbacks.onBossHp(this.bossHp, BOSS_MAX_HP, 1);
+      callbacks.onBossShield(this.nullShieldHp, NULL_SHIELD_MAX, true);
       this.startWave();
     }
 
     adminWin() {
       if (this.mode === "finished") return;
       this.bossHp = 0;
-      callbacks.onBossHp(0, 45, this.phase);
+      callbacks.onBossHp(0, BOSS_MAX_HP, this.phase);
       this.win();
+    }
+
+    adminSetPhase(phase) {
+      if (![1, 2, 3].includes(phase) || this.mode === "finished") return;
+      this.clearWave();
+      this.bossHp = phase === 1 ? 45 : phase === 2 ? 30 : 15;
+      this.installPhaseShield(phase);
+      callbacks.onBossHp(this.bossHp, BOSS_MAX_HP, phase);
+      this.startWave();
     }
 
     win() {
@@ -452,6 +640,23 @@ export function slimeArenaRetry() {
 
 export function slimeArenaAdminWin() {
   activeScene?.adminWin();
+}
+
+export function slimeArenaAdminSetPhase(phase) {
+  activeScene?.adminSetPhase(phase);
+}
+
+export function slimeArenaDebugState() {
+  if (!activeScene) return null;
+  return {
+    mode: activeScene.mode,
+    bossHp: activeScene.bossHp,
+    phase: activeScene.phase,
+    repaired: activeScene.repaired,
+    nullShieldHp: activeScene.nullShieldHp,
+    guardRemaining: Math.max(0, activeScene.guardUntil - activeScene.time.now),
+    patternStep: activeScene.patternStep,
+  };
 }
 
 export function stopSlimeArena() {

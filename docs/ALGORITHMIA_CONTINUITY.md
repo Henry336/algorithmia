@@ -7,6 +7,9 @@ This file records live direction that should survive context refreshes. Keep it 
 - Python-first remains the default player-code language.
 - Arcade mode is the encounter laboratory: bosses can be selected directly while their campaign routes remain connected to the same encounter implementations.
 - Sorting Slime is the first Phaser encounter. Its movement arena, hazards, command phase, and repair editor establish the runtime pattern for future real-time bosses.
+- Sorting Slime's current boss contract is phase-local: each phase starts with a 100 HP Null shield, Repair removes that shield and makes the phase pattern deterministic, and crossing a core-health threshold recompiles a new shield with a new Python problem.
+- Guard is a visible five-second defensive state that halves damage. Attack does fixed core damage only after a shield breach and physically returns Patchrunner to the hazard route.
+- Boss hazards continue until the player reaches the boss; there are no passive timed access windows. Repairs should visibly alter battlefield behavior, not only testcase text or damage numbers.
 - "Chapters" should mean multi-room routes with multiple enemies before a boss, not one square room and one fight.
 - "Rooms" are connected spaces in a route graph, not stacked floors. They can branch left/right/up/down, allow backtracking, and may be outdoor fields, caves, archives, vents, courts, or other story-specific spaces.
 - Levels 0-1 are still prototype/tutorial-scale. Chapter 2 and beyond should increasingly feel like fuller chapter routes.

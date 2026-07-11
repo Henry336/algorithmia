@@ -78,7 +78,11 @@ class WebRoomMapContracts(unittest.TestCase):
         self.assertIn("startSortingSlimeArenaBattle", battle)
         self.assertIn("new Phaser.Game", engine)
         self.assertIn("spawnColumn", engine)
-        self.assertIn("openAccess", engine)
+        self.assertIn("spawnMergeBurst", engine)
+        self.assertIn("spawnSpiralBurst", engine)
+        self.assertIn("NULL_SHIELD_MAX = 100", engine)
+        self.assertIn("GUARD_DURATION = 5000", engine)
+        self.assertNotIn("openAccess", engine)
 
     def assert_all_targets_interactable(self, board, start, blocking, target_code, label):
         reachable = flood(board, start, blocking)

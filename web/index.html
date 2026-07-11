@@ -214,6 +214,13 @@
             <div id="slime-boss-hp-fill" class="slime-boss-hp-fill"></div>
           </div>
           <span id="slime-boss-hp-text" class="slime-boss-hp-text">45/45</span>
+          <div id="slime-null-shield-row" class="slime-null-shield-row active">
+            <span>NULL SHIELD</span>
+            <div class="slime-null-shield-shell" aria-label="Sorting Slime Null shield">
+              <div id="slime-null-shield-fill" class="slime-null-shield-fill"></div>
+            </div>
+            <strong id="slime-null-shield-text">100/100</strong>
+          </div>
         </div>
       </header>
 
@@ -238,11 +245,11 @@
           <div class="slime-repair-heading">
             <div>
               <span class="slime-repair-kicker">LIVE REPAIR</span>
-              <strong>Stabilize the ordering behavior</strong>
+              <strong id="slime-repair-title">Stabilize the ordering behavior</strong>
             </div>
             <span id="slime-repair-timer" class="slime-repair-timer">Stun: 60s</span>
           </div>
-          <p class="slime-repair-brief">Return a new ascending list. Your code remains if the slime wakes before you finish.</p>
+          <p id="slime-repair-requirement" class="slime-repair-brief">Return a new ascending list. Your code remains if the slime wakes before you finish.</p>
           <textarea id="slime-repair-editor" class="slime-repair-editor" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea>
           <div class="slime-repair-actions">
             <button class="battle-btn primary" data-action="run-slime-repair">Run Repair</button>

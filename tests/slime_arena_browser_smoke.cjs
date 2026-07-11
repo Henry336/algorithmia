@@ -54,6 +54,22 @@ async function openArena(page) {
   await page.locator("#slime-arena-host canvas").waitFor({ state: "visible", timeout: 10000 });
 }
 
+async function reachSlime(page) {
+  await page.keyboard.down("ArrowRight");
+  for (let step = 0; step < 16; step += 1) {
+    const vertical = step % 2 === 0 ? "ArrowUp" : "ArrowDown";
+    await page.keyboard.down(vertical);
+    await page.waitForTimeout(420);
+    await page.keyboard.up(vertical);
+    if (await page.locator("#slime-command-panel").evaluate((element) => !element.classList.contains("hidden"))) break;
+  }
+  await page.keyboard.up("ArrowRight");
+  if (await page.locator("#slime-command-panel").evaluate((element) => element.classList.contains("hidden"))) {
+    const state = await page.evaluate(async () => (await import("./js/slimeArenaEngine.js")).slimeArenaDebugState());
+    throw new Error(`Could not reach Sorting Slime: ${JSON.stringify(state)}`);
+  }
+}
+
 async function main() {
   await ensureServer();
   const browser = await launchBrowser();
@@ -71,17 +87,32 @@ async function main() {
     await page.waitForTimeout(2600);
     await page.screenshot({ path: path.resolve("build", "slime-arena-desktop.png"), fullPage: true });
 
-    await page.waitForFunction(() => document.querySelector("#slime-wave-label")?.textContent.includes("Access window"), null, { timeout: 16000 });
-    await page.keyboard.down("ArrowRight");
-    await page.waitForTimeout(3500);
-    await page.keyboard.up("ArrowRight");
-    await page.locator("#slime-command-panel:not(.hidden)").waitFor({ timeout: 4000 });
+    await reachSlime(page);
     const commandLabels = await page.locator("#slime-command-panel .slime-command:not(.admin-only)").allTextContents();
     if (JSON.stringify(commandLabels) !== JSON.stringify(["Attack 5", "Use", "Repair", "Guard"])) {
       throw new Error(`Unexpected command order: ${JSON.stringify(commandLabels)}`);
     }
     const cursorDuringCommands = await page.locator("#slime-arena-shell").evaluate((element) => getComputedStyle(element).cursor);
     if (cursorDuringCommands !== "none") throw new Error(`Command pointer should be hidden, got ${cursorDuringCommands}`);
+    const initialCombatState = await page.evaluate(async () => (await import("./js/slimeArenaEngine.js")).slimeArenaDebugState());
+    if (initialCombatState.nullShieldHp !== 100 || initialCombatState.repaired) {
+      throw new Error(`Unexpected initial shield state: ${JSON.stringify(initialCombatState)}`);
+    }
+
+    await page.keyboard.press("ArrowRight");
+    await page.keyboard.press("ArrowRight");
+    await page.keyboard.press("ArrowRight");
+    await page.keyboard.press("Space");
+    await page.waitForTimeout(500);
+    const guardedState = await page.evaluate(async () => (await import("./js/slimeArenaEngine.js")).slimeArenaDebugState());
+    if (guardedState.guardRemaining < 4000) throw new Error(`Guard did not arm for five seconds: ${JSON.stringify(guardedState)}`);
+    await page.waitForTimeout(5100);
+    if (errors.length) throw new Error(`Browser errors during Guard: ${errors.join(" | ")}`);
+    const expiredGuardState = await page.evaluate(async () => (await import("./js/slimeArenaEngine.js")).slimeArenaDebugState());
+    if (expiredGuardState.guardRemaining !== 0) throw new Error(`Guard did not expire: ${JSON.stringify(expiredGuardState)}`);
+    await page.evaluate(async () => (await import("./js/state.js")).setState({ playerHp: 40 }));
+
+    await reachSlime(page);
 
     await page.keyboard.press("KeyD");
     await page.keyboard.press("Space");
@@ -117,6 +148,49 @@ async function main() {
     await page.locator('[data-action="run-slime-repair"]').click();
     await page.locator("#slime-repair-feedback.success").waitFor({ timeout: 5000 });
     await page.locator("#slime-repair-panel").waitFor({ state: "hidden", timeout: 4000 });
+    const repairedCombatState = await page.evaluate(async () => (await import("./js/slimeArenaEngine.js")).slimeArenaDebugState());
+    if (repairedCombatState.nullShieldHp !== 0 || !repairedCombatState.repaired) {
+      throw new Error(`Repair did not breach the phase shield: ${JSON.stringify(repairedCombatState)}`);
+    }
+
+    const laterRepairResults = await page.evaluate(async () => {
+      const { runPythonRepair } = await import("./js/pythonRepairRuntime.js");
+      const mergeCode = `def solve(values):
+    merged = values[:]
+    for i in range(len(merged)):
+        for j in range(len(merged) - 1 - i):
+            if merged[j] > merged[j + 1]:
+                merged[j], merged[j + 1] = merged[j + 1], merged[j]
+    return merged`;
+      const reverseCode = `def solve(values):
+    reversed_values = values[:]
+    for i in range(len(reversed_values) / 2):
+        reversed_values[i], reversed_values[len(reversed_values) - 1 - i] = reversed_values[len(reversed_values) - 1 - i], reversed_values[i]
+    return reversed_values`;
+      return Promise.all([
+        runPythonRepair(mergeCode, [{ name: "merge", input: [1, 4, 7, 2, 3, 9], expected: [1, 2, 3, 4, 7, 9] }]),
+        runPythonRepair(reverseCode, [{ name: "reverse", input: [1, 2, 3, 4, 5], expected: [5, 4, 3, 2, 1] }]),
+      ]);
+    });
+    if (!laterRepairResults.every((outcome) => outcome.ok && outcome.results.every((result) => result.pass))) {
+      throw new Error(`Later phase repair samples failed: ${JSON.stringify(laterRepairResults)}`);
+    }
+
+    await page.evaluate(async () => (await import("./js/slimeArenaEngine.js")).slimeArenaAdminSetPhase(2));
+    await page.waitForTimeout(1800);
+    const mergeState = await page.evaluate(async () => (await import("./js/slimeArenaEngine.js")).slimeArenaDebugState());
+    if (mergeState.phase !== 2 || mergeState.nullShieldHp !== 100 || mergeState.repaired) {
+      throw new Error(`Phase 2 did not compile a fresh shield: ${JSON.stringify(mergeState)}`);
+    }
+    await page.screenshot({ path: path.resolve("build", "slime-phase-2.png"), fullPage: true });
+
+    await page.evaluate(async () => (await import("./js/slimeArenaEngine.js")).slimeArenaAdminSetPhase(3));
+    await page.waitForTimeout(1800);
+    const spiralState = await page.evaluate(async () => (await import("./js/slimeArenaEngine.js")).slimeArenaDebugState());
+    if (spiralState.phase !== 3 || spiralState.nullShieldHp !== 100 || spiralState.repaired) {
+      throw new Error(`Phase 3 did not compile a fresh shield: ${JSON.stringify(spiralState)}`);
+    }
+    await page.screenshot({ path: path.resolve("build", "slime-phase-3.png"), fullPage: true });
 
     await page.evaluate(async () => {
       const arena = await import("./js/slimeArenaEngine.js");

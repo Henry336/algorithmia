@@ -4,15 +4,24 @@ Significant player-facing and developer-facing changes are recorded here. Detail
 
 ## Unreleased
 
-- No unreleased changes yet.
+### Combat
+
+- Reworked Guard into a visible five-second shield that halves incoming damage and cleanly bursts when it expires.
+- Added a 100 HP Null shield to every Sorting Slime phase. Successful phase-specific repairs breach it; crossing a core-health threshold recompiles a fresh shield and new repair problem.
+- Removed Repair's flat Attack bonus. Direct attacks now deal 5 core damage and launch Patchrunner back toward spawn, while unrepaired attacks only chip the Null shield.
+- Made Sorting Slime hazards continuous until Patchrunner physically reaches the boss.
+- Increased Insertion March frequency and made its repaired columns follow a readable `1-2-3-4-5-4-3` height sequence.
+- Replaced later generic columns with Merge Flood's one-second pop fields and Overflow Spiral's radial rotating patterns, each gaining a distinct deterministic behavior after repair.
+- Added a jump-and-slam entrance, animated shield formation and rupture effects, and cleaner boss-driven recoil.
+- Extended the browser smoke to verify Guard timing, phase shield resets, repair breaches, and all three Phaser attack patterns.
 
 ## 0.2.0 - 2026-07-11
 
 ### Combat
 
 - Added Phaser 3.90 as the real-time browser combat engine.
-- Rebuilt Sorting Slime as a three-phase movement battle with collision damage, knockback, guarding, access windows, boss HP, defeat, retry, and admin completion.
-- Made successful Python repairs reorganize attack formations and strengthen weak-point attacks.
+- Rebuilt Sorting Slime as a three-phase movement battle with collision damage, knockback, guarding, boss HP, defeat, retry, and admin completion.
+- Made successful Python repairs reorganize attack formations.
 - Added keyboard-first command selection for Attack, Use, Repair, and Guard.
 - Added `ui-command-select.wav` feedback and restored pointer interaction only when the Repair editor opens.
 - Added Tab, Shift+Tab, and normal Space behavior inside the Repair editor.

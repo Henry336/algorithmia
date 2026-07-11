@@ -2175,6 +2175,52 @@ body.admin-mode .admin-only {
   text-align: right;
 }
 
+.slime-null-shield-row {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) 62px;
+  gap: 9px;
+  align-items: center;
+  margin-top: 5px;
+  color: #c38cff;
+  font-size: 0.61rem;
+  transition: color 240ms ease, opacity 240ms ease;
+}
+
+.slime-null-shield-shell {
+  height: 7px;
+  overflow: hidden;
+  border: 1px solid #8754b8;
+  background: #170722;
+  box-shadow: 0 0 10px #9a4dff66, inset 0 0 0 1px #09030d;
+}
+
+.slime-null-shield-fill {
+  width: 100%;
+  height: 100%;
+  background: #a84cff;
+  box-shadow: 0 0 12px #c26cff, inset 0 -2px 0 #63269a;
+  transition: width 280ms steps(10, end), opacity 220ms ease;
+}
+
+.slime-null-shield-row strong {
+  text-align: right;
+  font-size: 0.61rem;
+}
+
+.slime-null-shield-row.breached {
+  color: #77dfd0;
+}
+
+.slime-null-shield-row.breached .slime-null-shield-fill {
+  opacity: 0;
+}
+
+.slime-null-shield-row.breached .slime-null-shield-shell {
+  border-color: #3f7772;
+  box-shadow: 0 0 8px #68c9b644;
+}
+
 .slime-arena-frame {
   min-height: 0;
   display: grid;
