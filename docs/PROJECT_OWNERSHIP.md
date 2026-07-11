@@ -51,6 +51,7 @@ Use a separate branch for larger changes with `git switch -c your-name/short-cha
 ## Fast Testing Routes
 
 - `http://localhost:4173/?admin=1` unlocks level select and admin win controls.
+- `http://localhost:4173/?admin=1&chapter=5` opens the LDtk import test directly.
 - `http://localhost:4173/?admin=0` turns admin mode off.
 - `http://localhost:4173/?admin=1&encounter=sorting-slime` opens the Phaser boss directly.
 - `http://localhost:4173/?workshop=1` opens the Workshop editor directly.
@@ -83,6 +84,8 @@ location.reload();
 | Workshop editor UI | `web/js/workshopEditor.js` and `web/css/style.css` |
 | Campaign entry room | `web/js/room.js` |
 | Later chapter maps and story events | `web/js/chapter1.js` through `chapter4.js` |
+| LDtk import test map | `web/data/ldtk/chapter5_layout.ldtk` |
+| LDtk import test renderer | `web/js/chapter5.js` |
 | Save fields | `web/js/state.js` |
 | Shared HP and Focus rules | `web/js/combatState.js` |
 | Player-written browser Python support | `web/js/pythonRepairRuntime.js` |
@@ -109,6 +112,25 @@ Keep these boundaries when adding features. A new hazard belongs in the patterns
 4. `style.css` owns the Workshop layout and tile visuals.
 
 The live deployment can create, save, import, and export drafts in the browser. It cannot write official campaign data into GitHub until the project adds a backend with authentication. For now, use Export JSON, review the level pack, then commit it as source data when the campaign loader is ready.
+
+## LDtk Test Import
+
+Chapter 5 is a practical LDtk import test. The game fetches `web/data/ldtk/chapter5_layout.ldtk`, renders the `Collisions` IntGrid, and turns LDtk entities into simple game interactions.
+
+Supported in the test importer:
+
+- collision walls;
+- doors between neighboring GridVania rooms;
+- items and simple inventory;
+- keyed doors;
+- buttons that open secret walls in the current room.
+
+Not supported yet:
+
+- external tileset art rendering;
+- Player entity placement, because the uploaded test map did not include a Player instance;
+- campaign-quality dialogue, enemies, or battles from LDtk fields;
+- automatic promotion into official chapter data.
 
 ## Before You Commit
 

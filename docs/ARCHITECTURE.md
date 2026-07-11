@@ -31,6 +31,7 @@ web/index.html
 | Shared vitals | `combatState.js`, `battleHud.js` | HP, Focus, shared combat readouts |
 | Queueworks map | `room.js` | Chapter 0 movement, interactions, campaign win callback |
 | Later maps | `chapter1.js`-`chapter4.js` | Room graphs, enemies, puzzles, secrets, chapter progression |
+| LDtk import test | `chapter5.js`, `web/data/ldtk/` | Runtime fetch/render of LDtk JSON, collision grid, doors, items, buttons, and secret walls |
 | Real-time arena | `slimeArenaEngine.js` | Phaser scene, player movement, collisions, waves, phases |
 | Slime encounter coordination | `slimeArenaBattle.js` | DOM commands, Repair overlay, sound, save state, arena callbacks |
 | Slime balance | `slimeArenaConfig.js` | Arena dimensions, HP, timing, phase names, speed |
@@ -144,6 +145,8 @@ Runtime assets belong under `web/assets`:
 
 Character metadata may preserve original generator descriptions. Runtime code should reference stable project-relative paths rather than top-level raw export folders.
 
+LDtk test maps live under `web/data/ldtk/` so Vercel can publish them with the static site. The current Chapter 5 importer reads LDtk JSON directly, uses the `Collisions` IntGrid for blocking, renders LDtk entities with Algorithmia placeholder sprites, and supports simple items, keyed doors, buttons, and secret walls. It does not yet use external LDtk tileset images or convert LDtk maps into official campaign data files.
+
 ## Tests
 
 The test layers are complementary:
@@ -153,6 +156,7 @@ The test layers are complementary:
 - JavaScript syntax checks catch module parse failures.
 - `slime_arena_browser_smoke.cjs` verifies direct, campaign, and Arcade launch paths plus keyboard commands, Repair input, Python results, assets, victory, and mobile canvas fitting.
 - `workshop_browser_smoke.cjs` verifies the Workshop can open directly, paint tiles, place entities, edit dialogue and encounter data, save a draft, reload it, and export JSON.
+- `ldtk_chapter_browser_smoke.cjs` verifies the LDtk JSON publishes, Chapter 5 renders, and an LDtk item can be collected from the imported map.
 
 Passing unit tests does not prove a canvas rendered correctly. Passing a screenshot does not prove a room route is reachable. Run both relevant layers.
 
@@ -172,6 +176,7 @@ Branch pushes receive Preview deployments. `main` is production. The build must 
 - Later battle modules duplicate Python-subset worker logic.
 - Chapter files own large inline room definitions and will eventually benefit from data extraction.
 - Workshop exports are not yet consumed by campaign rooms directly.
+- Chapter 5 is a proof-of-import LDtk route, not a final authored campaign chapter.
 - `style.css` is monolithic and should be split only with visual regression coverage.
 - The Python package name is misspelled for historical compatibility.
 - Mobile battle input is keyboard-first; dedicated touch combat controls are not complete.

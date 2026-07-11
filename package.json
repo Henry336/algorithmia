@@ -8,9 +8,10 @@
     "dev": "node scripts/serve-web.mjs",
     "test": "npm run check",
     "check": "node scripts/check-js.mjs",
-    "verify:web": "npm run build && npm run check && npm run smoke:slime && npm run smoke:workshop",
+    "verify:web": "npm run build && npm run check && npm run smoke:slime && npm run smoke:workshop && npm run smoke:ldtk",
     "smoke:slime": "node tests/slime_arena_browser_smoke.cjs",
-    "smoke:workshop": "node tests/workshop_browser_smoke.cjs"
+    "smoke:workshop": "node tests/workshop_browser_smoke.cjs",
+    "smoke:ldtk": "node tests/ldtk_chapter_browser_smoke.cjs"
   },
   "dependencies": {
     "phaser": "3.90.0"

@@ -6,6 +6,7 @@ Significant player-facing and developer-facing changes are recorded here. Detail
 
 ### Developer Experience
 
+- Added Chapter 5 as an LDtk import test that fetches a deployed `.ldtk` file, renders its collision grid and entities, supports simple items, keyed doors, buttons, secret walls, room transitions, and has a dedicated browser smoke.
 - Added Workshop Mode as a visual level editor with map painting, entity placement, dialogue editing, battle preset editing, local browser draft saves, JSON import/export, and reachability validation.
 - Added a Workshop browser smoke that verifies direct launch, painting, entity editing, battle metadata, local persistence, reload, and JSON export.
 - Added an owner-focused project guide covering prerequisites, account access, file ownership, common edits, testing, deployment, rollback, and troubleshooting.

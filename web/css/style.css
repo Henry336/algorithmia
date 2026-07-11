@@ -1002,7 +1002,8 @@ body.admin-mode .title-build {
 #screen-room-ch1,
 #screen-room-ch2,
 #screen-room-ch3,
-#screen-room-ch4 {
+#screen-room-ch4,
+#screen-room-ch5 {
   justify-content: flex-start;
   padding-top: 10px;
   gap: 8px;
@@ -1416,6 +1417,80 @@ body.admin-mode .title-build {
   border: 1px solid #7fd8c977;
   transform: translate(-50%, -50%) rotate(45deg);
   animation: graphDiamondRing 1.8s steps(4, end) infinite;
+}
+
+.theme-ldtk-test {
+  border-color: #7b6aa8;
+  background: #141522;
+}
+
+.theme-ldtk-test .tile-floor {
+  background: #3a3d53;
+  border-color: #25283a;
+}
+
+.theme-ldtk-test .tile-floor.alt {
+  background: #40445c;
+}
+
+.theme-ldtk-test .tile-floor.ldtk-edge {
+  background: #303348;
+}
+
+.theme-ldtk-test .tile-wall {
+  background:
+    linear-gradient(135deg, #27202f, #151822);
+  border-color: #0d0e15;
+  box-shadow: inset 3px 3px 0 #494052, inset -3px -3px 0 #0b0c11;
+}
+
+.ldtk-entity {
+  display: grid;
+  place-items: center;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 5px 4px #00000099);
+}
+
+.ldtk-entity > div {
+  transform: translateY(-3px);
+}
+
+.ldtk-door {
+  animation: ldtkDoorPulse 2.4s ease-in-out infinite;
+}
+
+.ldtk-item {
+  animation: ldtkItemBob 1.7s steps(3, end) infinite;
+}
+
+.ldtk-button {
+  filter: drop-shadow(0 0 8px #7fd8c955);
+}
+
+.ldtk-secretwall {
+  opacity: 0.88;
+}
+
+.ldtk-item-badge {
+  position: absolute;
+  right: -4px;
+  bottom: -2px;
+  padding: 1px 3px;
+  border: 1px solid #11151c;
+  background: #f0b94e;
+  color: #11151c;
+  font-size: 8px;
+  line-height: 1;
+}
+
+@keyframes ldtkDoorPulse {
+  0%, 100% { filter: drop-shadow(0 5px 4px #00000099); }
+  50% { filter: drop-shadow(0 5px 4px #00000099) drop-shadow(0 0 8px #f0b94e77); }
+}
+
+@keyframes ldtkItemBob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
 }
 
 .tile-icon-wrap {
@@ -2499,6 +2574,8 @@ body.admin-mode .admin-only {
   .recursive-husk-entity::before,
   .theme-graphreach .tile-diamond::before,
   .theme-graphreach .tile-diamond::after,
+  .ldtk-door,
+  .ldtk-item,
   .code-battle-image-sprite,
   .recursive-husk-battle-sprite,
   .battle-scene::before,

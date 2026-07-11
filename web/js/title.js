@@ -12,7 +12,7 @@ const screens = {
   workshop: document.getElementById("screen-workshop"),
 };
 
-export function initTitle({ onEnterChapter0, onEnterChapter1, onEnterChapter2, onEnterChapter3, onEnterChapter4, onEnterArcadeEncounter, onEnterWorkshop }) {
+export function initTitle({ onEnterChapter0, onEnterChapter1, onEnterChapter2, onEnterChapter3, onEnterChapter4, onEnterChapter5, onEnterArcadeEncounter, onEnterWorkshop }) {
   syncAdminModeFromUrl();
   const continueBtn = document.querySelector('[data-action="continue"]');
   continueBtn.disabled = !hasSave();
@@ -21,9 +21,10 @@ export function initTitle({ onEnterChapter0, onEnterChapter1, onEnterChapter2, o
   renderTitleSprites();
 
   function resumeFurthest() {
-    const { queueworksGateOpen, dispatcherDefeated, heapWardenDefeated, bogoDefeated } = getState();
+    const { queueworksGateOpen, dispatcherDefeated, heapWardenDefeated, bogoDefeated, nullFerrymanDefeated } = getState();
     hideAll();
-    if (bogoDefeated) onEnterChapter4();
+    if (nullFerrymanDefeated && onEnterChapter5) onEnterChapter5();
+    else if (bogoDefeated) onEnterChapter4();
     else if (heapWardenDefeated) onEnterChapter3();
     else if (dispatcherDefeated) onEnterChapter2();
     else if (queueworksGateOpen) onEnterChapter1();
@@ -31,7 +32,7 @@ export function initTitle({ onEnterChapter0, onEnterChapter1, onEnterChapter2, o
   }
 
   function refreshChapterCards() {
-    const { queueworksGateOpen, dispatcherDefeated, heapWardenDefeated, bogoDefeated } = getState();
+    const { queueworksGateOpen, dispatcherDefeated, heapWardenDefeated, bogoDefeated, nullFerrymanDefeated } = getState();
     const admin = isAdminMode();
     const ch1Card = document.querySelector('.chapter-card[data-chapter="1"]');
     if (ch1Card) {
@@ -52,6 +53,11 @@ export function initTitle({ onEnterChapter0, onEnterChapter1, onEnterChapter2, o
     if (ch4Card) {
       ch4Card.disabled = !admin && !bogoDefeated;
       ch4Card.classList.toggle("locked", !admin && !bogoDefeated);
+    }
+    const ch5Card = document.querySelector('.chapter-card[data-chapter="5"]');
+    if (ch5Card) {
+      ch5Card.disabled = !admin && !nullFerrymanDefeated;
+      ch5Card.classList.toggle("locked", !admin && !nullFerrymanDefeated);
     }
   }
   refreshChapterCards();
@@ -91,6 +97,7 @@ export function initTitle({ onEnterChapter0, onEnterChapter1, onEnterChapter2, o
       else if (chapter === 2) onEnterChapter2();
       else if (chapter === 3) onEnterChapter3();
       else if (chapter === 4) onEnterChapter4();
+      else if (chapter === 5 && onEnterChapter5) onEnterChapter5();
     });
   });
 
@@ -117,6 +124,7 @@ export function initTitle({ onEnterChapter0, onEnterChapter1, onEnterChapter2, o
       document.getElementById("screen-room-ch2").classList.remove("active");
       document.getElementById("screen-room-ch3").classList.remove("active");
       document.getElementById("screen-room-ch4").classList.remove("active");
+      document.getElementById("screen-room-ch5").classList.remove("active");
       show(screens.title);
       continueBtn.disabled = !hasSave();
     });

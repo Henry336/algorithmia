@@ -7,6 +7,7 @@ The browser game under `web/` is the primary product. The older `algorithimia/` 
 ## Current State
 
 - Campaign levels 0-4 are playable as connected room routes.
+- Chapter 5 is an LDtk import test that renders a sample LDtk GridVania map as an explorable room route.
 - Arcade Mode is available from the title screen.
 - Workshop Mode is available from the title screen for visual room, entity, dialogue, and encounter drafting.
 - Sorting Slime is the first Phaser-powered real-time boss encounter.
@@ -38,6 +39,7 @@ Useful routes:
 - `/` - title screen, campaign, Arcade Mode
 - `/?workshop=1` - open the Workshop editor directly
 - `/?admin=1` - unlock every level and show encounter skip controls
+- `/?admin=1&chapter=5` - launch the LDtk Chapter 5 import test directly
 - `/?admin=0` - disable persisted admin mode
 - `/?admin=1&encounter=sorting-slime` - launch the Phaser Sorting Slime battle directly
 
@@ -108,6 +110,7 @@ web/                         Player-facing browser game
   js/workshopData.js         Workshop level format, defaults, and editor libraries
   js/workshopValidation.js   Reachability and level-pack validation
   js/workshopEditor.js       Visual level editor UI and local draft persistence
+  js/chapter5.js             LDtk import test renderer and room interaction bridge
   js/pythonRepairRuntime.js  Current limited browser Python subset
   assets/                    Character and audio assets
 

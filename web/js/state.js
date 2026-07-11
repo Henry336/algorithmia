@@ -39,6 +39,11 @@ const defaults = {
   foundGraphreachChapelSecret: false,
   foundGraphreachDarkSecret: false,
   graphDiamonds: [],
+  ldtkChapter5Level: null,
+  ldtkChapter5Player: null,
+  ldtkChapter5Items: [],
+  ldtkChapter5Inventory: [],
+  ldtkChapter5Secrets: [],
   archiveFragmentAwake: false,
   textSpeed: "normal",
 };
