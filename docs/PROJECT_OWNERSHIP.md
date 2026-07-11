@@ -53,11 +53,19 @@ Use a separate branch for larger changes with `git switch -c your-name/short-cha
 - `http://localhost:4173/?admin=1` unlocks level select and admin win controls.
 - `http://localhost:4173/?admin=0` turns admin mode off.
 - `http://localhost:4173/?admin=1&encounter=sorting-slime` opens the Phaser boss directly.
+- `http://localhost:4173/?workshop=1` opens the Workshop editor directly.
 
 Browser saves live in `localStorage`. To clear a broken test save, open the browser console and run:
 
 ```js
 localStorage.removeItem("algorithmia-state");
+location.reload();
+```
+
+Workshop drafts use a separate browser save. Clear only the editor draft with:
+
+```js
+localStorage.removeItem("algorithmia.workshop.draft.v1");
 location.reload();
 ```
 
@@ -71,6 +79,8 @@ location.reload();
 | Sorting Slime commands and Repair screen behavior | `web/js/slimeArenaBattle.js` |
 | Sorting Slime movement, damage, phases, shields, or knockback | `web/js/slimeArenaEngine.js` |
 | Title and Arcade selection | `web/js/title.js` and `web/index.html` |
+| Workshop level editor data and validation | `web/js/workshopData.js` and `web/js/workshopValidation.js` |
+| Workshop editor UI | `web/js/workshopEditor.js` and `web/css/style.css` |
 | Campaign entry room | `web/js/room.js` |
 | Later chapter maps and story events | `web/js/chapter1.js` through `chapter4.js` |
 | Save fields | `web/js/state.js` |
@@ -90,6 +100,15 @@ location.reload();
 5. `slimeArenaBattle.js` connects the canvas to buttons, text, audio, saves, and the Repair editor.
 
 Keep these boundaries when adding features. A new hazard belongs in the patterns file; a new hint belongs in the repair-tasks file.
+
+## Workshop File Roles
+
+1. `workshopData.js` defines the level JSON shape, default room, tile library, entity library, battle presets, repair challenge options, and draft storage key.
+2. `workshopValidation.js` checks room reachability and common broken-level mistakes.
+3. `workshopEditor.js` owns the visible editor UI, local draft save/load, import/export, and the test marker.
+4. `style.css` owns the Workshop layout and tile visuals.
+
+The live deployment can create, save, import, and export drafts in the browser. It cannot write official campaign data into GitHub until the project adds a backend with authentication. For now, use Export JSON, review the level pack, then commit it as source data when the campaign loader is ready.
 
 ## Before You Commit
 

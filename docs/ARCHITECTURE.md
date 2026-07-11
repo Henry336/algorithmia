@@ -36,6 +36,7 @@ web/index.html
 | Slime balance | `slimeArenaConfig.js` | Arena dimensions, HP, timing, phase names, speed |
 | Slime hazard patterns | `slimeArenaPatterns.js` | Column, merge, and spiral hazard placement |
 | Slime repair content | `slimeRepairTasks.js` | Prompts, starters, examples, hints, and cases |
+| Workshop editor | `workshopData.js`, `workshopValidation.js`, `workshopEditor.js` | Visual room drafting, level-pack JSON, reachability checks, local browser drafts |
 | Browser Python subset | `pythonRepairRuntime.js` | Worker execution, timeout, metrics, limited translation |
 | Earlier battles | `battle.js`, `ticketBattle.js`, `codeBattle.js`, `bogoBossBattle.js` | Pre-Phaser encounter implementations |
 | Dialogue | `dialogue.js` | Queueing, typewriter text, completion callbacks |
@@ -96,6 +97,8 @@ Current categories include:
 
 Do not persist temporary Phaser objects, timers, DOM nodes, or repair workers.
 
+Workshop Mode uses its own `localStorage` key for editor drafts. A live Vercel deployment can save, load, import, and export level JSON in the browser, but it cannot write official campaign files back to GitHub without a future authenticated backend. Official campaign content should still be reviewed and committed as repository data.
+
 ## Browser Python Execution
 
 There are currently two browser code paths:
@@ -149,6 +152,7 @@ The test layers are complementary:
 - `test_web_room_maps.py` validates dimensions and reachability for required room interactions.
 - JavaScript syntax checks catch module parse failures.
 - `slime_arena_browser_smoke.cjs` verifies direct, campaign, and Arcade launch paths plus keyboard commands, Repair input, Python results, assets, victory, and mobile canvas fitting.
+- `workshop_browser_smoke.cjs` verifies the Workshop can open directly, paint tiles, place entities, edit dialogue and encounter data, save a draft, reload it, and export JSON.
 
 Passing unit tests does not prove a canvas rendered correctly. Passing a screenshot does not prove a room route is reachable. Run both relevant layers.
 
@@ -167,6 +171,7 @@ Branch pushes receive Preview deployments. `main` is production. The build must 
 - Only Sorting Slime uses the Phaser arena.
 - Later battle modules duplicate Python-subset worker logic.
 - Chapter files own large inline room definitions and will eventually benefit from data extraction.
+- Workshop exports are not yet consumed by campaign rooms directly.
 - `style.css` is monolithic and should be split only with visual regression coverage.
 - The Python package name is misspelled for historical compatibility.
 - Mobile battle input is keyboard-first; dedicated touch combat controls are not complete.

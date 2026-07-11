@@ -9,9 +9,10 @@ const screens = {
   arcade: document.getElementById("screen-arcade-select"),
   chapterSelect: document.getElementById("screen-chapter-select"),
   options: document.getElementById("screen-options"),
+  workshop: document.getElementById("screen-workshop"),
 };
 
-export function initTitle({ onEnterChapter0, onEnterChapter1, onEnterChapter2, onEnterChapter3, onEnterChapter4, onEnterArcadeEncounter }) {
+export function initTitle({ onEnterChapter0, onEnterChapter1, onEnterChapter2, onEnterChapter3, onEnterChapter4, onEnterArcadeEncounter, onEnterWorkshop }) {
   syncAdminModeFromUrl();
   const continueBtn = document.querySelector('[data-action="continue"]');
   continueBtn.disabled = !hasSave();
@@ -66,6 +67,8 @@ export function initTitle({ onEnterChapter0, onEnterChapter1, onEnterChapter2, o
       resumeFurthest();
     } else if (action === "arcade") {
       show(screens.arcade);
+    } else if (action === "workshop") {
+      if (onEnterWorkshop) onEnterWorkshop();
     } else if (action === "chapter-select") {
       refreshChapterCards();
       show(screens.chapterSelect);

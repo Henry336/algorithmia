@@ -6,6 +6,7 @@ import { initChapter3Room } from "./chapter3.js";
 import { initChapter4Room } from "./chapter4.js";
 import { isAdminMode } from "./admin.js";
 import { startSortingSlimeArenaBattle } from "./slimeArenaBattle.js";
+import { initWorkshop } from "./workshopEditor.js";
 
 function enterChapter0() {
   document.getElementById("screen-room").classList.add("active");
@@ -47,6 +48,17 @@ function enterArcadeEncounter(encounter) {
   });
 }
 
+function enterWorkshop() {
+  document.querySelectorAll(".screen.active").forEach((screen) => screen.classList.remove("active"));
+  document.getElementById("screen-workshop").classList.add("active");
+  initWorkshop({
+    onExit: () => {
+      document.getElementById("screen-workshop").classList.remove("active");
+      document.getElementById("screen-title").classList.add("active");
+    },
+  });
+}
+
 initTitle({
   onEnterChapter0: enterChapter0,
   onEnterChapter1: enterChapter1,
@@ -54,6 +66,7 @@ initTitle({
   onEnterChapter3: enterChapter3,
   onEnterChapter4: enterChapter4,
   onEnterArcadeEncounter: enterArcadeEncounter,
+  onEnterWorkshop: enterWorkshop,
 });
 
 const launchEncounter = new URLSearchParams(window.location.search).get("encounter");
@@ -64,4 +77,8 @@ if (isAdminMode() && launchEncounter === "sorting-slime") {
       document.body.dataset.slimeSmokeWin = "true";
     },
   });
+}
+
+if (new URLSearchParams(window.location.search).get("workshop") === "1") {
+  enterWorkshop();
 }

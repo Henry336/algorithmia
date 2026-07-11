@@ -6,6 +6,8 @@ Significant player-facing and developer-facing changes are recorded here. Detail
 
 ### Developer Experience
 
+- Added Workshop Mode as a visual level editor with map painting, entity placement, dialogue editing, battle preset editing, local browser draft saves, JSON import/export, and reachability validation.
+- Added a Workshop browser smoke that verifies direct launch, painting, entity editing, battle metadata, local persistence, reload, and JSON export.
 - Added an owner-focused project guide covering prerequisites, account access, file ownership, common edits, testing, deployment, rollback, and troubleshooting.
 - Split Sorting Slime balance, hazard patterns, and repair content into focused modules so common changes do not require editing the full engine or controller.
 - Replaced the hand-maintained JavaScript syntax-check list with automatic discovery and added `npm run verify:web` as the complete browser verification command.

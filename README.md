@@ -8,6 +8,7 @@ The browser game under `web/` is the primary product. The older `algorithimia/` 
 
 - Campaign levels 0-4 are playable as connected room routes.
 - Arcade Mode is available from the title screen.
+- Workshop Mode is available from the title screen for visual room, entity, dialogue, and encounter drafting.
 - Sorting Slime is the first Phaser-powered real-time boss encounter.
 - Later encounters currently use the earlier DOM battle systems and will migrate to Phaser incrementally.
 - Python is the default repair dialect.
@@ -35,6 +36,7 @@ Open [http://localhost:4173](http://localhost:4173).
 Useful routes:
 
 - `/` - title screen, campaign, Arcade Mode
+- `/?workshop=1` - open the Workshop editor directly
 - `/?admin=1` - unlock every level and show encounter skip controls
 - `/?admin=0` - disable persisted admin mode
 - `/?admin=1&encounter=sorting-slime` - launch the Phaser Sorting Slime battle directly
@@ -69,6 +71,12 @@ Browser encounter smoke, including campaign and Arcade launch paths:
 npm run smoke:slime
 ```
 
+Workshop editor smoke:
+
+```bash
+npm run smoke:workshop
+```
+
 The smoke command starts a temporary local server when one is not already running. Install a Playwright browser once if prompted:
 
 ```bash
@@ -97,6 +105,9 @@ web/                         Player-facing browser game
   js/slimeArenaConfig.js     Sorting Slime balance numbers and labels
   js/slimeArenaPatterns.js   Sorting Slime hazard formations
   js/slimeRepairTasks.js     Sorting Slime prompts, hints, starters, and cases
+  js/workshopData.js         Workshop level format, defaults, and editor libraries
+  js/workshopValidation.js   Reachability and level-pack validation
+  js/workshopEditor.js       Visual level editor UI and local draft persistence
   js/pythonRepairRuntime.js  Current limited browser Python subset
   assets/                    Character and audio assets
 
@@ -135,6 +146,8 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) and [docs/ARCHITECTURE.md](docs/ARCHITECT
 Vercel installs npm dependencies, runs `npm run build`, and publishes `web/` according to `vercel.json`. Pull-request and branch pushes receive Preview deployments; `main` is the production source.
 
 Before pushing to `main`, run the build, syntax checks, Python suite, and relevant browser smoke.
+
+Workshop drafts created on the production site are stored in that browser's `localStorage`. Use Export JSON to turn a draft into a level pack that can be reviewed, committed, and deployed as official content.
 
 ## Naming Note
 
