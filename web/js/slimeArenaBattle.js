@@ -1,4 +1,5 @@
 import { applyBattleCost, getVitals, MAX_FOCUS, MAX_HP } from "./combatState.js";
+import { playMusic, playSound, stopAllAudio } from "./audio.js";
 import { isAdminMode } from "./admin.js";
 import { runPythonRepair, summarizeRepairMetrics } from "./pythonRepairRuntime.js";
 import { setState } from "./state.js";
@@ -59,14 +60,8 @@ let commandIndex = 0;
 let activePhase = 1;
 let hintIndex = 0;
 
-const commandSelectAudio = new Audio("assets/audio/ui-command-select.wav");
-commandSelectAudio.preload = "auto";
-
 function playCommandSelectSound() {
-  commandSelectAudio.currentTime = 0;
-  commandSelectAudio.play().catch(() => {
-    // Browsers may decline audio before the first user gesture.
-  });
+  playSound("commandSelect");
 }
 
 function visibleCommandButtons() {
@@ -295,6 +290,7 @@ function showNextHint() {
 
 function handleDefeat() {
   clearRepairTimer();
+  stopAllAudio();
   setHidden(commandPanel, true);
   setHidden(repairPanel, true);
   setHidden(defeatPanel, false);
@@ -304,6 +300,7 @@ function handleDefeat() {
 }
 
 function retryBattle() {
+  playMusic("slimeBossPhase12", { restart: true });
   setState({ playerHp: MAX_HP, playerFocus: MAX_FOCUS });
   updateVitals();
   hideOverlays();
@@ -314,6 +311,7 @@ function retryBattle() {
 function finishBattle() {
   if (finishing) return;
   finishing = true;
+  stopAllAudio();
   clearRepairTimer();
   window.setTimeout(() => {
     transition.classList.add("active");
@@ -340,6 +338,7 @@ const callbacks = {
     statusEl.textContent = message;
   },
   onWave({ phase, wave, name, repaired }) {
+    playMusic(phase >= 3 ? "slimeBossPhase3" : "slimeBossPhase12");
     activePhase = phase;
     hideOverlays();
     setPointerLocked(true);
@@ -348,6 +347,7 @@ const callbacks = {
   },
   onCommandWindow: showCommandWindow,
   onDamage(amount, guarded) {
+    playSound("hitHurt");
     const cost = applyBattleCost({ hp: amount });
     statusEl.textContent = guarded
       ? `Guard halves the collision: -${cost.hpLost} HP.`
@@ -355,6 +355,7 @@ const callbacks = {
     return updateVitals();
   },
   onAttack(amount, repaired, shielded) {
+    playSound("hitHurt");
     setHidden(commandPanel, true);
     statusEl.textContent = shielded
       ? `The strike removes ${amount} shield HP. Repair can breach all 100 at once.`
@@ -392,6 +393,7 @@ document.addEventListener("keydown", onCommandKeyDown);
 editor.addEventListener("keydown", onEditorKeyDown);
 
 export function startSortingSlimeArenaBattle({ onWin }) {
+  stopAllAudio();
   onWinCallback = onWin;
   finishing = false;
   clearRepairTimer();
@@ -407,6 +409,7 @@ export function startSortingSlimeArenaBattle({ onWin }) {
   shell.classList.remove("hidden");
   setPointerLocked(true);
   screenBattle.classList.add("phaser-slime-active");
+  playMusic("slimeBossPhase12", { restart: true });
 
   transition.classList.add("active");
   window.setTimeout(() => {

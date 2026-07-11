@@ -16,6 +16,8 @@ Significant player-facing and developer-facing changes are recorded here. Detail
 
 ### Combat
 
+- Integrated Sorting Slime phase music, phase-3 music, and the shared hit sound for player, boss, and shield damage.
+- Added a small browser audio helper so command sounds, hit effects, and looping encounter music use the same autoplay-safe behavior.
 - Reframed all three Sorting Slime repairs as beginner code-completion exercises with most control flow prewritten, concrete input/output examples, and optional two-step conceptual and syntax hints.
 - Reworked Guard into a visible five-second shield that halves incoming damage and cleanly bursts when it expires.
 - Added a 100 HP Null shield to every Sorting Slime phase. Successful phase-specific repairs breach it; crossing a core-health threshold recompiles a fresh shield and new repair problem.
@@ -24,7 +26,7 @@ Significant player-facing and developer-facing changes are recorded here. Detail
 - Increased Insertion March frequency and made its repaired columns follow a readable `1-2-3-4-5-4-3` height sequence.
 - Replaced later generic columns with Merge Flood's one-second pop fields and Overflow Spiral's radial rotating patterns, each gaining a distinct deterministic behavior after repair.
 - Added a jump-and-slam entrance, animated shield formation and rupture effects, and cleaner boss-driven recoil.
-- Extended the browser smoke to verify Guard timing, phase shield resets, repair breaches, and all three Phaser attack patterns.
+- Extended the browser smoke to verify Guard timing, phase shield resets, repair breaches, all three Phaser attack patterns, and deployed battle audio assets.
 
 ## 0.2.0 - 2026-07-11
 

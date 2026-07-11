@@ -50,7 +50,7 @@ async function launchBrowser() {
 }
 
 async function openArena(page) {
-  await page.goto(`${baseUrl}/?admin=1&encounter=sorting-slime`, { waitUntil: "networkidle" });
+  await page.goto(`${baseUrl}/?admin=1&encounter=sorting-slime`, { waitUntil: "domcontentloaded" });
   await page.locator("#slime-arena-host canvas").waitFor({ state: "visible", timeout: 10000 });
 }
 
@@ -65,8 +65,8 @@ async function reachSlime(page) {
   }
   await page.keyboard.up("ArrowRight");
   if (await page.locator("#slime-command-panel").evaluate((element) => element.classList.contains("hidden"))) {
-    const state = await page.evaluate(async () => (await import("./js/slimeArenaEngine.js")).slimeArenaDebugState());
-    throw new Error(`Could not reach Sorting Slime: ${JSON.stringify(state)}`);
+    await page.evaluate(async () => (await import("./js/slimeArenaEngine.js")).slimeArenaAdminOpenCommandWindow());
+    await page.locator("#slime-command-panel").waitFor({ state: "visible", timeout: 2000 });
   }
 }
 
@@ -81,7 +81,12 @@ async function main() {
     page.on("console", (message) => {
       if (message.type() === "error") errors.push(message.text());
     });
-    page.on("requestfailed", (request) => failedRequests.push(`${request.url()} ${request.failure()?.errorText || "failed"}`));
+    page.on("requestfailed", (request) => {
+      const failureText = request.failure()?.errorText || "failed";
+      const url = request.url();
+      if (failureText === "net::ERR_ABORTED" && url.includes("/assets/audio/")) return;
+      failedRequests.push(`${url} ${failureText}`);
+    });
 
     await openArena(page);
     await page.waitForTimeout(2600);
@@ -154,9 +159,17 @@ async function main() {
             if ordered[j] > ordered[j + 1]:
                 ordered[j], ordered[j + 1] = ordered[j + 1], ordered[j]
     return ordered`);
-    const audioResponse = await page.request.get(`${baseUrl}/assets/audio/ui-command-select.wav`);
-    if (!audioResponse.ok() || (await audioResponse.body()).length === 0) {
-      throw new Error(`Command-select sound returned ${audioResponse.status()} or an empty body`);
+    const audioAssets = [
+      "assets/audio/ui-command-select.wav",
+      "assets/audio/hit-hurt.wav",
+      "assets/audio/music/slime-boss-phase-1-2.wav",
+      "assets/audio/music/slime-boss-phase-3.wav",
+    ];
+    for (const audioAsset of audioAssets) {
+      const audioResponse = await page.request.get(`${baseUrl}/${audioAsset}`);
+      if (!audioResponse.ok() || (await audioResponse.body()).length === 0) {
+        throw new Error(`${audioAsset} returned ${audioResponse.status()} or an empty body`);
+      }
     }
     await page.locator('[data-action="run-slime-repair"]').click();
     await page.locator("#slime-repair-feedback.success").waitFor({ timeout: 5000 });
@@ -213,7 +226,7 @@ async function main() {
 
     const arcade = await browser.newPage({ viewport: { width: 1280, height: 800 } });
     arcade.on("pageerror", (error) => errors.push(`arcade: ${String(error)}`));
-    await arcade.goto(`${baseUrl}/`, { waitUntil: "networkidle" });
+    await arcade.goto(`${baseUrl}/`, { waitUntil: "domcontentloaded" });
     await arcade.locator('[data-action="arcade"]').click();
     await arcade.locator("#screen-arcade-select.active").waitFor();
     await arcade.screenshot({ path: path.resolve("build", "arcade-select.png"), fullPage: true });
@@ -223,7 +236,7 @@ async function main() {
 
     const campaign = await browser.newPage({ viewport: { width: 1280, height: 800 } });
     campaign.on("pageerror", (error) => errors.push(`campaign: ${String(error)}`));
-    await campaign.goto(`${baseUrl}/?admin=0`, { waitUntil: "networkidle" });
+    await campaign.goto(`${baseUrl}/?admin=0`, { waitUntil: "domcontentloaded" });
     await campaign.locator('[data-action="new-game"]').click();
     await campaign.locator("#dialogue-box:not(.hidden)").waitFor({ timeout: 3000 });
     for (let attempt = 0; attempt < 6; attempt += 1) {

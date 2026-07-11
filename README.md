@@ -102,6 +102,7 @@ web/                         Player-facing browser game
   js/main.js                 Screen and route entry point
   js/room.js                 Queueworks campaign room
   js/chapter1.js ...         Later campaign routes
+  js/audio.js                Shared browser-safe sound effects and music helper
   js/slimeArenaEngine.js     Phaser movement, hazards, collisions, and phases
   js/slimeArenaBattle.js     Sorting Slime DOM/Phaser/Python coordination
   js/slimeArenaConfig.js     Sorting Slime balance numbers and labels

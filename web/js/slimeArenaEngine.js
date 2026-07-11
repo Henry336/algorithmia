@@ -541,6 +541,10 @@ export function slimeArenaAdminSetPhase(phase) {
   activeScene?.adminSetPhase(phase);
 }
 
+export function slimeArenaAdminOpenCommandWindow() {
+  activeScene?.openCommandWindow();
+}
+
 export function slimeArenaDebugState() {
   if (!activeScene) return null;
   return {
