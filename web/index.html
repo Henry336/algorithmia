@@ -250,11 +250,14 @@
             <span id="slime-repair-timer" class="slime-repair-timer">Stun: 60s</span>
           </div>
           <p id="slime-repair-requirement" class="slime-repair-brief">Return a new ascending list. Your code remains if the slime wakes before you finish.</p>
+          <p id="slime-repair-example" class="slime-repair-example">Example: [3, 1, 2] becomes [1, 2, 3].</p>
           <textarea id="slime-repair-editor" class="slime-repair-editor" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea>
           <div class="slime-repair-actions">
             <button class="battle-btn primary" data-action="run-slime-repair">Run Repair</button>
+            <button class="battle-btn hint" data-action="show-slime-hint">Show Hint</button>
             <button class="battle-btn" data-action="leave-slime-repair">Return to Fight</button>
           </div>
+          <div id="slime-repair-hint" class="slime-repair-hint hidden" role="status"></div>
           <div id="slime-repair-results" class="slime-repair-results"></div>
           <div id="slime-repair-feedback" class="slime-repair-feedback"></div>
       </div>

@@ -125,6 +125,19 @@ async function main() {
     await page.screenshot({ path: path.resolve("build", "slime-repair-desktop.png"), fullPage: true });
 
     const repairEditor = page.locator("#slime-repair-editor");
+    const starterCode = await repairEditor.inputValue();
+    if (!starterCode.includes("for i in range") || !starterCode.includes("TODO: swap these neighboring values")) {
+      throw new Error(`Phase 1 starter is not a guided completion exercise: ${JSON.stringify(starterCode)}`);
+    }
+    await page.locator('[data-action="show-slime-hint"]').click();
+    await page.locator("#slime-repair-hint:not(.hidden)").waitFor();
+    if (!(await page.locator("#slime-repair-hint").textContent()).includes("larger value is on the left")) {
+      throw new Error("Conceptual repair hint did not appear.");
+    }
+    await page.locator('[data-action="show-slime-hint"]').click();
+    if (!(await page.locator("#slime-repair-hint").textContent()).includes("ordered[j], ordered[j + 1]")) {
+      throw new Error("Syntax repair hint did not appear.");
+    }
     await repairEditor.fill("def solve(values):\n");
     await repairEditor.press("Tab");
     await repairEditor.type("ordered = values[:]");

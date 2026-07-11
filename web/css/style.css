@@ -2357,7 +2357,7 @@ body.admin-mode .admin-only {
 
 .slime-repair-panel {
   display: grid;
-  grid-template-rows: auto auto minmax(180px, 1fr) auto auto auto;
+  grid-template-rows: auto auto auto minmax(180px, 1fr) auto auto auto auto;
   gap: 10px;
   padding: 18px;
 }
@@ -2396,6 +2396,12 @@ body.admin-mode .admin-only {
   font-size: 0.74rem;
 }
 
+.slime-repair-example {
+  margin: 0;
+  color: #78d8ca;
+  font-size: 0.7rem;
+}
+
 .slime-repair-editor {
   width: 100%;
   min-height: 180px;
@@ -2421,6 +2427,26 @@ body.admin-mode .admin-only {
   display: flex;
   gap: 10px;
   justify-content: center;
+}
+
+.slime-repair-hint {
+  min-height: 34px;
+  padding: 8px 10px;
+  border: 1px solid #6f5b8f;
+  background: #171126;
+  color: #d9c6f5;
+  font-size: 0.69rem;
+  line-height: 1.45;
+  box-shadow: inset 3px 0 0 #9b6bd1;
+}
+
+.slime-repair-hint.hidden {
+  display: none;
+}
+
+.battle-btn.hint {
+  border-color: #8064a5;
+  color: #d9c6f5;
 }
 
 .slime-repair-results {

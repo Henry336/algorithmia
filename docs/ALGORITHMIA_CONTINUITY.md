@@ -8,6 +8,7 @@ This file records live direction that should survive context refreshes. Keep it 
 - Arcade mode is the encounter laboratory: bosses can be selected directly while their campaign routes remain connected to the same encounter implementations.
 - Sorting Slime is the first Phaser encounter. Its movement arena, hazards, command phase, and repair editor establish the runtime pattern for future real-time bosses.
 - Sorting Slime's current boss contract is phase-local: each phase starts with a 100 HP Null shield, Repair removes that shield and makes the phase pattern deterministic, and crossing a core-health threshold recompiles a new shield with a new Python problem.
+- As the first boss, Sorting Slime teaches repairs through code completion: prewritten loops, a concrete input/output example, one small missing expression or swap, and optional progressive hints. Later bosses may demand more independent code.
 - Guard is a visible five-second defensive state that halves damage. Attack does fixed core damage only after a shield breach and physically returns Patchrunner to the hazard route.
 - Boss hazards continue until the player reaches the boss; there are no passive timed access windows. Repairs should visibly alter battlefield behavior, not only testcase text or damage numbers.
 - "Chapters" should mean multi-room routes with multiple enemies before a boss, not one square room and one fight.

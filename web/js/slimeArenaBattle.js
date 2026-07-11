@@ -17,10 +17,18 @@ const REPAIRS = {
   1: {
     title: "Stabilize the insertion march",
     requirement: "Return a new ascending list. Built-in sorting shortcuts are disabled.",
+    example: "Example: [3, 1, 2] becomes [1, 2, 3].",
     starter: `def solve(values):
     ordered = values[:]
-    # Compare neighboring values and swap them when needed.
+    for i in range(len(ordered)):
+        for j in range(len(ordered) - 1 - i):
+            if ordered[j] > ordered[j + 1]:
+                # TODO: swap these neighboring values
     return ordered`,
+    hints: [
+      "The larger value is on the left. Exchange it with the smaller value immediately to its right.",
+      "Replace the TODO with: ordered[j], ordered[j + 1] = ordered[j + 1], ordered[j]",
+    ],
     cases: [
       { name: "visible_spill", input: [5, 1, 4, 2, 3], expected: [1, 2, 3, 4, 5], sealed: false },
       { name: "visible_duplicates", input: [3, 1, 3, 2], expected: [1, 2, 3, 3], sealed: false },
@@ -32,10 +40,19 @@ const REPAIRS = {
   2: {
     title: "Merge the split allocations",
     requirement: "The first and second halves are sorted runs. Merge them without sorting shortcuts.",
+    example: "Example: [1, 4, 2, 3] becomes [1, 2, 3, 4].",
     starter: `def solve(values):
     merged = values[:]
-    # Merge the two sorted halves into merged.
+    for i in range(len(merged)):
+        for j in range(len(merged) - 1 - i):
+            # TODO: replace False with the out-of-order check
+            if False:
+                merged[j], merged[j + 1] = merged[j + 1], merged[j]
     return merged`,
+    hints: [
+      "The existing swap is correct. It should run only when the current value is larger than the next value.",
+      "Replace False with: merged[j] > merged[j + 1]",
+    ],
     cases: [
       { name: "visible_even_runs", input: [1, 4, 7, 2, 3, 9], expected: [1, 2, 3, 4, 7, 9], sealed: false },
       { name: "visible_overlap", input: [0, 5, 8, 1, 5, 6], expected: [0, 1, 5, 5, 6, 8], sealed: false },
@@ -47,10 +64,16 @@ const REPAIRS = {
   3: {
     title: "Reverse the overflow direction",
     requirement: "Reverse the copied list in place. Swap mirrored positions without shortcuts.",
+    example: "Example: [1, 2, 3, 4] becomes [4, 3, 2, 1].",
     starter: `def solve(values):
     reversed_values = values[:]
-    # Swap the outer values, then move inward.
+    for i in range(len(reversed_values) / 2):
+        # TODO: swap position i with its mirrored position
     return reversed_values`,
+    hints: [
+      "The position mirrored across the list is len(reversed_values) - 1 - i.",
+      "Replace the TODO with: reversed_values[i], reversed_values[len(reversed_values) - 1 - i] = reversed_values[len(reversed_values) - 1 - i], reversed_values[i]",
+    ],
     cases: [
       { name: "visible_odd", input: [1, 2, 3, 4, 5], expected: [5, 4, 3, 2, 1], sealed: false },
       { name: "visible_even", input: [8, 6, 4, 2], expected: [2, 4, 6, 8], sealed: false },
@@ -84,6 +107,7 @@ const useBtn = document.querySelector('[data-action="slime-use"]');
 const repairBtn = document.querySelector('[data-action="slime-repair"]');
 const guardBtn = document.querySelector('[data-action="slime-guard"]');
 const runRepairBtn = document.querySelector('[data-action="run-slime-repair"]');
+const hintBtn = document.querySelector('[data-action="show-slime-hint"]');
 const leaveRepairBtn = document.querySelector('[data-action="leave-slime-repair"]');
 const retryBtn = document.querySelector('[data-action="retry-slime-battle"]');
 const adminWinBtn = document.querySelector('[data-action="admin-win-slime"]');
@@ -93,6 +117,8 @@ const repairResultsEl = document.getElementById("slime-repair-results");
 const repairFeedbackEl = document.getElementById("slime-repair-feedback");
 const repairTitleEl = document.getElementById("slime-repair-title");
 const repairRequirementEl = document.getElementById("slime-repair-requirement");
+const repairExampleEl = document.getElementById("slime-repair-example");
+const repairHintEl = document.getElementById("slime-repair-hint");
 
 let onWinCallback = null;
 const savedCodeByPhase = new Map();
@@ -101,6 +127,7 @@ let repairDeadline = 0;
 let finishing = false;
 let commandIndex = 0;
 let activePhase = 1;
+let hintIndex = 0;
 
 const commandSelectAudio = new Audio("assets/audio/ui-command-select.wav");
 commandSelectAudio.preload = "auto";
@@ -245,6 +272,11 @@ function openRepair() {
   editor.value = savedCodeByPhase.get(activePhase) || repair.starter;
   repairTitleEl.textContent = repair.title;
   repairRequirementEl.textContent = repair.requirement;
+  repairExampleEl.textContent = repair.example;
+  hintIndex = 0;
+  hintBtn.textContent = "Show Hint";
+  hintBtn.disabled = false;
+  setHidden(repairHintEl, true);
   repairResultsEl.innerHTML = "";
   repairFeedbackEl.textContent = "Sorting Slime is stunned. Your progress is saved when it wakes.";
   repairFeedbackEl.classList.remove("error", "success");
@@ -314,6 +346,21 @@ async function runRepair() {
     runRepairBtn.disabled = false;
     closeRepair(true, quality);
   }, 950);
+}
+
+function showNextHint() {
+  const repair = REPAIRS[activePhase];
+  const hint = repair.hints[hintIndex];
+  if (!hint) return;
+  repairHintEl.textContent = `Hint ${hintIndex + 1}/${repair.hints.length}: ${hint}`;
+  setHidden(repairHintEl, false);
+  hintIndex += 1;
+  if (hintIndex >= repair.hints.length) {
+    hintBtn.textContent = "All Hints Shown";
+    hintBtn.disabled = true;
+  } else {
+    hintBtn.textContent = "Next Hint";
+  }
 }
 
 function handleDefeat() {
@@ -405,6 +452,7 @@ useBtn.addEventListener("click", () => {
 repairBtn.addEventListener("click", () => slimeArenaOpenRepair());
 guardBtn.addEventListener("click", () => slimeArenaGuard());
 runRepairBtn.addEventListener("click", runRepair);
+hintBtn.addEventListener("click", showNextHint);
 leaveRepairBtn.addEventListener("click", () => closeRepair(false, "none"));
 retryBtn.addEventListener("click", retryBattle);
 adminWinBtn.addEventListener("click", () => {

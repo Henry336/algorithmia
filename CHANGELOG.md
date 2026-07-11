@@ -6,6 +6,7 @@ Significant player-facing and developer-facing changes are recorded here. Detail
 
 ### Combat
 
+- Reframed all three Sorting Slime repairs as beginner code-completion exercises with most control flow prewritten, concrete input/output examples, and optional two-step conceptual and syntax hints.
 - Reworked Guard into a visible five-second shield that halves incoming damage and cleanly bursts when it expires.
 - Added a 100 HP Null shield to every Sorting Slime phase. Successful phase-specific repairs breach it; crossing a core-health threshold recompiles a fresh shield and new repair problem.
 - Removed Repair's flat Attack bonus. Direct attacks now deal 5 core damage and launch Patchrunner back toward spawn, while unrepaired attacks only chip the Null shield.
