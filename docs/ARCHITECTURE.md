@@ -33,6 +33,9 @@ web/index.html
 | Later maps | `chapter1.js`-`chapter4.js` | Room graphs, enemies, puzzles, secrets, chapter progression |
 | Real-time arena | `slimeArenaEngine.js` | Phaser scene, player movement, collisions, waves, phases |
 | Slime encounter coordination | `slimeArenaBattle.js` | DOM commands, Repair overlay, sound, save state, arena callbacks |
+| Slime balance | `slimeArenaConfig.js` | Arena dimensions, HP, timing, phase names, speed |
+| Slime hazard patterns | `slimeArenaPatterns.js` | Column, merge, and spiral hazard placement |
+| Slime repair content | `slimeRepairTasks.js` | Prompts, starters, examples, hints, and cases |
 | Browser Python subset | `pythonRepairRuntime.js` | Worker execution, timeout, metrics, limited translation |
 | Earlier battles | `battle.js`, `ticketBattle.js`, `codeBattle.js`, `bogoBossBattle.js` | Pre-Phaser encounter implementations |
 | Dialogue | `dialogue.js` | Queueing, typewriter text, completion callbacks |
@@ -46,11 +49,11 @@ Do not put DOM mutation into Phaser pattern code. Do not put collision or per-fr
 Campaign collision or Arcade selection
   -> startSortingSlimeArenaBattle()
   -> startSlimeArena()
-  -> Phaser dodge wave
-  -> access window
+  -> continuous Phaser hazard pattern
+  -> player reaches Sorting Slime
   -> Attack / Use / Repair / Guard
        Repair -> Web Worker -> public and sealed cases
-              -> repair quality -> changed arena behavior
+              -> shield breach -> changed arena behavior
   -> boss HP reaches zero
   -> caller-provided win callback
        campaign: persist gate progress

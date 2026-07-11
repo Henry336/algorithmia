@@ -4,6 +4,13 @@ Significant player-facing and developer-facing changes are recorded here. Detail
 
 ## Unreleased
 
+### Developer Experience
+
+- Added an owner-focused project guide covering prerequisites, account access, file ownership, common edits, testing, deployment, rollback, and troubleshooting.
+- Split Sorting Slime balance, hazard patterns, and repair content into focused modules so common changes do not require editing the full engine or controller.
+- Replaced the hand-maintained JavaScript syntax-check list with automatic discovery and added `npm run verify:web` as the complete browser verification command.
+- Pinned Node 20 through `.nvmrc` and updated architecture and migration documentation to match the live continuous-hazard combat flow.
+
 ### Combat
 
 - Reframed all three Sorting Slime repairs as beginner code-completion exercises with most control flow prewritten, concrete input/output examples, and optional two-step conceptual and syntax hints.

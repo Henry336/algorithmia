@@ -25,10 +25,11 @@ python -m unittest discover -s tests
 Read these files in order:
 
 1. `README.md`
-2. `docs/ARCHITECTURE.md`
-3. `docs/ALGORITHMIA_CONTINUITY.md`
-4. `docs/PHASER_MIGRATION.md` when touching battles
-5. `docs/SAFE_EXECUTION.md` when touching player code execution
+2. `docs/PROJECT_OWNERSHIP.md`
+3. `docs/ARCHITECTURE.md`
+4. `docs/ALGORITHMIA_CONTINUITY.md`
+5. `docs/PHASER_MIGRATION.md` when touching battles
+6. `docs/SAFE_EXECUTION.md` when touching player code execution
 
 For narrative work, also read `ALGORITHMIA_STORY_SO_FAR.md` and `ALGORITHMIA_CHRONOLOGICAL_STORY_OVERVIEW.md`.
 
@@ -39,6 +40,7 @@ npm run build          # copy the pinned Phaser runtime into web/vendor
 npm run dev            # serve web/ at http://localhost:4173
 npm run check          # JavaScript syntax checks
 npm run smoke:slime    # self-starting browser smoke for campaign/Arcade/Repair
+npm run verify:web     # build, syntax check, and browser smoke in one command
 python -m unittest discover -s tests
 ```
 

@@ -70,6 +70,8 @@ class WebRoomMapContracts(unittest.TestCase):
         html = (ROOT / "web" / "index.html").read_text(encoding="utf-8")
         battle = (ROOT / "web" / "js" / "battle.js").read_text(encoding="utf-8")
         engine = (ROOT / "web" / "js" / "slimeArenaEngine.js").read_text(encoding="utf-8")
+        patterns = (ROOT / "web" / "js" / "slimeArenaPatterns.js").read_text(encoding="utf-8")
+        config = (ROOT / "web" / "js" / "slimeArenaConfig.js").read_text(encoding="utf-8")
 
         self.assertIn('src="vendor/phaser.min.js"', html)
         self.assertIn('id="slime-arena-host"', html)
@@ -77,11 +79,12 @@ class WebRoomMapContracts(unittest.TestCase):
         self.assertIn('data-arcade-encounter="sorting-slime"', html)
         self.assertIn("startSortingSlimeArenaBattle", battle)
         self.assertIn("new Phaser.Game", engine)
-        self.assertIn("spawnColumn", engine)
-        self.assertIn("spawnMergeBurst", engine)
-        self.assertIn("spawnSpiralBurst", engine)
-        self.assertIn("NULL_SHIELD_MAX = 100", engine)
-        self.assertIn("GUARD_DURATION = 5000", engine)
+        self.assertIn("patternForPhase", engine)
+        self.assertIn("spawnInsertionMarch", patterns)
+        self.assertIn("spawnMergeFlood", patterns)
+        self.assertIn("spawnOverflowSpiral", patterns)
+        self.assertIn("nullShieldMax: 100", config)
+        self.assertIn("guardDurationMs: 5000", config)
         self.assertNotIn("openAccess", engine)
 
     def assert_all_targets_interactable(self, board, start, blocking, target_code, label):

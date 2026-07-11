@@ -1,13 +1,17 @@
-const WIDTH = 960;
-const HEIGHT = 540;
-const FLOOR_TOP = 68;
-const FLOOR_BOTTOM = HEIGHT - 52;
-const PLAYER_START_X = 70;
-const BOSS_X = WIDTH - 92;
-const ROWS = 7;
-const BOSS_MAX_HP = 45;
-const NULL_SHIELD_MAX = 100;
-const GUARD_DURATION = 5000;
+import { phaseForBossHp, SLIME_ARENA } from "./slimeArenaConfig.js";
+import { patternForPhase } from "./slimeArenaPatterns.js";
+
+const {
+  width: WIDTH,
+  height: HEIGHT,
+  floorTop: FLOOR_TOP,
+  floorBottom: FLOOR_BOTTOM,
+  playerStartX: PLAYER_START_X,
+  bossX: BOSS_X,
+  bossMaxHp: BOSS_MAX_HP,
+  nullShieldMax: NULL_SHIELD_MAX,
+  guardDurationMs: GUARD_DURATION,
+} = SLIME_ARENA;
 
 const PLAYER_IMAGE = "assets/characters/patchrunner/A_young_field_technician_in/rotations/east.png";
 const SLIME_IMAGE = "assets/characters/sorting-slime/A_translucent_lime-green_gelatinous_blob/rotations/west.png";
@@ -15,17 +19,6 @@ const SLIME_IMAGE = "assets/characters/sorting-slime/A_translucent_lime-green_ge
 let game = null;
 let activeScene = null;
 let canvasResizeObserver = null;
-
-function phaseForHp(hp) {
-  if (hp > 30) return 1;
-  if (hp > 15) return 2;
-  return 3;
-}
-
-function rowY(index) {
-  const span = FLOOR_BOTTOM - FLOOR_TOP;
-  return FLOOR_TOP + (span * index) / (ROWS - 1);
-}
 
 function createSceneClass(Phaser, callbacks) {
   return class SortingSlimeScene extends Phaser.Scene {
@@ -38,7 +31,6 @@ function createSceneClass(Phaser, callbacks) {
       this.repairQuality = "none";
       this.nullShieldHp = NULL_SHIELD_MAX;
       this.guardUntil = 0;
-      this.lastGap = 3;
       this.invulnerableUntil = 0;
       this.waveEvents = [];
       this.waveNumber = 0;
@@ -185,7 +177,7 @@ function createSceneClass(Phaser, callbacks) {
       this.bossShieldInner.setPosition(this.boss.x, this.boss.y);
       if (this.guardUntil && time >= this.guardUntil) this.expireGuard();
       if (this.mode !== "dodge") return;
-      const speed = 245;
+      const speed = SLIME_ARENA.playerSpeed;
       let vx = 0;
       let vy = 0;
       if (this.cursors.left.isDown || this.keys.left.isDown) vx -= speed;
@@ -231,14 +223,13 @@ function createSceneClass(Phaser, callbacks) {
       this.waveNumber += 1;
       if (resetPlayer) this.player.setPosition(PLAYER_START_X, HEIGHT / 2);
       this.player.setVelocity(0, 0).clearTint();
-      this.phase = phaseForHp(this.bossHp);
+      this.phase = phaseForBossHp(this.bossHp);
       callbacks.onBossHp(this.bossHp, BOSS_MAX_HP, this.phase);
 
-      const names = ["Insertion March", "Merge Flood", "Overflow Spiral"];
       callbacks.onWave({
         phase: this.phase,
         wave: this.waveNumber,
-        name: names[this.phase - 1],
+        name: SLIME_ARENA.phaseNames[this.phase],
         repaired: this.repaired,
       });
       const status = this.phase === 1
@@ -247,106 +238,10 @@ function createSceneClass(Phaser, callbacks) {
           ? (this.repaired ? "REPAIRED: merge clusters now resolve at one readable locus." : "Merge Flood is scattering one-second allocations across the floor.")
           : (this.repaired ? "REPAIRED: the spiral is clockwise, periodic, and leaves a stable spoke." : "Overflow Spiral changes direction without warning.");
       callbacks.onStatus(status);
-
-      if (this.phase === 1) {
-        this.spawnColumn();
-        this.waveEvents.push(this.time.addEvent({ delay: this.repaired ? 760 : 620, loop: true, callback: () => this.spawnColumn() }));
-      } else if (this.phase === 2) {
-        this.spawnMergeBurst();
-        this.waveEvents.push(this.time.addEvent({ delay: this.repaired ? 980 : 720, loop: true, callback: () => this.spawnMergeBurst() }));
-      } else {
-        this.spawnSpiralBurst();
-        this.waveEvents.push(this.time.addEvent({ delay: this.repaired ? 1120 : 760, loop: true, callback: () => this.spawnSpiralBurst() }));
-      }
-    }
-
-    chooseGap() {
-      if (this.repaired) {
-        const orderedGaps = [1, 2, 3, 4, 5, 4, 3, 2];
-        this.lastGap = orderedGaps[this.patternStep % orderedGaps.length];
-      } else {
-        this.lastGap = Phaser.Math.Between(1, ROWS - 2);
-      }
-      return this.lastGap;
-    }
-
-    spawnColumn() {
-      if (this.mode !== "dodge") return;
-      if (this.repaired) {
-        const heights = [1, 2, 3, 4, 5, 4, 3, 2];
-        const sequenceIndex = this.patternStep % heights.length;
-        const height = heights[sequenceIndex];
-        const fromTop = Math.floor(this.patternStep / heights.length) % 2 === 0;
-        this.patternStep += 1;
-        const warningY = fromTop ? rowY((height - 1) / 2) : rowY(ROWS - 1 - (height - 1) / 2);
-        const warning = this.add.rectangle(WIDTH - 46, warningY, 12, Math.max(42, height * 58), 0x8eeaff, 0.22).setDepth(2);
-        this.tweens.add({ targets: warning, alpha: 0.72, duration: 150, yoyo: true, repeat: 2, onComplete: () => warning.destroy() });
-        for (let index = 0; index < height; index += 1) {
-          const row = fromTop ? index : ROWS - 1 - index;
-          const minion = this.minions.create(WIDTH + 44, rowY(row), "sorting-slime");
-          minion.setDisplaySize(56, 56).setDepth(5).setVelocityX(-220).setAlpha(0.8);
-          minion.body.setSize(34, 34).setOffset(23, 23);
-          this.tweens.add({ targets: minion, scaleY: minion.scaleY * 0.82, duration: 340, yoyo: true, repeat: -1 });
-        }
-        return;
-      }
-      const gap = this.chooseGap();
-      this.patternStep += 1;
-      const gapRadius = 0;
-      const speed = 252;
-      const warning = this.add.rectangle(WIDTH - 46, rowY(gap), 12, 58, 0xc66cff, 0.24).setDepth(2);
-      this.tweens.add({ targets: warning, alpha: 0.75, duration: 180, yoyo: true, repeat: 2, onComplete: () => warning.destroy() });
-
-      for (let row = 0; row < ROWS; row += 1) {
-        if (Math.abs(row - gap) <= gapRadius) continue;
-        const minion = this.minions.create(WIDTH + 44, rowY(row), "sorting-slime");
-        minion.setDisplaySize(56, 56).setDepth(5).setVelocityX(-speed);
-        minion.body.setSize(34, 34).setOffset(23, 23);
-        minion.setAlpha(0.96);
-        this.tweens.add({ targets: minion, scaleY: minion.scaleY * 0.82, duration: 340, yoyo: true, repeat: -1 });
-      }
-    }
-
-    spawnMergeBurst() {
-      if (this.mode !== "dodge") return;
-      const count = this.repaired ? 3 : Phaser.Math.Between(5, 7);
-      const anchorX = Phaser.Math.Between(250, 690);
-      const anchorY = rowY(Phaser.Math.Between(1, ROWS - 2));
-      for (let index = 0; index < count; index += 1) {
-        const x = this.repaired ? anchorX + (index - 1) * 44 : Phaser.Math.Between(170, 730);
-        const y = this.repaired ? anchorY : Phaser.Math.Between(FLOOR_TOP, FLOOR_BOTTOM);
-        const warning = this.add.circle(x, y, 24, 0xc66cff, 0.2).setStrokeStyle(2, 0xf0b2ff, 0.8).setDepth(3);
-        this.tweens.add({ targets: warning, scaleX: 1.35, scaleY: 1.35, alpha: 0.8, duration: 240, yoyo: true, repeat: 1 });
-        this.waveEvents.push(this.time.delayedCall(420, () => {
-          warning.destroy();
-          if (this.mode !== "dodge") return;
-          const minion = this.minions.create(x, y, "sorting-slime");
-          minion.setDisplaySize(62, 62).setDepth(5).setTint(this.repaired ? 0x9eeaff : 0xd174ff);
-          minion.body.setSize(36, 36).setOffset(22, 22);
-          minion.setAlpha(0);
-          this.tweens.add({ targets: minion, alpha: 0.96, scaleX: minion.scaleX * 1.12, scaleY: minion.scaleY * 0.88, duration: 100, yoyo: true, repeat: 1 });
-          this.waveEvents.push(this.time.delayedCall(1000, () => {
-            if (!minion.active) return;
-            this.tweens.add({ targets: minion, alpha: 0, duration: 130, onComplete: () => minion.destroy() });
-          }));
-        }));
-      }
-    }
-
-    spawnSpiralBurst() {
-      if (this.mode !== "dodge") return;
-      const count = this.repaired ? 6 : 9;
-      const base = this.repaired ? (this.patternStep % 8) * (Math.PI / 4) : Phaser.Math.FloatBetween(0, Math.PI * 2);
-      const direction = this.repaired ? 1 : Phaser.Math.RND.pick([-1, 1]);
-      this.patternStep += 1;
-      for (let index = 0; index < count; index += 1) {
-        if (this.repaired && index === 3) continue;
-        const angle = base + (index / count) * Math.PI * 2;
-        const minion = this.minions.create(BOSS_X, HEIGHT / 2, "sorting-slime");
-        minion.setDisplaySize(this.repaired ? 50 : 58, this.repaired ? 50 : 58).setDepth(5).setTint(0xc66cff);
-        minion.body.setSize(32, 32).setOffset(24, 24);
-        minion.setData({ spiral: true, bornAt: this.time.now, angle, turnRate: direction * (this.repaired ? 0.0014 : Phaser.Math.FloatBetween(0.0018, 0.0032)), radialSpeed: this.repaired ? 0.115 : Phaser.Math.FloatBetween(0.13, 0.18), repairedBias: this.repaired ? Math.sin(base) * 18 : Phaser.Math.Between(-36, 36) });
-      }
+      const spawnPattern = patternForPhase(this.phase);
+      const delay = SLIME_ARENA.phaseSpawnDelayMs[this.phase][this.repaired ? "repaired" : "broken"];
+      spawnPattern(this, Phaser);
+      this.waveEvents.push(this.time.addEvent({ delay, loop: true, callback: () => spawnPattern(this, Phaser) }));
     }
 
     openCommandWindow() {
@@ -376,7 +271,7 @@ function createSceneClass(Phaser, callbacks) {
       this.cameras.main.shake(180, 0.014);
       this.boss.setTintFill(0xffffff);
       this.time.delayedCall(120, () => this.boss.clearTint());
-      const nextPhase = phaseForHp(this.bossHp);
+      const nextPhase = phaseForBossHp(this.bossHp);
       callbacks.onBossHp(this.bossHp, BOSS_MAX_HP, nextPhase);
       callbacks.onAttack(damage, true, false);
       if (this.bossHp <= 0) {

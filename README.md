@@ -94,6 +94,9 @@ web/                         Player-facing browser game
   js/chapter1.js ...         Later campaign routes
   js/slimeArenaEngine.js     Phaser movement, hazards, collisions, and phases
   js/slimeArenaBattle.js     Sorting Slime DOM/Phaser/Python coordination
+  js/slimeArenaConfig.js     Sorting Slime balance numbers and labels
+  js/slimeArenaPatterns.js   Sorting Slime hazard formations
+  js/slimeRepairTasks.js     Sorting Slime prompts, hints, starters, and cases
   js/pythonRepairRuntime.js  Current limited browser Python subset
   assets/                    Character and audio assets
 
@@ -106,6 +109,7 @@ docs/                        Architecture, continuity, migration, and safety not
 ## Documentation
 
 - [Contributing](CONTRIBUTING.md) - setup, workflow, conventions, and change checklist
+- [Project ownership](docs/PROJECT_OWNERSHIP.md) - accounts, common edits, publishing, recovery, and troubleshooting
 - [Architecture](docs/ARCHITECTURE.md) - runtime boundaries and module ownership
 - [Project continuity](docs/ALGORITHMIA_CONTINUITY.md) - active gameplay and canon constraints
 - [Phaser migration](docs/PHASER_MIGRATION.md) - what has migrated and what has not

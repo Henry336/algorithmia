@@ -7,7 +7,8 @@
     "build": "node scripts/copy-phaser.mjs",
     "dev": "node scripts/serve-web.mjs",
     "test": "npm run check",
-    "check": "node --check web/js/slimeArenaEngine.js && node --check web/js/slimeArenaBattle.js && node --check web/js/pythonRepairRuntime.js && node --check web/js/battle.js && node --check web/js/main.js && node --check tests/slime_arena_browser_smoke.cjs && node --check scripts/copy-phaser.mjs && node --check scripts/serve-web.mjs",
+    "check": "node scripts/check-js.mjs",
+    "verify:web": "npm run build && npm run check && npm run smoke:slime",
     "smoke:slime": "node tests/slime_arena_browser_smoke.cjs"
   },
   "dependencies": {
