@@ -66,6 +66,18 @@ def clear_codes(board, *codes):
 
 
 class WebRoomMapContracts(unittest.TestCase):
+    def test_sorting_slime_phaser_entry_points_are_packaged(self):
+        html = (ROOT / "web" / "index.html").read_text(encoding="utf-8")
+        battle = (ROOT / "web" / "js" / "battle.js").read_text(encoding="utf-8")
+        engine = (ROOT / "web" / "js" / "slimeArenaEngine.js").read_text(encoding="utf-8")
+
+        self.assertIn('src="vendor/phaser.min.js"', html)
+        self.assertIn('id="slime-arena-host"', html)
+        self.assertIn("startSortingSlimeArenaBattle", battle)
+        self.assertIn("new Phaser.Game", engine)
+        self.assertIn("spawnColumn", engine)
+        self.assertIn("openAccess", engine)
+
     def assert_all_targets_interactable(self, board, start, blocking, target_code, label):
         reachable = flood(board, start, blocking)
         targets = positions(board, target_code)
@@ -125,15 +137,23 @@ class WebRoomMapContracts(unittest.TestCase):
 
     def test_graphreach_crossing_required_interactions_and_boss_gate_are_reachable(self):
         board = load_room_maps("chapter4.js")[1]
-        blocking = {1, 2, 3, 8, 10, 14, 17, 19, 20, 21, 22, 5, 7, 9, 11}
+        blocking = {1, 2, 3, 8, 10, 14, 17, 19, 20, 21, 22, 5, 7, 9, 11, 24, 25}
         start = (6, 8)
-        self.assert_all_targets_interactable(board, start, blocking, 14, "Graphreach anchors")
+        self.assert_all_targets_interactable(board, start, blocking, 24, "Graphreach Recursive Husk mini-boss")
         self.assertIn((6, 9), flood(board, start, blocking), "Graphreach return door should be reachable")
 
-        opened = [row[:] for row in board]
+        opened = clear_codes(board, 24)
+        self.assert_all_targets_interactable(opened, start, blocking, 14, "Graphreach anchors after mini-boss")
         opened[4][12] = 6
         reachable = flood(opened, start, blocking - {3})
         self.assertIn((12, 4), reachable, "Graphreach boss gate should be reachable after anchors")
+
+    def test_graphreach_secret_room_secret_boss_is_reachable(self):
+        board = load_room_maps("chapter4.js")[4]
+        blocking = {1, 2, 3, 8, 10, 14, 17, 19, 20, 21, 22, 5, 7, 9, 11, 24, 25}
+        start = (11, 5)
+        self.assert_all_targets_interactable(board, start, blocking, 25, "Graphreach secret boss")
+        self.assertIn((11, 5), flood(board, start, blocking), "Graphreach secret-room return should be reachable")
 
 
 if __name__ == "__main__":

@@ -3,6 +3,7 @@ import { applyBattleCost } from "./combatState.js";
 import { describeCost, initBattleHud, logBattle, updateBattleVitals } from "./battleHud.js";
 import { renderSortingSlimeBattleSprite } from "./playerSprite.js";
 import { isAdminMode } from "./admin.js";
+import { startSortingSlimeArenaBattle } from "./slimeArenaBattle.js";
 
 const RUNE_COLORS = ["#c94f4f", "#4f7fc9", "#d8c24a", "#8a4fc9", "#5fbf5f", "#e08a3f", "#4fc9b0"];
 
@@ -45,6 +46,10 @@ function shuffledSealedSet() {
 }
 
 export function startSortingSlimeBattle({ onWin, title = "Sorting Slime", enemySprite = null, publicValues = [5, 1, 4, 2, 3] }) {
+  if (title === "Sorting Slime" && !enemySprite) {
+    startSortingSlimeArenaBattle({ onWin });
+    return;
+  }
   onWinCallback = onWin;
   round = 1;
   values = publicValues.slice();

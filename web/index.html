@@ -175,6 +175,67 @@
 
   <!-- BATTLE SCREEN -->
   <section id="screen-battle" class="screen">
+    <div id="slime-arena-shell" class="slime-arena-shell hidden">
+      <header class="slime-combat-header">
+        <div class="slime-player-readout">
+          <span class="slime-readout-name">PATCHRUNNER</span>
+          <span>HP <strong id="slime-player-hp">40/40</strong></span>
+          <span>FOCUS <strong id="slime-player-focus">20/20</strong></span>
+        </div>
+        <div class="slime-boss-readout">
+          <div class="slime-boss-heading">
+            <span>SORTING SLIME</span>
+            <span id="slime-phase-label">Phase 1</span>
+          </div>
+          <div class="slime-boss-hp-shell" aria-label="Sorting Slime health">
+            <div id="slime-boss-hp-fill" class="slime-boss-hp-fill"></div>
+          </div>
+          <span id="slime-boss-hp-text" class="slime-boss-hp-text">45/45</span>
+        </div>
+      </header>
+
+      <div class="slime-arena-frame">
+        <div id="slime-arena-host" class="slime-arena-host" tabindex="0" aria-label="Sorting Slime combat arena"></div>
+        <div class="slime-wave-chip" id="slime-wave-label">Room sealed</div>
+      </div>
+
+      <div class="slime-arena-footer">
+        <p id="slime-arena-status" class="slime-arena-status" role="status">Sorting Slime is entering the execution space.</p>
+
+        <div id="slime-command-panel" class="slime-command-panel hidden" aria-label="Combat commands">
+          <button class="slime-command attack" data-action="slime-attack">Attack 5</button>
+          <button class="slime-command" data-action="slime-use">Use</button>
+          <button class="slime-command repair" data-action="slime-repair">Repair</button>
+          <button class="slime-command" data-action="slime-guard">Guard</button>
+          <button class="slime-command admin-only" data-action="admin-win-slime">Admin Win</button>
+        </div>
+      </div>
+
+      <div id="slime-repair-panel" class="slime-repair-panel hidden">
+          <div class="slime-repair-heading">
+            <div>
+              <span class="slime-repair-kicker">LIVE REPAIR</span>
+              <strong>Stabilize the ordering behavior</strong>
+            </div>
+            <span id="slime-repair-timer" class="slime-repair-timer">Stun: 60s</span>
+          </div>
+          <p class="slime-repair-brief">Return a new ascending list. Your code remains if the slime wakes before you finish.</p>
+          <textarea id="slime-repair-editor" class="slime-repair-editor" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea>
+          <div class="slime-repair-actions">
+            <button class="battle-btn primary" data-action="run-slime-repair">Run Repair</button>
+            <button class="battle-btn" data-action="leave-slime-repair">Return to Fight</button>
+          </div>
+          <div id="slime-repair-results" class="slime-repair-results"></div>
+          <div id="slime-repair-feedback" class="slime-repair-feedback"></div>
+      </div>
+
+      <div id="slime-defeat-panel" class="slime-defeat-panel hidden">
+        <strong>EXECUTION PATH LOST</strong>
+        <span>The room can be rewound. Your unfinished repair is still saved.</span>
+        <button class="battle-btn primary" data-action="retry-slime-battle">Retry Encounter</button>
+      </div>
+    </div>
+
     <div class="battle-scene battle-shell">
       <div class="battle-backdrop"></div>
       <div class="battle-arena">
@@ -339,6 +400,7 @@
   <div id="screen-transition" class="screen-transition"></div>
 </div>
 
+<script src="vendor/phaser.min.js"></script>
 <script type="module" src="js/main.js"></script>
 </body>
 </html>

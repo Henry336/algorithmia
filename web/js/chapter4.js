@@ -4,6 +4,7 @@ import { animatePatchrunnerStep, placePatchrunnerEntity, updatePatchrunnerFacing
 import { sayLines, isDialogueActive, advance as advanceDialogue } from "./dialogue.js";
 import { getState, setState } from "./state.js";
 import { startTicketBattle } from "./ticketBattle.js";
+import { startCodeBattle } from "./codeBattle.js";
 import { fitRoomViewportToScreen } from "./viewportScale.js";
 
 export const TILE = 42;
@@ -30,6 +31,12 @@ const CHASM = 19;
 const CAVE = 20;
 const ROOT = 21;
 const WATER = 22;
+const WITNESS_DIAMOND = 23;
+const RECURSIVE_HUSK_CODE = 24;
+const NULL_WITNESS_CODE = 25;
+
+const RECURSIVE_HUSK_IMAGE = "assets/characters/recursive-husk/recursive-husk-92.png";
+const DIAMOND_TOTAL = 3;
 
 const ROOM_BRIDGEHEAD = 0;
 const ROOM_CROSSING = 1;
@@ -53,7 +60,7 @@ const ROOM_MAPS = [
     [1, 0, 19, 5, 0, 18, 0, 18, 0, 7, 0, 0, 12],
     [1, 0, 0, 0, 21, 18, 8, 18, 21, 0, 0, 19, 1],
     [1, 22, 19, 0, 0, 18, 0, 18, 0, 0, 19, 22, 1],
-    [17, 0, 0, 0, 19, 18, 0, 18, 19, 0, 0, 0, 1],
+    [17, 0, 0, 0, 19, 18, 23, 18, 19, 0, 0, 0, 1],
     [1, 22, 22, 0, 0, 18, 0, 18, 0, 0, 22, 22, 1],
     [1, 1, 21, 21, 0, 18, 0, 18, 0, 21, 21, 1, 1],
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -65,8 +72,8 @@ const ROOM_MAPS = [
     [1, 0, 0, 19, 0, 18, 0, 18, 0, 19, 14, 0, 1],
     [1, 0, 10, 0, 14, 18, 8, 18, 0, 0, 0, 0, 3],
     [1, 0, 0, 19, 0, 18, 0, 18, 0, 19, 0, 0, 1],
-    [1, 19, 0, 2, 0, 18, 0, 18, 0, 2, 0, 19, 1],
-    [1, 19, 10, 0, 0, 18, 0, 18, 0, 0, 10, 19, 1],
+    [1, 19, 0, 2, 0, 18, 24, 18, 0, 2, 0, 19, 1],
+    [1, 19, 10, 0, 0, 18, 0, 18, 23, 0, 10, 19, 1],
     [1, 1, 19, 0, 0, 18, 0, 18, 0, 0, 19, 1, 1],
     [1, 1, 1, 1, 1, 1, 13, 1, 1, 1, 1, 1, 1],
   ],
@@ -78,7 +85,7 @@ const ROOM_MAPS = [
     [1, 20, 0, 0, 0, 2, 0, 2, 0, 0, 0, 20, 1],
     [1, 20, 2, 0, 8, 0, 0, 0, 0, 2, 0, 1, 1],
     [1, 1, 20, 0, 0, 0, 2, 0, 0, 20, 20, 1, 1],
-    [1, 1, 20, 20, 0, 0, 0, 0, 20, 20, 1, 1, 1],
+    [1, 1, 20, 20, 0, 0, 23, 0, 20, 20, 1, 1, 1],
     [1, 1, 1, 20, 20, 0, 0, 20, 20, 1, 1, 1, 1],
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
   ],
@@ -100,7 +107,7 @@ const ROOM_MAPS = [
     [1, 10, 0, 0, 0, 19, 0, 0, 0, 19, 10, 10, 1],
     [1, 19, 0, 8, 0, 0, 0, 2, 0, 0, 0, 10, 1],
     [1, 10, 0, 0, 2, 10, 0, 0, 0, 19, 0, 0, 1],
-    [1, 10, 10, 0, 0, 0, 0, 10, 0, 0, 0, 13, 1],
+    [1, 10, 10, 0, 0, 0, 0, 10, 25, 0, 0, 13, 1],
     [1, 1, 10, 19, 0, 0, 2, 0, 0, 19, 10, 10, 1],
     [1, 1, 10, 10, 0, 19, 0, 0, 10, 10, 10, 1, 1],
     [1, 1, 1, 10, 10, 10, 19, 10, 10, 1, 1, 1, 1],
@@ -137,6 +144,27 @@ function randomSealedNodes(count) {
   return list;
 }
 
+function profitCase(name, values) {
+  let low = values[0] || 0;
+  let best = 0;
+  for (const value of values) {
+    if (value < low) low = value;
+    const gain = value - low;
+    if (gain > best) best = gain;
+  }
+  return { name, input: values, expected: best };
+}
+
+function jumpCase(name, values) {
+  let reach = 0;
+  for (let i = 0; i < values.length; i++) {
+    if (i > reach) return { name, input: values, expected: false };
+    const nextReach = i + values[i];
+    if (nextReach > reach) reach = nextReach;
+  }
+  return { name, input: values, expected: true };
+}
+
 export function initChapter4Room({ onExitToChapter5: exitHandler } = {}) {
   onExitToChapter5 = exitHandler || null;
   viewport = document.getElementById("room-viewport-ch4");
@@ -167,8 +195,12 @@ function buildCurrentMap() {
   const state = getState();
   if (state.bridgeWispCleared) clearCode(next, BRIDGE_WISP_CODE);
   if (state.cycleHoundCleared) clearCode(next, CYCLE_HOUND_CODE);
+  if (state.recursiveHuskCleared) clearCode(next, RECURSIVE_HUSK_CODE);
   if (state.componentHermitCleared) clearCode(next, COMPONENT_HERMIT_CODE);
+  if (state.nullWitnessDefeated) clearCode(next, NULL_WITNESS_CODE);
   if (state.nullFerrymanDefeated) clearCode(next, NULL_FERRYMAN_CODE);
+  clearCollectedDiamonds(next, state.graphDiamonds || []);
+  if (roomIndex === ROOM_BRIDGEHEAD && !allDiamondsCollected(state)) next[6][0] = WALL;
   if (roomIndex === ROOM_BRIDGEHEAD && state.bridgeWispCleared && state.cycleHoundCleared) openNorthGate(next);
   if (roomIndex === ROOM_CROSSING && state.bridgeAnchorsAligned) openEastGate(next);
   if (roomIndex === ROOM_BOSS && state.nullFerrymanDefeated) openNorthGate(next);
@@ -191,6 +223,25 @@ function clearCode(targetMap, code) {
       if (targetMap[r][c] === code) targetMap[r][c] = FLOOR;
     }
   }
+}
+
+function clearCollectedDiamonds(targetMap, collected) {
+  const collectedSet = new Set(collected);
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      if (targetMap[r][c] === WITNESS_DIAMOND && collectedSet.has(diamondKey(roomIndex, c, r))) {
+        targetMap[r][c] = FLOOR;
+      }
+    }
+  }
+}
+
+function diamondKey(room, col, row) {
+  return `${room}:${col},${row}`;
+}
+
+function allDiamondsCollected(state = getState()) {
+  return ((state.graphDiamonds || []).length >= DIAMOND_TOTAL);
 }
 
 function goToRoom(nextRoom, start, lines) {
@@ -227,14 +278,38 @@ function render() {
 
   placeCodeEntity("bridge-wisp", BRIDGE_WISP_CODE, BRIDGE_WISP, SPRITE_PX);
   placeCodeEntity("cycle-hound", CYCLE_HOUND_CODE, CYCLE_HOUND, SPRITE_PX);
+  placeRecursiveHuskEntity("recursive-husk", RECURSIVE_HUSK_CODE, "recursive-husk-map-sprite");
   placeCodeEntity("component-hermit", COMPONENT_HERMIT_CODE, COMPONENT_HERMIT, SPRITE_PX);
   placeCodeEntity("null-ferryman", NULL_FERRYMAN_CODE, NULL_FERRYMAN, 5);
+  placeRecursiveHuskEntity("null-witness", NULL_WITNESS_CODE, "recursive-husk-map-sprite secret-boss-map-sprite");
   playerEl = placePatchrunnerEntity(viewport, player.col, player.row, TILE, player.facing);
 }
 
 function placeCodeEntity(id, code, sprite, pixelSize) {
   const pos = findCode(code);
   if (pos) placeEntity(id, pos.col, pos.row, sprite, pixelSize);
+}
+
+function placeRecursiveHuskEntity(id, code, className) {
+  const pos = findCode(code);
+  if (!pos) return;
+  let el = viewport.querySelector(`[data-entity="${id}"]`);
+  if (!el) {
+    el = document.createElement("div");
+    el.className = "entity recursive-husk-entity";
+    el.dataset.entity = id;
+    viewport.appendChild(el);
+    const img = document.createElement("img");
+    img.className = className;
+    img.alt = "";
+    img.draggable = false;
+    img.src = RECURSIVE_HUSK_IMAGE;
+    el.appendChild(img);
+  }
+  el.style.width = `${TILE}px`;
+  el.style.height = `${TILE}px`;
+  el.style.left = `${pos.col * TILE}px`;
+  el.style.top = `${pos.row * TILE}px`;
 }
 
 function tileClass(code, r, c) {
@@ -249,6 +324,7 @@ function tileClass(code, r, c) {
   if (code === ROOT) return "tile-root";
   if (code === WATER) return "tile-water";
   if (code === ANCHOR) return "tile-anchor";
+  if (code === WITNESS_DIAMOND) return "tile-diamond";
   if (code === CLUTTER || code === LORE) return "tile-ledger";
   return "tile-floor" + ((r + c) % 2 === 0 ? "" : " alt");
 }
@@ -298,7 +374,8 @@ function findCode(code) {
 function isBlocking(code) {
   return code === WALL || code === CLUTTER || code === CLOSED_GATE || code === LORE || code === NULL_ROT ||
     code === ANCHOR || code === SECRET_DOOR || code === CHASM || code === CAVE || code === ROOT || code === WATER ||
-    code === BRIDGE_WISP_CODE || code === CYCLE_HOUND_CODE || code === COMPONENT_HERMIT_CODE || code === NULL_FERRYMAN_CODE;
+    code === BRIDGE_WISP_CODE || code === CYCLE_HOUND_CODE || code === RECURSIVE_HUSK_CODE ||
+    code === COMPONENT_HERMIT_CODE || code === NULL_FERRYMAN_CODE || code === NULL_WITNESS_CODE;
 }
 
 const DIR_OFFSET = {
@@ -331,8 +408,11 @@ function tryMove(dir) {
 function handleSpecialTile(code, col, row) {
   if (code === BRIDGE_WISP_CODE) return enterBridgeWispBattle(), true;
   if (code === CYCLE_HOUND_CODE) return enterCycleHoundBattle(), true;
+  if (code === RECURSIVE_HUSK_CODE) return enterRecursiveHuskBattle(), true;
   if (code === COMPONENT_HERMIT_CODE) return enterComponentHermitBattle(), true;
   if (code === NULL_FERRYMAN_CODE) return enterNullFerrymanBattle(), true;
+  if (code === NULL_WITNESS_CODE) return enterNullWitnessBattle(), true;
+  if (code === WITNESS_DIAMOND) return collectWitnessDiamond(col, row), true;
   if (code === LORE) return inspectLore(), true;
   if (code === ANCHOR) return alignBridgeAnchor(col, row), true;
   if (code === ROUTE_DOOR) return onReachRouteDoor(), true;
@@ -340,6 +420,28 @@ function handleSpecialTile(code, col, row) {
   if (code === SECRET_DOOR) return onReachSecretDoor(), true;
   if (code === RETURN_DOOR) return onReachReturnDoor(), true;
   return false;
+}
+
+function collectWitnessDiamond(col, row) {
+  const key = diamondKey(roomIndex, col, row);
+  const collected = getState().graphDiamonds || [];
+  if (collected.includes(key)) return;
+  const next = [...collected, key];
+  setState({ graphDiamonds: next });
+  map[row][col] = FLOOR;
+  map = buildCurrentMap();
+  render();
+  if (next.length >= DIAMOND_TOTAL) {
+    sayLines([
+      { speaker: "", text: "The third witness diamond clicks without touching anything." },
+      { speaker: "The dark", text: "A wall near the beginning remembers it was a door." },
+      { speaker: "Mira Vale", text: "Backtrack. Carefully. That sentence sounded too pleased with itself." },
+    ]);
+    return;
+  }
+  sayLines([
+    { speaker: "", text: `Witness diamond ${next.length}/${DIAMOND_TOTAL} recovered. It feels less like treasure than testimony.` },
+  ]);
 }
 
 const GRAPH_BATTLE_TEXT = {
@@ -391,6 +493,45 @@ function enterCycleHoundBattle() {
         { speaker: "", text: "The hound's trail folds into one clear crossing." },
       ],
     })
+  );
+}
+
+function enterRecursiveHuskBattle() {
+  sayLines(
+    [
+      { speaker: "", text: "The crossing pinches inward. A hollow thing blocks the bridge, its chest full of smaller versions of itself." },
+      { speaker: "Mira Vale", text: "Recursive Husk. It tried to repair itself by going deeper. Now it only accepts proofs that move forward." },
+    ],
+    () => {
+      startCodeBattle({
+        title: "Recursive Husk",
+        starterCode: `def solve(values):
+    low = values[0]
+    best = 0
+    # Return the best profit from one buy before one sell.
+    return best`,
+        objective: "Find the maximum one-pass profit. This mini-boss punishes quadratic wandering.",
+        publicCases: [profitCase("visible_prices", [7, 1, 5, 3, 6, 4])],
+        generateSealed: () => [profitCase("sealed_falling", [7, 6, 4, 3, 1]), profitCase("sealed_late_peak", [2, 4, 1, 9, 3])],
+        enemyImage: RECURSIVE_HUSK_IMAGE,
+        enemyImageClass: "recursive-husk-battle-sprite",
+        returnScreen: "screen-room-ch4",
+        roundHint1: "Scan prices left to right. Track the lowest seen price and the best later profit.",
+        roundHint2: "Fresh prices. Keep the one-pass invariant; do not search every pair.",
+        wonHint: "The husk finds one forward edge and stops folding inward.",
+        shortcutBlockMessage: "No shortcut sorting here. This is a scan problem: buy before sell.",
+        onWin: () => {
+          setState({ recursiveHuskCleared: true });
+          clearCode(map, RECURSIVE_HUSK_CODE);
+          map = buildCurrentMap();
+          render();
+          sayLines([
+            { speaker: "", text: "The hollow body opens like a bridge knot coming loose." },
+            { speaker: "Mira Vale", text: "That was not just harder. It was different. Good. Graphreach should demand more than ordering." },
+          ]);
+        },
+      });
+    }
   );
 }
 
@@ -486,6 +627,49 @@ function enterNullFerrymanBattle() {
   );
 }
 
+function enterNullWitnessBattle() {
+  if (getState().nullWitnessDefeated) {
+    sayLines([{ speaker: "The Inner Copy", text: "You already reached me. Why is the room still rendering?" }]);
+    return;
+  }
+  sayLines(
+    [
+      { speaker: "The dark", text: "You collected optional objects because a system rewarded you before." },
+      { speaker: "The Inner Copy", text: "Can you still call it secret if the code expected you?" },
+      { speaker: "Mira Vale", text: "Do not answer that. Beat it first." },
+    ],
+    () => {
+      startCodeBattle({
+        title: "The Inner Copy",
+        starterCode: `def solve(values):
+    reach = 0
+    # Return True if every index can still reach the end.
+    return True`,
+        objective: "Solve a reachability check: return True if jumps can reach the final index.",
+        publicCases: [jumpCase("visible_reachable", [2, 3, 1, 1, 4]), jumpCase("visible_cut", [3, 2, 1, 0, 4])],
+        generateSealed: () => [jumpCase("sealed_short", [2, 0, 0]), jumpCase("sealed_gap", [1, 0, 2])],
+        enemyImage: RECURSIVE_HUSK_IMAGE,
+        enemyImageClass: "recursive-husk-battle-sprite secret-boss-battle-sprite",
+        returnScreen: "screen-room-ch4",
+        roundHint1: "Track the farthest reachable index. If the current index is beyond it, the route is broken.",
+        roundHint2: "Fresh route. Prove reachability without memorizing the visible jumps.",
+        wonHint: "The inner copy stops asking who moved the goalpost.",
+        shortcutBlockMessage: "Sorting cannot repair reachability. Track the farthest reachable index.",
+        onWin: () => {
+          setState({ nullWitnessDefeated: true });
+          clearCode(map, NULL_WITNESS_CODE);
+          map = buildCurrentMap();
+          render();
+          sayLines([
+            { speaker: "The Inner Copy", text: "A player found the hidden room. A function returned True. Neither proves who is outside." },
+            { speaker: "", text: "The secret chamber loses its recursion, but the silence keeps one nested echo." },
+          ]);
+        },
+      });
+    }
+  );
+}
+
 function inspectLore() {
   if (roomIndex === ROOM_BRIDGEHEAD) return findBridgeheadSecret();
   if (roomIndex === ROOM_CROSSING) {
@@ -510,7 +694,7 @@ function inspectLore() {
     sayLines([
       { speaker: "", text: "The cave wall shows a route graph of this room. One node is labeled YOU ARE HERE even when you move." },
       { speaker: "The dark", text: "A player wants exits. A program wants states. Which one are you repairing?" },
-      { speaker: "", text: "There is still nobody in the cave." },
+      { speaker: "", text: "There is still nobody in the cave, except the copy that waited for you to read this line." },
     ]);
     return;
   }
@@ -584,8 +768,13 @@ function onReachSideDoor() {
 }
 
 function onReachSecretDoor() {
+  if (!allDiamondsCollected()) {
+    sayLines([{ speaker: "", text: "The wall is smooth here. Three missing witnesses disagree." }]);
+    return;
+  }
   goToRoom(ROOM_SECRET, ROOM_STARTS[ROOM_SECRET], [
-    { speaker: "", text: "A root-covered gap accepts you sideways into a cave the map does not admit." },
+    { speaker: "", text: "A wall near the bridgehead unfolds into a cave the map does not admit." },
+    { speaker: "The dark", text: "Thank you for testing the optional path." },
   ]);
 }
 

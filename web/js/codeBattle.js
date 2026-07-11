@@ -266,7 +266,14 @@ export function startCodeBattle(battleConfig) {
   titleEl.textContent = config.title;
   editor.value = config.starterCode || "def solve(values):\n    return values";
   enemySpriteHost.innerHTML = "";
-  if (config.enemySprite) {
+  if (config.enemyImage) {
+    const img = document.createElement("img");
+    img.className = config.enemyImageClass || "code-battle-image-sprite";
+    img.alt = config.title || "";
+    img.draggable = false;
+    img.src = config.enemyImage;
+    enemySpriteHost.appendChild(img);
+  } else if (config.enemySprite) {
     applyPixelArt(enemySpriteHost, config.enemySprite.matrix, config.enemySprite.palette, config.enemyPixelSize || 5);
   }
   initBattleHud(screenBattle, {
@@ -359,7 +366,7 @@ runBtn.addEventListener("click", async () => {
 
   for (const rule of BANNED_PATTERNS) {
     if (rule.pattern.test(source)) {
-      feedbackEl.textContent = rule.message;
+      feedbackEl.textContent = config.shortcutBlockMessage || rule.message;
       feedbackEl.classList.add("error");
       applyCodeMistake(`Shortcut blocked ${failedRuns + 1}: no visible algorithm.`, 2, 2);
       return;

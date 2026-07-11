@@ -19,6 +19,7 @@ This file records live direction that should survive context refreshes. Keep it 
 - Real PixelLab exports live under `web/assets/characters/<character>/`.
 - Patchrunner, Mira, and Sorting Slime use exported directional PNGs with CSS crop/scale wrappers because the source PNGs have transparent padding.
 - Placeholder matrix art is acceptable for enemies and environmental objects until replacement assets arrive, but new real character assets should replace placeholders promptly.
+- Recursive Husk currently uses an AI-generated concept plus a 92x92 project-local crop under `web/assets/characters/recursive-husk/`. Treat it as a high-quality temporary concept sprite, not a finished directional PixelLab sheet.
 
 ## Null Rot
 
@@ -39,6 +40,8 @@ This file records live direction that should survive context refreshes. Keep it 
 - Chapter 2: Heaplight Foundry is a connected route graph: intake floor branches east to the ash archive, west to a hidden cold vent, north to the furnace core, and east from the core into the Heap Warden crucible. Ember Sorter and Priority Forger gate the core; Heat Sifter plus three reachable valves gate the boss; Ash Auditor is optional archive combat/lore.
 - Chapter 3: Array Plains is a connected route graph: corrupted rowgrass approach branches east to the index library, west to a hidden null-marsh, north to Bogo's court, and east from the court into Lord Bogo's amphitheatre. Shuffle Imp and Pivot Shade gate the court; Null Echo plus three array mirrors gate the boss; Index Ghost is optional library combat/lore.
 - Chapter 3 minions should not all be identical sorting prompts. Null Echo currently uses a script-fixing variant: the starter Python is corrupted by a `None`/zero confusion and the player repairs it.
-- Chapter 4: Graphreach is a connected bridge/cave route graph: bridgehead branches east to the component chapel, west to a hidden cave, north to the anchor crossing, and east from the crossing into the Null Ferryman dock. Bridge Wisp and Cycle Hound gate the crossing; three bridge anchors gate the boss; Component Hermit is optional chapel combat/lore.
+- Chapter 4: Graphreach is a connected bridge/cave route graph: bridgehead branches east to the component chapel, west to a diamond-locked hidden cave, north to the anchor crossing, and east from the crossing into the Null Ferryman dock. Bridge Wisp and Cycle Hound gate the crossing; Recursive Husk mini-boss blocks the anchor crossing with a harder Python max-profit challenge; three bridge anchors gate the main boss; Component Hermit is optional chapel combat/lore.
+- Chapter 4 hidden route: collect three witness diamonds across Graphreach, then backtrack to the bridgehead west wall to reveal the secret room. The secret room contains The Inner Copy secret boss, a Python reachability/jump-game challenge with fourth-wall-leaning dialogue.
+- Mini-bosses should use harder interview-style problems beyond sorting/order clicking. Current examples: Recursive Husk uses best-time-to-buy-sell-stock style max profit; The Inner Copy uses jump-game reachability.
 - Optional rooms may hold lore, optional enemies, hidden secrets, creepy darkness dialogue, or quiet deco space. They should make chapters feel like places, not just combat queues.
 - Sorting Slime has a real exported asset and should idle on the map while acting more aggressive in battle.

@@ -4,6 +4,8 @@ import { initChapter1Room } from "./chapter1.js";
 import { initChapter2Room } from "./chapter2.js";
 import { initChapter3Room } from "./chapter3.js";
 import { initChapter4Room } from "./chapter4.js";
+import { isAdminMode } from "./admin.js";
+import { startSortingSlimeArenaBattle } from "./slimeArenaBattle.js";
 
 function enterChapter0() {
   document.getElementById("screen-room").classList.add("active");
@@ -41,3 +43,13 @@ initTitle({
   onEnterChapter3: enterChapter3,
   onEnterChapter4: enterChapter4,
 });
+
+const launchEncounter = new URLSearchParams(window.location.search).get("encounter");
+if (isAdminMode() && launchEncounter === "sorting-slime") {
+  document.querySelectorAll(".screen.active").forEach((screen) => screen.classList.remove("active"));
+  startSortingSlimeArenaBattle({
+    onWin: () => {
+      document.body.dataset.slimeSmokeWin = "true";
+    },
+  });
+}

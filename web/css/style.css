@@ -801,6 +801,40 @@ body.admin-mode .title-build {
   background: #20342c;
 }
 
+.theme-graphreach .tile-diamond {
+  position: relative;
+  background: #17252a;
+  border-color: #223a43;
+  box-shadow: inset 0 0 14px #7fd8c91f;
+}
+
+.theme-graphreach .tile-diamond::before,
+.theme-graphreach .tile-diamond::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  pointer-events: none;
+}
+
+.theme-graphreach .tile-diamond::before {
+  width: 18px;
+  height: 18px;
+  background:
+    linear-gradient(135deg, #bdfcff 0 28%, #7fd8c9 29% 52%, #8a4fc9 53% 100%);
+  transform: translate(-50%, -50%) rotate(45deg);
+  box-shadow: 0 0 12px #7fd8c9cc, 0 0 22px #8a4fc977;
+  animation: graphDiamondPulse 1.2s steps(3, end) infinite;
+}
+
+.theme-graphreach .tile-diamond::after {
+  width: 28px;
+  height: 28px;
+  border: 1px solid #7fd8c977;
+  transform: translate(-50%, -50%) rotate(45deg);
+  animation: graphDiamondRing 1.8s steps(4, end) infinite;
+}
+
 .tile-icon-wrap {
   position: absolute;
   display: flex;
@@ -932,6 +966,50 @@ body.admin-mode .title-build {
   animation: bogoMapIdle 1.35s steps(4, end) infinite;
 }
 
+.recursive-husk-entity {
+  align-items: flex-end;
+  overflow: visible;
+  z-index: 5;
+}
+
+.recursive-husk-entity::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -16px;
+  width: 126px;
+  height: 74px;
+  transform: translateX(-50%);
+  background: radial-gradient(circle, #8a4fc977 0 18%, #05050a00 66%);
+  filter: blur(4px);
+  opacity: 0.78;
+  animation: recursiveHuskAura 1.1s steps(3, end) infinite;
+}
+
+.recursive-husk-map-sprite {
+  --husk-foot-offset: 36px;
+  position: relative;
+  z-index: 1;
+  width: 116px;
+  height: 116px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  transform: translateY(var(--husk-foot-offset));
+  transform-origin: 50% 86%;
+  filter:
+    drop-shadow(0 9px 6px #000000aa)
+    drop-shadow(0 0 12px #8a4fc9aa)
+    drop-shadow(0 0 5px #7fd8c988);
+  animation: recursiveHuskIdle 1.05s steps(4, end) infinite;
+}
+
+.secret-boss-map-sprite {
+  filter:
+    drop-shadow(0 9px 6px #000000cc)
+    drop-shadow(0 0 18px #7fd8c9cc)
+    drop-shadow(0 0 10px #8a4fc9cc);
+}
+
 .sorting-slime-battle-sprite {
   width: clamp(130px, 18vw, 168px);
   height: clamp(130px, 18vw, 168px);
@@ -975,6 +1053,27 @@ body.admin-mode .title-build {
   0% { opacity: 0.35; filter: blur(1px) brightness(0.9); }
   50% { opacity: 0.9; filter: blur(0) brightness(1.35); }
   100% { opacity: 0.55; filter: blur(1px) brightness(1); }
+}
+
+@keyframes recursiveHuskIdle {
+  0%, 100% { transform: translateY(var(--husk-foot-offset)) scale(1); }
+  33% { transform: translateY(calc(var(--husk-foot-offset) - 4px)) scale(1.04, 0.97); }
+  66% { transform: translateY(calc(var(--husk-foot-offset) - 1px)) scale(0.98, 1.04); }
+}
+
+@keyframes recursiveHuskAura {
+  0%, 100% { opacity: 0.45; transform: translateX(-50%) scale(0.95); }
+  50% { opacity: 0.9; transform: translateX(-50%) scale(1.12); }
+}
+
+@keyframes graphDiamondPulse {
+  0%, 100% { filter: brightness(0.85); transform: translate(-50%, -50%) rotate(45deg) scale(0.92); }
+  50% { filter: brightness(1.35); transform: translate(-50%, -50%) rotate(45deg) scale(1.08); }
+}
+
+@keyframes graphDiamondRing {
+  0%, 100% { opacity: 0.35; transform: translate(-50%, -50%) rotate(45deg) scale(0.9); }
+  50% { opacity: 0.9; transform: translate(-50%, -50%) rotate(45deg) scale(1.15); }
 }
 
 @keyframes roomTileBreathe {
@@ -1394,6 +1493,32 @@ body.admin-mode .title-build {
   filter: drop-shadow(0 6px 6px #00000066);
 }
 
+.code-battle-image-sprite {
+  width: 118px;
+  height: 118px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 9px 7px #00000099) drop-shadow(0 0 12px #7fd8c977);
+  animation: battleEnemyIdle 2.2s ease-in-out infinite;
+}
+
+.recursive-husk-battle-sprite {
+  width: 160px;
+  height: 160px;
+  margin: -18px 0 -20px;
+  filter:
+    drop-shadow(0 14px 9px #000000bb)
+    drop-shadow(0 0 18px #8a4fc9aa)
+    drop-shadow(0 0 8px #7fd8c9aa);
+  animation: recursiveHuskBattleIdle 0.92s steps(4, end) infinite;
+}
+
+.secret-boss-battle-sprite {
+  width: 184px;
+  height: 184px;
+  margin: -26px 0 -28px;
+}
+
 .enemy-card .battle-enemy canvas {
   animation: battleEnemyIdle 2.2s ease-in-out infinite;
   transform-origin: 50% 82%;
@@ -1677,6 +1802,13 @@ body.admin-mode .admin-only {
   50% { transform: translateY(-3px) scale(1.03); }
 }
 
+@keyframes recursiveHuskBattleIdle {
+  0%, 100% { transform: translateY(0) scale(1); }
+  25% { transform: translateY(-4px) scale(1.04, 0.98); }
+  55% { transform: translateY(1px) scale(0.98, 1.05); }
+  80% { transform: translateY(-2px) scale(1.02); }
+}
+
 @keyframes objectiveScan {
   0%, 58% { transform: translateX(-120%); opacity: 0; }
   68% { opacity: 1; }
@@ -1780,6 +1912,12 @@ body.admin-mode .admin-only {
   .bogolord-map-sprite,
   .bogolord-entity::before,
   .bogolord-entity::after,
+  .recursive-husk-map-sprite,
+  .recursive-husk-entity::before,
+  .theme-graphreach .tile-diamond::before,
+  .theme-graphreach .tile-diamond::after,
+  .code-battle-image-sprite,
+  .recursive-husk-battle-sprite,
   .battle-scene::before,
   .battle-scene::after,
   .battle-backdrop,
@@ -1807,6 +1945,442 @@ body.admin-mode .admin-only {
   .title-build {
     opacity: 1;
     transform: none;
+  }
+}
+
+/* ---------- Phaser Sorting Slime encounter ---------- */
+
+#screen-battle.phaser-slime-active > .battle-scene {
+  display: none;
+}
+
+.slime-arena-shell.hidden,
+.slime-command-panel.hidden,
+.slime-repair-panel.hidden,
+.slime-defeat-panel.hidden {
+  display: none !important;
+}
+
+.slime-arena-shell {
+  position: relative;
+  width: min(96vw, 1280px);
+  height: min(96vh, 900px);
+  min-height: 620px;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  padding: 14px;
+  border: 3px solid #4e837f;
+  background: #0b1015;
+  box-shadow: 0 0 0 3px #111d22, 0 18px 54px #00000099, inset 0 0 34px #1e4c4733;
+  overflow: hidden;
+}
+
+.slime-arena-shell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.28;
+  background-image:
+    repeating-linear-gradient(0deg, transparent 0 27px, #71c9ba18 28px, transparent 29px),
+    repeating-linear-gradient(90deg, transparent 0 43px, #d8a04a12 44px, transparent 45px);
+  animation: slimeShellScan 7s linear infinite;
+}
+
+.slime-combat-header,
+.slime-arena-frame,
+.slime-arena-footer {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+}
+
+.slime-combat-header {
+  min-height: 58px;
+  display: grid;
+  grid-template-columns: minmax(260px, 0.75fr) minmax(360px, 1.25fr);
+  gap: 12px;
+  align-items: center;
+  padding: 10px 14px;
+  border: 2px solid #365d61;
+  background: #101920;
+  box-shadow: inset 0 -4px 0 #081013;
+}
+
+.slime-player-readout,
+.slime-boss-heading {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 0.76rem;
+}
+
+.slime-readout-name,
+.slime-boss-heading > span:first-child {
+  color: #f3c25f;
+  font-weight: 700;
+}
+
+.slime-player-readout strong {
+  color: #80e2d1;
+}
+
+.slime-boss-readout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 10px;
+  align-items: center;
+}
+
+.slime-boss-heading {
+  grid-column: 1 / -1;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
+
+.slime-boss-heading > span:last-child {
+  color: #d7a6e7;
+}
+
+.slime-boss-hp-shell {
+  height: 12px;
+  border: 2px solid #6a4777;
+  background: #210f29;
+  box-shadow: inset 0 0 0 2px #09050c;
+  overflow: hidden;
+}
+
+.slime-boss-hp-fill {
+  width: 100%;
+  height: 100%;
+  background: #d5656d;
+  box-shadow: inset 0 -3px 0 #8a344b, 0 0 12px #e27f8799;
+  transition: width 360ms steps(9, end);
+}
+
+.slime-boss-hp-text {
+  min-width: 58px;
+  color: #f1b1b4;
+  font-size: 0.72rem;
+  text-align: right;
+}
+
+.slime-arena-frame {
+  min-height: 0;
+  display: grid;
+  place-items: center;
+  border: 2px solid #2f5f62;
+  background: #071017;
+  overflow: hidden;
+}
+
+.slime-arena-host {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 360px;
+  outline: none;
+}
+
+.slime-arena-host canvas {
+  display: block;
+  image-rendering: pixelated;
+}
+
+.slime-arena-host:focus-visible {
+  box-shadow: inset 0 0 0 3px #f3c25f;
+}
+
+.slime-wave-chip {
+  position: absolute;
+  left: 14px;
+  top: 14px;
+  min-width: 170px;
+  padding: 7px 10px;
+  border-left: 4px solid #f3c25f;
+  background: #0b1219e8;
+  color: #bee8df;
+  font-size: 0.7rem;
+  box-shadow: 4px 4px 0 #00000066;
+}
+
+.slime-arena-footer {
+  min-height: 76px;
+  padding: 10px 12px;
+  border: 2px solid #365d61;
+  background: #101920;
+}
+
+.slime-arena-status {
+  min-height: 1.3em;
+  margin: 0 0 8px;
+  color: #b6c9c7;
+  font-size: 0.76rem;
+  text-align: center;
+}
+
+.slime-command-panel {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.slime-arena-shell.keyboard-command-mode,
+.slime-arena-shell.keyboard-command-mode * {
+  cursor: none !important;
+}
+
+.slime-arena-shell.keyboard-command-mode .slime-command {
+  pointer-events: none;
+}
+
+.slime-command {
+  min-height: 42px;
+  border: 2px solid #4a6870;
+  background: #10171d;
+  color: #d9e3e2;
+  font: inherit;
+  font-size: 0.76rem;
+  cursor: pointer;
+  transition: transform 100ms steps(2, end), border-color 100ms linear, background 100ms linear;
+}
+
+.slime-command:hover:not(:disabled),
+.slime-command:focus-visible {
+  transform: translateY(-2px);
+  border-color: #80e2d1;
+  background: #17252a;
+  outline: none;
+}
+
+.slime-command.keyboard-selected {
+  position: relative;
+  transform: translateY(-2px);
+  border-color: #80e2d1;
+  background: #17252a;
+  box-shadow: inset 0 0 0 1px #80e2d133, 0 0 12px #80e2d122;
+}
+
+.slime-command.keyboard-selected::before {
+  content: "";
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  background: #f3c25f;
+  transform: translateY(-50%) rotate(45deg);
+  box-shadow: 0 0 8px #f3c25f99;
+}
+
+.slime-command.attack {
+  border-color: #e27478;
+  color: #f4b0b2;
+}
+
+.slime-command.repair {
+  border-color: #f0b94e;
+  color: #ffd77c;
+}
+
+.slime-command:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+.slime-repair-panel,
+.slime-defeat-panel {
+  position: absolute;
+  z-index: 20;
+  inset: 82px 22px 20px;
+  border: 3px solid #d2a650;
+  background: #0d1318f7;
+  box-shadow: 0 20px 80px #000000dd, inset 0 0 42px #5e402b2c;
+}
+
+.slime-repair-panel {
+  display: grid;
+  grid-template-rows: auto auto minmax(180px, 1fr) auto auto auto;
+  gap: 10px;
+  padding: 18px;
+}
+
+.slime-repair-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: center;
+  color: #e6eceb;
+}
+
+.slime-repair-heading > div {
+  display: grid;
+  gap: 5px;
+}
+
+.slime-repair-kicker {
+  color: #72d8c7;
+  font-size: 0.65rem;
+}
+
+.slime-repair-timer {
+  min-width: 94px;
+  padding: 7px 9px;
+  border: 2px solid #bd6267;
+  color: #f1a1a5;
+  text-align: center;
+  font-size: 0.72rem;
+  animation: repairTimerPulse 1s steps(2, end) infinite;
+}
+
+.slime-repair-brief {
+  margin: 0;
+  color: #aebcba;
+  font-size: 0.74rem;
+}
+
+.slime-repair-editor {
+  width: 100%;
+  min-height: 180px;
+  resize: none;
+  padding: 14px;
+  border: 2px solid #4b7072;
+  border-left: 6px solid #72d8c7;
+  background: #080d12;
+  color: #e6eceb;
+  font: inherit;
+  font-size: 0.78rem;
+  line-height: 1.55;
+  tab-size: 4;
+  outline: none;
+}
+
+.slime-repair-editor:focus {
+  border-color: #8be7d6;
+  box-shadow: 0 0 0 2px #72d8c733;
+}
+
+.slime-repair-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.slime-repair-results {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px 12px;
+  min-height: 24px;
+}
+
+.slime-repair-result {
+  padding: 5px 7px;
+  border-left: 3px solid #d1666a;
+  color: #e69a9d;
+  background: #30191c88;
+  font-size: 0.66rem;
+}
+
+.slime-repair-result.pass {
+  border-color: #67c887;
+  color: #9ce6b4;
+  background: #17302288;
+}
+
+.slime-repair-feedback {
+  min-height: 1.3em;
+  color: #c8d1cf;
+  text-align: center;
+  font-size: 0.72rem;
+}
+
+.slime-repair-feedback.error {
+  color: #ee8a8e;
+}
+
+.slime-repair-feedback.success {
+  color: #93e4ad;
+}
+
+.slime-defeat-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  color: #c5cecc;
+  text-align: center;
+}
+
+.slime-defeat-panel strong {
+  color: #ef858b;
+  font-size: 1.25rem;
+}
+
+@keyframes slimeShellScan {
+  from { transform: translateY(0); }
+  to { transform: translateY(29px); }
+}
+
+@keyframes repairTimerPulse {
+  0%, 50% { border-color: #bd6267; }
+  51%, 100% { border-color: #f0b94e; }
+}
+
+@media (max-width: 760px), (max-height: 720px) {
+  .slime-arena-shell {
+    width: 100vw;
+    height: 100vh;
+    min-height: 0;
+    padding: 7px;
+    gap: 6px;
+    border-width: 2px;
+  }
+
+  .slime-combat-header {
+    grid-template-columns: 1fr;
+    gap: 7px;
+    padding: 7px 9px;
+  }
+
+  .slime-player-readout {
+    justify-content: space-between;
+  }
+
+  .slime-player-readout,
+  .slime-boss-heading {
+    font-size: 0.62rem;
+  }
+
+  .slime-arena-host {
+    min-height: 260px;
+  }
+
+  .slime-command-panel {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .slime-repair-panel,
+  .slime-defeat-panel {
+    inset: 8px;
+  }
+
+  .slime-repair-panel {
+    padding: 11px;
+    grid-template-rows: auto auto minmax(120px, 1fr) auto auto auto;
+  }
+
+  .slime-repair-results {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slime-arena-shell::before,
+  .slime-repair-timer {
+    animation: none;
   }
 }
 
