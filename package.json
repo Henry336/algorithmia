@@ -1,14 +1,19 @@
 {
   "name": "algorithmia-web",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Browser build tooling for the Algorithmia programming RPG.",
   "scripts": {
     "build": "node scripts/copy-phaser.mjs",
-    "check": "node --check web/js/slimeArenaEngine.js && node --check web/js/slimeArenaBattle.js && node --check web/js/pythonRepairRuntime.js && node --check web/js/battle.js && node --check web/js/main.js && node --check tests/slime_arena_browser_smoke.cjs && node --check scripts/copy-phaser.mjs",
+    "dev": "node scripts/serve-web.mjs",
+    "test": "npm run check",
+    "check": "node --check web/js/slimeArenaEngine.js && node --check web/js/slimeArenaBattle.js && node --check web/js/pythonRepairRuntime.js && node --check web/js/battle.js && node --check web/js/main.js && node --check tests/slime_arena_browser_smoke.cjs && node --check scripts/copy-phaser.mjs && node --check scripts/serve-web.mjs",
     "smoke:slime": "node tests/slime_arena_browser_smoke.cjs"
   },
   "dependencies": {
     "phaser": "3.90.0"
+  },
+  "devDependencies": {
+    "playwright": "1.61.1"
   }
 }

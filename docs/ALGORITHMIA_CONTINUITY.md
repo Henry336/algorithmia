@@ -1,10 +1,12 @@
-# Algorithimia Continuity Tracker
+# Algorithmia Continuity Tracker
 
 This file records live direction that should survive context refreshes. Keep it short, implementation-facing, and update it when gameplay or canon decisions change.
 
 ## Current Gameplay Direction
 
 - Python-first remains the default player-code language.
+- Arcade mode is the encounter laboratory: bosses can be selected directly while their campaign routes remain connected to the same encounter implementations.
+- Sorting Slime is the first Phaser encounter. Its movement arena, hazards, command phase, and repair editor establish the runtime pattern for future real-time bosses.
 - "Chapters" should mean multi-room routes with multiple enemies before a boss, not one square room and one fight.
 - "Rooms" are connected spaces in a route graph, not stacked floors. They can branch left/right/up/down, allow backtracking, and may be outdoor fields, caves, archives, vents, courts, or other story-specific spaces.
 - Levels 0-1 are still prototype/tutorial-scale. Chapter 2 and beyond should increasingly feel like fuller chapter routes.

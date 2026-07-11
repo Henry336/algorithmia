@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "algorithimia"
-version = "0.1.0"
-description = "A DSA programming RPG prototype."
+version = "0.2.0"
+description = "Legacy validation and trace engine for the Algorithmia programming RPG."
 requires-python = ">=3.11"
 
 [tool.setuptools.packages.find]

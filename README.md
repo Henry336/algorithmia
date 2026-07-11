@@ -1,115 +1,137 @@
-# Algorithimia
+# Algorithmia
 
-Algorithimia is a browser-based programming RPG. Data structures and algorithms are the physical rules of the world: the player is a junior Patchrunner repairing broken civic systems by writing and reasoning about code.
+Algorithmia is a browser-based programming RPG where algorithms are physical rules of the world. The player is Patchrunner, a technician who survives corrupted systems, reaches vulnerable enemies, and writes Python repairs that change the battlefield itself.
 
-The player-facing game lives in `web/` — a plain static site (no build step, no backend) with a title screen and three tile-based explorable chapters so far, each with dialogue, hidden secrets, and Pokémon-style battle-screen transitions into encounters:
+The browser game under `web/` is the primary product. The older `algorithimia/` Python package remains as a deterministic validation and trace reference; its misspelled module name is preserved for compatibility.
 
-- **Chapter 0 — Queueworks Intake**: the Sorting Slime (rune ordering, public + sealed rounds).
-- **Chapter 1 — The Dispatcher's Line**: a Line Cutter minor fight and The Dispatcher boss, both ticket-service-order puzzles mirroring the CLI's urgent/stable-tie/starvation-guard policy.
-- **Chapter 2 — Heaplight Foundry**: an Ember Sorter minor fight and The Heap Warden boss, both max-priority-first battles (a real priority-queue/heap-extraction rule, ties broken by arrival order) reusing the same battle-screen UI with a different policy plugged in.
-- **Chapter 3 — Array Plains**: a Shuffle Imp minor fight and Lord Bogo, Duke of Randomness, as the first boss requiring the player to actually write and run a `solve(values)` function rather than click tokens — real code, executed client-side in a Web Worker with a hard timeout so an infinite loop can't freeze the page.
+## Current State
 
-Art is currently hand-authored placeholder pixel art rendered to `<canvas>`, meant to be swapped for real exported sprites later without touching game logic.
+- Campaign levels 0-4 are playable as connected room routes.
+- Arcade Mode is available from the title screen.
+- Sorting Slime is the first Phaser-powered real-time boss encounter.
+- Later encounters currently use the earlier DOM battle systems and will migrate to Phaser incrementally.
+- Python is the default repair dialect.
+- Saves use browser `localStorage`.
+- Vercel builds and deploys the static `web/` output.
 
-The Python package in `algorithimia/` is the original CLI prototype and encounter/validation engine. It is no longer the player-facing surface; it stays useful as an internal sandbox for deterministic encounter logic and for a future in-browser code-execution engine.
+## Quick Start
 
-## Play the browser game
+Requirements:
 
-No install or build step. From the repo root:
+- Node.js 20 or newer
+- npm
+- Python 3.11 or newer for the legacy engine and unit tests
+
+From the repository root:
 
 ```bash
-python3 -m http.server 8000 --directory web
+npm install
+npm run build
+npm run dev
 ```
 
-Then open `http://localhost:8000` in a browser. Or just open `web/index.html` directly as a file.
+Open [http://localhost:4173](http://localhost:4173).
 
-Controls: Arrow keys / WASD to move, Space / Enter to interact, or the on-screen buttons on touch devices. Walk into Mira to talk, walk into the Sorting Slime to trigger the battle screen. Sort the visible rune spill into ascending order, pass the public round, then pass a second sealed round with a freshly shuffled set to prove the repair generalizes. A correct repair opens the Queueworks gate and the room stays updated across a reload (progress is saved to `localStorage`).
+Useful routes:
 
-### Deploying
+- `/` - title screen, campaign, Arcade Mode
+- `/?admin=1` - unlock every level and show encounter skip controls
+- `/?admin=0` - disable persisted admin mode
+- `/?admin=1&encounter=sorting-slime` - launch the Phaser Sorting Slime battle directly
 
-The site is static, so any static host works. `vercel.json` at the repo root points Vercel at `web/` as the output directory with no build command — connect the repo and deploy as-is.
+The Phaser runtime is installed through npm and copied to the generated `web/vendor/` directory by `npm run build`. Do not edit or commit `web/vendor/phaser.min.js`.
 
-### Structure
+## Controls
 
-```
-web/
-  index.html          title screen, chapter select, options, room, battle, dialogue markup
-  css/style.css        all screen styling, responsive room scaling, mobile d-pad
-  js/
-    main.js             screen state machine entry point
-    state.js             localStorage save/load
-    title.js             title/menu/chapter-select/options wiring
-    room.js               tile-grid overworld engine + Chapter 0 map
-    chapter1.js            tile-grid overworld engine + Chapter 1 map (Dispatcher's Line)
-    chapter2.js             tile-grid overworld engine + Chapter 2 map (Heaplight Foundry)
-    chapter3.js              tile-grid overworld engine + Chapter 3 map (Array Plains)
-    battle.js              Sorting Slime battle screen (public + sealed rounds)
-    ticketBattle.js          generic pick-the-order battle screen (public + sealed rounds),
-                              driven by a pluggable `solve(items)` policy + display config
-    codeBattle.js             real solve(values) code editor battle screen, run in a
-                               Web Worker with a hard timeout (public + sealed rounds)
-    triagePolicy.js           urgent/stable-tie/starvation-guard policy, ported from encounters.py
-    priorityPolicy.js          max-priority-first policy (stable ties by arrival), for Chapter 2
-    dialogue.js             typewriter dialogue box
-    sprites.js               placeholder pixel-art matrices + palettes
-    pixelart.js               matrix -> <canvas> renderer
-```
+Overworld:
 
-Replacing placeholder art: once real sprite sheets exist, swap the relevant `applyPixelArt(...)` call for an `<img>`/sprite-sheet draw — the matrices in `sprites.js` are meant to be thrown away, not maintained long-term.
+- Move: WASD or arrow keys
+- Interact/advance dialogue: Space or Enter
 
-## Python CLI / encounter engine
+Sorting Slime battle:
 
-The original CLI prototype still runs standalone and its test suite still passes; it is kept as the deterministic reference implementation for encounter validation logic (e.g. the Sorting Slime insertion-sort contract) and as a candidate engine for real in-browser code execution later.
+- Move: WASD or arrow keys
+- Choose commands: A/D or left/right
+- Confirm a command: Space or Enter
+- Repair editor: Tab indents, Shift+Tab unindents, and Space behaves normally
 
-```powershell
-python -m algorithimia
-python -m algorithimia --encounter triage_line
-python -m algorithimia --trace-html build/sorting-trace.html
+## Verification
+
+JavaScript syntax and build scripts:
+
+```bash
+npm run check
 ```
 
-On Windows installations that use the Python launcher, substitute `py` for `python`.
+Browser encounter smoke, including campaign and Arcade launch paths:
 
-### Test
-
-```powershell
-python -m unittest
+```bash
+npm run smoke:slime
 ```
 
-GitHub Actions runs the same unit-test suite on pushes to `main` and on pull requests.
+The smoke command starts a temporary local server when one is not already running. Install a Playwright browser once if prompted:
 
-## Encounter Contracts
-
-### Sorting Slime
-
-The reference Python solution:
-
-```python
-def solve(values):
-    ordered = list(values)
-    for i in range(1, len(ordered)):
-        current = ordered[i]
-        j = i - 1
-        while j >= 0 and ordered[j] > current:
-            ordered[j + 1] = ordered[j]
-            j -= 1
-        ordered[j + 1] = current
-    return ordered
+```bash
+npx playwright install chromium
 ```
 
-The engine runs several deterministic public cases plus sealed certification cases and reports whether the encounter is cleared. It rejects `sorted(...)`, indirect built-in `sorted` bindings, and `.sort()` so the player demonstrates visible sorting logic. Certification cases are shown as sealed pass/fail checks so hidden inputs stay hidden while memorized public-fixture answers still fail. The browser battle screen mirrors this same public-round-then-sealed-round pedagogy with a manual rune-swap puzzle instead of submitted Python.
+Python reference-engine tests:
 
-### Triage Line Dispatcher Trial
-
-The player submits Python that defines:
-
-```python
-def solve(tickets):
-    # Return ticket ids in service order.
-    return []
+```bash
+python -m unittest discover -s tests
 ```
 
-Each ticket is a JSON-compatible object with `id`, `arrival`, and `urgent`. Urgent tickets may advance, ties keep arrival order, and after two urgent services the oldest waiting ordinary ticket must be served if one exists. Not yet wired into the browser game.
+On Windows, `py -m unittest discover -s tests` is also valid.
 
-## Security Note
+## Repository Map
 
-Player Python (CLI path only, not yet exposed in the browser) runs in a child process with timeout, isolated mode, a minimal environment, restricted builtins, JSON-only I/O, source/result size caps, and a syntax preflight that rejects imports, dunder introspection, and dynamic evaluation/introspection helpers. This is a baseline local safety model, not a complete sandbox for hostile untrusted code — real in-browser or public code execution will need a stronger sandbox before it ships.
+```text
+web/                         Player-facing browser game
+  index.html                 Screens and shared battle/editor markup
+  css/style.css              Current visual system and responsive layouts
+  js/main.js                 Screen and route entry point
+  js/room.js                 Queueworks campaign room
+  js/chapter1.js ...         Later campaign routes
+  js/slimeArenaEngine.js     Phaser movement, hazards, collisions, and phases
+  js/slimeArenaBattle.js     Sorting Slime DOM/Phaser/Python coordination
+  js/pythonRepairRuntime.js  Current limited browser Python subset
+  assets/                    Character and audio assets
+
+algorithimia/                Legacy Python validation and trace package
+tests/                       Python contracts and browser smoke coverage
+scripts/                     Build and development helpers
+docs/                        Architecture, continuity, migration, and safety notes
+```
+
+## Documentation
+
+- [Contributing](CONTRIBUTING.md) - setup, workflow, conventions, and change checklist
+- [Architecture](docs/ARCHITECTURE.md) - runtime boundaries and module ownership
+- [Project continuity](docs/ALGORITHMIA_CONTINUITY.md) - active gameplay and canon constraints
+- [Phaser migration](docs/PHASER_MIGRATION.md) - what has migrated and what has not
+- [Safe execution](docs/SAFE_EXECUTION.md) - code-execution limits and security boundaries
+- [Changelog](CHANGELOG.md) - release-level history
+- [Story so far](ALGORITHMIA_STORY_SO_FAR.md) - working canon and narrative decisions
+- [Chronological story overview](ALGORITHMIA_CHRONOLOGICAL_STORY_OVERVIEW.md) - story events in timeline order
+- [Henry's vision](HENRY_VISION.md) - original product intent; some implementation details are historical
+
+## Adding an Encounter
+
+1. Define the enemy's battlefield rule and what Repair changes physically.
+2. Add deterministic public and sealed cases.
+3. Keep campaign progress behind the normal win callback.
+4. Add an admin completion path.
+5. Add reachability coverage for required room interactions.
+6. Add or extend a browser smoke path before considering the encounter complete.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) and [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full workflow.
+
+## Deployment
+
+Vercel installs npm dependencies, runs `npm run build`, and publishes `web/` according to `vercel.json`. Pull-request and branch pushes receive Preview deployments; `main` is the production source.
+
+Before pushing to `main`, run the build, syntax checks, Python suite, and relevant browser smoke.
+
+## Naming Note
+
+The project is **Algorithmia**. Older code and historical files may use `algorithimia`; do not introduce that spelling in new player-facing text or documentation. Renaming the Python import package is a separate compatibility migration and should not be mixed into gameplay changes.

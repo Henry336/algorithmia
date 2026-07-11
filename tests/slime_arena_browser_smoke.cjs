@@ -1,21 +1,53 @@
 const path = require("node:path");
-const os = require("node:os");
-const Module = require("node:module");
-
-const bundledModules = path.join(os.homedir(), ".cache", "codex-runtimes", "codex-primary-runtime", "dependencies", "node", "node_modules");
-const bundledPlaywrightCore = path.join(bundledModules, ".pnpm", "playwright-core@1.61.1", "node_modules");
-process.env.NODE_PATH = [process.env.NODE_PATH, bundledModules, bundledPlaywrightCore].filter(Boolean).join(path.delimiter);
-Module.Module._initPaths();
-
-let playwright;
-try {
-  playwright = require("playwright");
-} catch {
-  playwright = require(path.join(bundledModules, "playwright"));
-}
-const { chromium } = playwright;
+const { existsSync } = require("node:fs");
+const { spawn } = require("node:child_process");
+const { chromium } = require("playwright");
 
 const baseUrl = process.env.ALGORITHMIA_BASE_URL || "http://127.0.0.1:4173";
+let localServer = null;
+
+async function canReachServer() {
+  try {
+    const response = await fetch(baseUrl);
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
+async function ensureServer() {
+  if (await canReachServer()) return;
+  const target = new URL(baseUrl);
+  if (!["127.0.0.1", "localhost"].includes(target.hostname)) {
+    throw new Error(`Cannot reach external smoke target: ${baseUrl}`);
+  }
+
+  localServer = spawn(process.execPath, [path.resolve("scripts", "serve-web.mjs"), "--port", target.port || "4173"], {
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+  let serverError = "";
+  localServer.stderr.on("data", (chunk) => {
+    serverError += chunk.toString();
+  });
+
+  for (let attempt = 0; attempt < 40; attempt += 1) {
+    if (await canReachServer()) return;
+    await new Promise((resolve) => setTimeout(resolve, 250));
+  }
+  throw new Error(`Local server did not start. ${serverError}`);
+}
+
+async function launchBrowser() {
+  try {
+    return await chromium.launch({ headless: true });
+  } catch (error) {
+    const edgePath = "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe";
+    if (process.platform === "win32" && existsSync(edgePath)) {
+      return chromium.launch({ headless: true, executablePath: edgePath });
+    }
+    throw new Error(`${error.message}\nInstall a browser with: npx playwright install chromium`);
+  }
+}
 
 async function openArena(page) {
   await page.goto(`${baseUrl}/?admin=1&encounter=sorting-slime`, { waitUntil: "networkidle" });
@@ -23,8 +55,8 @@ async function openArena(page) {
 }
 
 async function main() {
-  const edgePath = "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe";
-  const browser = await chromium.launch({ headless: true, executablePath: edgePath });
+  await ensureServer();
+  const browser = await launchBrowser();
   try {
     const errors = [];
     const failedRequests = [];
@@ -78,8 +110,10 @@ async function main() {
             if ordered[j] > ordered[j + 1]:
                 ordered[j], ordered[j + 1] = ordered[j + 1], ordered[j]
     return ordered`);
-    const audioStatus = await page.evaluate(async () => (await fetch("assets/audio/ui-command-select.wav")).status);
-    if (audioStatus !== 200) throw new Error(`Command-select sound returned ${audioStatus}`);
+    const audioResponse = await page.request.get(`${baseUrl}/assets/audio/ui-command-select.wav`);
+    if (!audioResponse.ok() || (await audioResponse.body()).length === 0) {
+      throw new Error(`Command-select sound returned ${audioResponse.status()} or an empty body`);
+    }
     await page.locator('[data-action="run-slime-repair"]').click();
     await page.locator("#slime-repair-feedback.success").waitFor({ timeout: 5000 });
     await page.locator("#slime-repair-panel").waitFor({ state: "hidden", timeout: 4000 });
@@ -141,6 +175,7 @@ async function main() {
     console.log("Sorting Slime Phaser browser smoke passed.");
   } finally {
     await browser.close();
+    if (localServer && !localServer.killed) localServer.kill();
   }
 }
 

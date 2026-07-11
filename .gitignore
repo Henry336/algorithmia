@@ -9,4 +9,3 @@ build/
 node_modules/
 web/vendor/
 *.egg-info/
-.claude/
