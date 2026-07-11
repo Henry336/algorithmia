@@ -6,9 +6,14 @@ const AUDIO_ASSETS = {
 };
 
 const audioCache = new Map();
+const musicBufferCache = new Map();
 let currentMusicKey = null;
 let lastMusicOptions = {};
 let waitingForGesture = false;
+let audioContext = null;
+let musicSource = null;
+let musicGain = null;
+let musicRequestId = 0;
 
 function getAudio(key) {
   const config = AUDIO_ASSETS[key];
@@ -28,7 +33,10 @@ function armGestureRetry() {
   waitingForGesture = true;
   const retry = () => {
     waitingForGesture = false;
-    if (currentMusicKey) playMusic(currentMusicKey, lastMusicOptions);
+    if (audioContext?.state === "suspended") {
+      audioContext.resume().catch(() => {});
+    }
+    if (currentMusicKey && !musicSource) playMusic(currentMusicKey, lastMusicOptions);
     window.removeEventListener("pointerdown", retry);
     window.removeEventListener("keydown", retry);
   };
@@ -46,6 +54,44 @@ function safelyPlay(audio) {
   }
 }
 
+function getAudioContext() {
+  if (!audioContext) {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return null;
+    audioContext = new AudioContextClass();
+  }
+  return audioContext;
+}
+
+async function getMusicBuffer(key) {
+  if (musicBufferCache.has(key)) return musicBufferCache.get(key);
+  const config = AUDIO_ASSETS[key];
+  const context = getAudioContext();
+  if (!context) return null;
+  const response = await fetch(config.src);
+  const arrayBuffer = await response.arrayBuffer();
+  const audioBuffer = await context.decodeAudioData(arrayBuffer);
+  musicBufferCache.set(key, audioBuffer);
+  return audioBuffer;
+}
+
+function stopCurrentMusicSource({ resetKey = true } = {}) {
+  if (musicSource) {
+    try {
+      musicSource.stop();
+    } catch {
+      // The source may already have ended or been stopped by the browser.
+    }
+    musicSource.disconnect();
+    musicSource = null;
+  }
+  if (musicGain) {
+    musicGain.disconnect();
+    musicGain = null;
+  }
+  if (resetKey) currentMusicKey = null;
+}
+
 export function playSound(key, options = {}) {
   const audio = getAudio(key);
   audio.volume = options.volume ?? AUDIO_ASSETS[key].volume;
@@ -54,31 +100,60 @@ export function playSound(key, options = {}) {
 }
 
 export function playMusic(key, options = {}) {
-  const nextAudio = getAudio(key);
   lastMusicOptions = options;
-  if (currentMusicKey && currentMusicKey !== key) {
-    const oldAudio = getAudio(currentMusicKey);
-    oldAudio.pause();
-    oldAudio.currentTime = 0;
+  if (currentMusicKey === key && musicSource && !options.restart) return;
+
+  const context = getAudioContext();
+  if (!context) {
+    const fallbackAudio = getAudio(key);
+    fallbackAudio.loop = options.loop ?? Boolean(AUDIO_ASSETS[key].loop);
+    fallbackAudio.volume = options.volume ?? AUDIO_ASSETS[key].volume;
+    if (fallbackAudio.paused || options.restart) {
+      if (options.restart) fallbackAudio.currentTime = 0;
+      safelyPlay(fallbackAudio);
+    }
+    currentMusicKey = key;
+    return;
   }
+
+  const requestId = (musicRequestId += 1);
+  stopCurrentMusicSource({ resetKey: false });
   currentMusicKey = key;
-  nextAudio.loop = options.loop ?? Boolean(AUDIO_ASSETS[key].loop);
-  nextAudio.volume = options.volume ?? AUDIO_ASSETS[key].volume;
-  if (nextAudio.paused || options.restart) {
-    if (options.restart) nextAudio.currentTime = 0;
-    safelyPlay(nextAudio);
-  }
+  getMusicBuffer(key).then((buffer) => {
+    if (!buffer || requestId !== musicRequestId || currentMusicKey !== key) return;
+    const source = context.createBufferSource();
+    const gain = context.createGain();
+    source.buffer = buffer;
+    source.loop = options.loop ?? Boolean(AUDIO_ASSETS[key].loop);
+    gain.gain.value = options.volume ?? AUDIO_ASSETS[key].volume;
+    source.connect(gain);
+    gain.connect(context.destination);
+    musicSource = source;
+    musicGain = gain;
+    source.start(0);
+    if (context.state === "suspended") {
+      context.resume().catch(() => armGestureRetry());
+      armGestureRetry();
+    }
+  }).catch(() => {
+    armGestureRetry();
+  });
 }
 
 export function stopMusic(key = currentMusicKey) {
   if (!key) return;
-  const audio = getAudio(key);
-  audio.pause();
-  audio.currentTime = 0;
+  stopCurrentMusicSource({ resetKey: currentMusicKey === key });
+  if (audioCache.has(key)) {
+    const audio = getAudio(key);
+    audio.pause();
+    audio.currentTime = 0;
+  }
   if (currentMusicKey === key) currentMusicKey = null;
 }
 
 export function stopAllAudio() {
+  musicRequestId += 1;
+  stopCurrentMusicSource();
   audioCache.forEach((audio) => {
     audio.pause();
     audio.currentTime = 0;

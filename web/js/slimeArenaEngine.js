@@ -33,6 +33,7 @@ function createSceneClass(Phaser, callbacks) {
       this.guardUntil = 0;
       this.invulnerableUntil = 0;
       this.waveEvents = [];
+      this.hazardEffects = [];
       this.waveNumber = 0;
       this.patternStep = 0;
     }
@@ -216,6 +217,14 @@ function createSceneClass(Phaser, callbacks) {
       }
     }
 
+    trackHazardEffect(effect) {
+      this.hazardEffects.push(effect);
+      effect.once("destroy", () => {
+        this.hazardEffects = this.hazardEffects.filter((candidate) => candidate !== effect);
+      });
+      return effect;
+    }
+
     startWave({ resetPlayer = true } = {}) {
       if (this.mode === "finished") return;
       this.clearWave();
@@ -249,6 +258,7 @@ function createSceneClass(Phaser, callbacks) {
       this.mode = "command";
       this.player.setVelocity(0, 0);
       this.clearWaveEvents();
+      this.clearHazardEffects();
       this.minions.children.each((minion) => {
         if (!minion?.active) return;
         this.tweens.add({ targets: minion, alpha: 0, duration: 180, onComplete: () => minion.destroy() });
@@ -472,9 +482,24 @@ function createSceneClass(Phaser, callbacks) {
       this.waveEvents = [];
     }
 
+    clearHazardEffects() {
+      this.hazardEffects.forEach((effect) => {
+        if (!effect?.active) return;
+        this.tweens.killTweensOf(effect);
+        effect.destroy();
+      });
+      this.hazardEffects = [];
+    }
+
     clearWave() {
       this.clearWaveEvents();
-      if (this.minions) this.minions.clear(true, true);
+      this.clearHazardEffects();
+      if (this.minions) {
+        this.minions.children.each((minion) => {
+          if (minion?.active) this.tweens.killTweensOf(minion);
+        });
+        this.minions.clear(true, true);
+      }
     }
   };
 }
@@ -555,6 +580,7 @@ export function slimeArenaDebugState() {
     nullShieldHp: activeScene.nullShieldHp,
     guardRemaining: Math.max(0, activeScene.guardUntil - activeScene.time.now),
     patternStep: activeScene.patternStep,
+    hazardEffects: activeScene.hazardEffects.length,
   };
 }
 

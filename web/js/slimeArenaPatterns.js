@@ -14,7 +14,7 @@ export function spawnInsertionMarch(scene, Phaser) {
     const warningY = fromTop
       ? arenaRowY((height - 1) / 2)
       : arenaRowY(SLIME_ARENA.rows - 1 - (height - 1) / 2);
-    const warning = scene.add.rectangle(SLIME_ARENA.width - 46, warningY, 12, Math.max(42, height * 58), 0x8eeaff, 0.22).setDepth(2);
+    const warning = scene.trackHazardEffect(scene.add.rectangle(SLIME_ARENA.width - 46, warningY, 12, Math.max(42, height * 58), 0x8eeaff, 0.22).setDepth(2));
     scene.tweens.add({ targets: warning, alpha: 0.72, duration: 150, yoyo: true, repeat: 2, onComplete: () => warning.destroy() });
 
     for (let index = 0; index < height; index += 1) {
@@ -29,7 +29,7 @@ export function spawnInsertionMarch(scene, Phaser) {
 
   const gap = Phaser.Math.Between(1, SLIME_ARENA.rows - 2);
   scene.patternStep += 1;
-  const warning = scene.add.rectangle(SLIME_ARENA.width - 46, arenaRowY(gap), 12, 58, 0xc66cff, 0.24).setDepth(2);
+  const warning = scene.trackHazardEffect(scene.add.rectangle(SLIME_ARENA.width - 46, arenaRowY(gap), 12, 58, 0xc66cff, 0.24).setDepth(2));
   scene.tweens.add({ targets: warning, alpha: 0.75, duration: 180, yoyo: true, repeat: 2, onComplete: () => warning.destroy() });
 
   for (let row = 0; row < SLIME_ARENA.rows; row += 1) {
@@ -50,7 +50,7 @@ export function spawnMergeFlood(scene, Phaser) {
   for (let index = 0; index < count; index += 1) {
     const x = scene.repaired ? anchorX + (index - 1) * 44 : Phaser.Math.Between(170, 730);
     const y = scene.repaired ? anchorY : Phaser.Math.Between(SLIME_ARENA.floorTop, SLIME_ARENA.floorBottom);
-    const warning = scene.add.circle(x, y, 24, 0xc66cff, 0.2).setStrokeStyle(2, 0xf0b2ff, 0.8).setDepth(3);
+    const warning = scene.trackHazardEffect(scene.add.circle(x, y, 24, 0xc66cff, 0.2).setStrokeStyle(2, 0xf0b2ff, 0.8).setDepth(3));
     scene.tweens.add({ targets: warning, scaleX: 1.35, scaleY: 1.35, alpha: 0.8, duration: 240, yoyo: true, repeat: 1 });
     scene.waveEvents.push(scene.time.delayedCall(420, () => {
       warning.destroy();

@@ -209,6 +209,11 @@ async function main() {
       throw new Error(`Phase 2 did not compile a fresh shield: ${JSON.stringify(mergeState)}`);
     }
     await page.screenshot({ path: path.resolve("build", "slime-phase-2.png"), fullPage: true });
+    await page.evaluate(async () => (await import("./js/slimeArenaEngine.js")).slimeArenaAdminOpenCommandWindow());
+    const phase2CommandState = await page.evaluate(async () => (await import("./js/slimeArenaEngine.js")).slimeArenaDebugState());
+    if (phase2CommandState.hazardEffects !== 0) {
+      throw new Error(`Phase 2 warnings remained after command open: ${JSON.stringify(phase2CommandState)}`);
+    }
 
     await page.evaluate(async () => (await import("./js/slimeArenaEngine.js")).slimeArenaAdminSetPhase(3));
     await page.waitForTimeout(1800);

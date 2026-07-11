@@ -16,6 +16,8 @@ Significant player-facing and developer-facing changes are recorded here. Detail
 
 ### Combat
 
+- Switched Sorting Slime boss music to Web Audio buffer looping so phase 1/2 and phase 3 tracks can loop seamlessly until the active phase changes or the boss ends.
+- Fixed phase-2 Merge Flood warning circles that could remain on screen after the command window cancelled their cleanup timer.
 - Integrated Sorting Slime phase music, phase-3 music, and the shared hit sound for player, boss, and shield damage.
 - Added a small browser audio helper so command sounds, hit effects, and looping encounter music use the same autoplay-safe behavior.
 - Reframed all three Sorting Slime repairs as beginner code-completion exercises with most control flow prewritten, concrete input/output examples, and optional two-step conceptual and syntax hints.
