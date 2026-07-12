@@ -1,6 +1,11 @@
 const AUDIO_ASSETS = {
   commandSelect: { src: "assets/audio/ui-command-select.wav", volume: 0.55 },
   hitHurt: { src: "assets/audio/hit-hurt.wav", volume: 0.72 },
+  slimeBossTemporaryMotorist: {
+    src: "assets/audio/music/slime-boss-midnight-motorist-recreation.wav",
+    volume: 0.34,
+    loop: true,
+  },
   slimeBossPhase12: { src: "assets/audio/music/slime-boss-phase-1-2.wav", volume: 0.36, loop: true },
   slimeBossPhase3: { src: "assets/audio/music/slime-boss-phase-3.wav", volume: 0.38, loop: true },
 };

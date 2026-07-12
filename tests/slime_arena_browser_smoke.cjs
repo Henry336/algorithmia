@@ -162,6 +162,7 @@ async function main() {
     const audioAssets = [
       "assets/audio/ui-command-select.wav",
       "assets/audio/hit-hurt.wav",
+      "assets/audio/music/slime-boss-midnight-motorist-recreation.wav",
       "assets/audio/music/slime-boss-phase-1-2.wav",
       "assets/audio/music/slime-boss-phase-3.wav",
     ];

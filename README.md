@@ -129,6 +129,7 @@ docs/                        Architecture, continuity, migration, and safety not
 - [Project continuity](docs/ALGORITHMIA_CONTINUITY.md) - active gameplay and canon constraints
 - [Phaser migration](docs/PHASER_MIGRATION.md) - what has migrated and what has not
 - [Safe execution](docs/SAFE_EXECUTION.md) - code-execution limits and security boundaries
+- [Audio direction](docs/AUDIO_DIRECTION.md) - reusable music structure, motif, and loop notes
 - [Changelog](CHANGELOG.md) - release-level history
 - [Story so far](ALGORITHMIA_STORY_SO_FAR.md) - working canon and narrative decisions
 - [Chronological story overview](ALGORITHMIA_CHRONOLOGICAL_STORY_OVERVIEW.md) - story events in timeline order

@@ -51,6 +51,10 @@ const repairRequirementEl = document.getElementById("slime-repair-requirement");
 const repairExampleEl = document.getElementById("slime-repair-example");
 const repairHintEl = document.getElementById("slime-repair-hint");
 
+// Temporary music swap while the Slime boss theme is being prototyped.
+// Change this back to phase-specific keys when the final phase themes return.
+const SLIME_BOSS_MUSIC = "slimeBossTemporaryMotorist";
+
 let onWinCallback = null;
 const savedCodeByPhase = new Map();
 let repairTimer = null;
@@ -300,7 +304,7 @@ function handleDefeat() {
 }
 
 function retryBattle() {
-  playMusic("slimeBossPhase12", { restart: true });
+  playMusic(SLIME_BOSS_MUSIC, { restart: true });
   setState({ playerHp: MAX_HP, playerFocus: MAX_FOCUS });
   updateVitals();
   hideOverlays();
@@ -338,7 +342,7 @@ const callbacks = {
     statusEl.textContent = message;
   },
   onWave({ phase, wave, name, repaired }) {
-    playMusic(phase >= 3 ? "slimeBossPhase3" : "slimeBossPhase12");
+    playMusic(SLIME_BOSS_MUSIC);
     activePhase = phase;
     hideOverlays();
     setPointerLocked(true);
@@ -409,7 +413,7 @@ export function startSortingSlimeArenaBattle({ onWin }) {
   shell.classList.remove("hidden");
   setPointerLocked(true);
   screenBattle.classList.add("phaser-slime-active");
-  playMusic("slimeBossPhase12", { restart: true });
+  playMusic(SLIME_BOSS_MUSIC, { restart: true });
 
   transition.classList.add("active");
   window.setTimeout(() => {

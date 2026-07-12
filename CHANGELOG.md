@@ -16,6 +16,7 @@ Significant player-facing and developer-facing changes are recorded here. Detail
 
 ### Combat
 
+- Added the temporary full-fight Sorting Slime track `Midnight Motorist Recreation` while the final phase-specific boss themes are being worked out.
 - Switched Sorting Slime boss music to Web Audio buffer looping so phase 1/2 and phase 3 tracks can loop seamlessly until the active phase changes or the boss ends.
 - Fixed phase-2 Merge Flood warning circles that could remain on screen after the command window cancelled their cleanup timer.
 - Integrated Sorting Slime phase music, phase-3 music, and the shared hit sound for player, boss, and shield damage.
