@@ -20,7 +20,7 @@ export function spawnInsertionMarch(scene, Phaser) {
     for (let index = 0; index < height; index += 1) {
       const row = fromTop ? index : SLIME_ARENA.rows - 1 - index;
       const minion = scene.minions.create(SLIME_ARENA.width + 44, arenaRowY(row), "sorting-slime");
-      minion.setDisplaySize(56, 56).setDepth(5).setVelocityX(-220).setAlpha(0.8);
+      minion.setDisplaySize(56, 56).setDepth(5).setVelocityX(-154).setAlpha(0.8);
       minion.body.setSize(34, 34).setOffset(23, 23);
       scene.tweens.add({ targets: minion, scaleY: minion.scaleY * 0.82, duration: 340, yoyo: true, repeat: -1 });
     }
@@ -35,7 +35,7 @@ export function spawnInsertionMarch(scene, Phaser) {
   for (let row = 0; row < SLIME_ARENA.rows; row += 1) {
     if (row === gap) continue;
     const minion = scene.minions.create(SLIME_ARENA.width + 44, arenaRowY(row), "sorting-slime");
-    minion.setDisplaySize(56, 56).setDepth(5).setVelocityX(-252).setAlpha(0.96);
+    minion.setDisplaySize(56, 56).setDepth(5).setVelocityX(-176).setAlpha(0.96);
     minion.body.setSize(34, 34).setOffset(23, 23);
     scene.tweens.add({ targets: minion, scaleY: minion.scaleY * 0.82, duration: 340, yoyo: true, repeat: -1 });
   }
