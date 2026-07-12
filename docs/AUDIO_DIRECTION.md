@@ -6,9 +6,7 @@ This file captures practical music notes so prototype tracks can become reusable
 
 Source file: `Midnight Motorist Recreation.wav`
 
-Deployed copy: `web/assets/audio/music/slime-boss-midnight-motorist-recreation.wav`
-
-Current use: temporary single looping track for the whole Sorting Slime boss fight. The original phase 1/2 and phase 3 tracks are still in the repo and can be restored later by changing `SLIME_BOSS_MUSIC` in `web/js/slimeArenaBattle.js`.
+Current use: reference only. This was briefly used as a temporary full-fight Sorting Slime track, then removed from deployed assets when the boss returned to phase-specific music.
 
 Observed structure from the mixed WAV:
 
@@ -31,3 +29,9 @@ Ideas to reuse in final original themes:
 - Let phase 1/2 use the cleaner square-wave drive.
 - Let phase 3 keep the same rhythm but add wrong notes, detuned doubles, or noisier percussion.
 - Preserve the 64-second reset idea for longer boss arrangements, but keep exported game loops clean at their loop boundary.
+
+## Sorting Slime Phase Loop Cleanup
+
+The original `slime-boss-phase-1-2.wav` and `slime-boss-phase-3.wav` exports were 51.2 seconds long, but only the first 12.8 seconds contained the intended loop. The remaining 38.4 seconds came from empty UltraBox pattern slots and exported as silence.
+
+The deployed phase files are now trimmed to 12.8 seconds so Web Audio loops the musical phrase immediately. When exporting from UltraBox, make sure unused timeline boxes are not included in the export unless silence is intentional.

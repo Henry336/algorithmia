@@ -162,14 +162,17 @@ async function main() {
     const audioAssets = [
       "assets/audio/ui-command-select.wav",
       "assets/audio/hit-hurt.wav",
-      "assets/audio/music/slime-boss-midnight-motorist-recreation.wav",
       "assets/audio/music/slime-boss-phase-1-2.wav",
       "assets/audio/music/slime-boss-phase-3.wav",
     ];
     for (const audioAsset of audioAssets) {
       const audioResponse = await page.request.get(`${baseUrl}/${audioAsset}`);
-      if (!audioResponse.ok() || (await audioResponse.body()).length === 0) {
+      const audioBody = await audioResponse.body();
+      if (!audioResponse.ok() || audioBody.length === 0) {
         throw new Error(`${audioAsset} returned ${audioResponse.status()} or an empty body`);
+      }
+      if (audioAsset.includes("slime-boss-phase") && audioBody.length > 4_000_000) {
+        throw new Error(`${audioAsset} appears to include exported silence; body was ${audioBody.length} bytes`);
       }
     }
     await page.locator('[data-action="run-slime-repair"]').click();
