@@ -103,6 +103,10 @@ async function main() {
     if (initialCombatState.nullShieldHp !== 100 || initialCombatState.repaired) {
       throw new Error(`Unexpected initial shield state: ${JSON.stringify(initialCombatState)}`);
     }
+    const initialStatus = await page.locator("#slime-arena-status").textContent();
+    if (!initialStatus.includes("Mira Vale: The slime has its shield up")) {
+      throw new Error(`Mira's opening repair guidance did not appear: ${JSON.stringify(initialStatus)}`);
+    }
 
     await page.keyboard.press("ArrowRight");
     await page.keyboard.press("ArrowRight");
@@ -125,6 +129,8 @@ async function main() {
     await page.keyboard.press("ArrowRight");
     await page.keyboard.press("Space");
     await page.locator("#slime-repair-panel:not(.hidden)").waitFor();
+    const repairOpenState = await page.evaluate(async () => (await import("./js/slimeArenaEngine.js")).slimeArenaDebugState());
+    if (repairOpenState.stunStars < 5) throw new Error(`Stun stars did not appear over the slime: ${JSON.stringify(repairOpenState)}`);
     const cursorDuringRepair = await page.locator("#slime-arena-shell").evaluate((element) => getComputedStyle(element).cursor);
     if (cursorDuringRepair === "none") throw new Error("Pointer should return for the repair editor.");
     await page.screenshot({ path: path.resolve("build", "slime-repair-desktop.png"), fullPage: true });
@@ -181,6 +187,10 @@ async function main() {
     const repairedCombatState = await page.evaluate(async () => (await import("./js/slimeArenaEngine.js")).slimeArenaDebugState());
     if (repairedCombatState.nullShieldHp !== 0 || !repairedCombatState.repaired) {
       throw new Error(`Repair did not breach the phase shield: ${JSON.stringify(repairedCombatState)}`);
+    }
+    const repairedStatus = await page.locator("#slime-arena-status").textContent();
+    if (!repairedStatus.includes("Mira Vale: Quick")) {
+      throw new Error(`Mira's post-repair attack prompt did not appear: ${JSON.stringify(repairedStatus)}`);
     }
 
     const laterRepairResults = await page.evaluate(async () => {

@@ -16,6 +16,9 @@ Significant player-facing and developer-facing changes are recorded here. Detail
 
 ### Combat
 
+- Reduced phase-1 Sorting Slime column frequency while keeping column travel speed unchanged.
+- Added Mira Vale guidance that tells beginners to repair the shielded slime before attacking and to strike once repairs weaken it.
+- Added yellow orbiting stun stars above Sorting Slime while the Repair editor is open.
 - Restored Sorting Slime to phase-specific music, removed the temporary deployed full-fight track, and trimmed the phase 1/2 and phase 3 WAVs to their 12.8-second musical loop so they no longer play 38 seconds of exported silence before looping.
 - Added the temporary full-fight Sorting Slime track `Midnight Motorist Recreation` while the final phase-specific boss themes are being worked out.
 - Switched Sorting Slime boss music to Web Audio buffer looping so phase 1/2 and phase 3 tracks can loop seamlessly until the active phase changes or the boss ends.

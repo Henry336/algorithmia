@@ -34,6 +34,8 @@ function createSceneClass(Phaser, callbacks) {
       this.invulnerableUntil = 0;
       this.waveEvents = [];
       this.hazardEffects = [];
+      this.stunStars = [];
+      this.stunStarAngle = 0;
       this.waveNumber = 0;
       this.patternStep = 0;
     }
@@ -176,6 +178,7 @@ function createSceneClass(Phaser, callbacks) {
       this.playerShield.setPosition(this.player.x, this.player.y);
       this.bossShield.setPosition(this.boss.x, this.boss.y);
       this.bossShieldInner.setPosition(this.boss.x, this.boss.y);
+      this.updateStunStars(time);
       if (this.guardUntil && time >= this.guardUntil) this.expireGuard();
       if (this.mode !== "dodge") return;
       const speed = SLIME_ARENA.playerSpeed;
@@ -242,10 +245,14 @@ function createSceneClass(Phaser, callbacks) {
         repaired: this.repaired,
       });
       const status = this.phase === 1
-        ? (this.repaired ? "REPAIRED: column heights now rise and fall in sorted order." : "Insertion March is unstable. The columns refuse to stop.")
+        ? (this.repaired
+          ? "Mira Vale: Quick, the slime's shield is down. Attack it while it's weakened!"
+          : this.waveNumber === 1
+            ? "Mira Vale: The slime has its shield up. Get close and repair it first if you want real damage. Dodge the columns and reach it."
+            : "Insertion March is unstable. The columns keep coming, but there is room to slip through.")
         : this.phase === 2
-          ? (this.repaired ? "REPAIRED: merge clusters now resolve at one readable locus." : "Merge Flood is scattering one-second allocations across the floor.")
-          : (this.repaired ? "REPAIRED: the spiral is clockwise, periodic, and leaves a stable spoke." : "Overflow Spiral changes direction without warning.");
+          ? (this.repaired ? "Mira Vale: The shield is open again. Hit it before the logic recompiles!" : "Merge Flood is scattering one-second allocations across the floor.")
+          : (this.repaired ? "Mira Vale: That's the opening. Strike before the overflow stabilizes!" : "Overflow Spiral changes direction without warning.");
       callbacks.onStatus(status);
       const spawnPattern = patternForPhase(this.phase);
       const delay = SLIME_ARENA.phaseSpawnDelayMs[this.phase][this.repaired ? "repaired" : "broken"];
@@ -310,11 +317,13 @@ function createSceneClass(Phaser, callbacks) {
       this.physics.pause();
       this.input.keyboard.enabled = false;
       this.boss.setTint(0x8eeaff);
+      this.startStunStars();
       callbacks.onRepairOpened();
     }
 
     resumeFromRepair({ repaired = false, quality = "none" } = {}) {
       if (this.mode !== "repair") return;
+      this.stopStunStars();
       if (repaired) {
         this.repaired = true;
         this.repairQuality = quality;
@@ -327,6 +336,51 @@ function createSceneClass(Phaser, callbacks) {
       this.physics.resume();
       this.mode = "transition";
       this.time.delayedCall(360, () => this.startWave());
+    }
+
+    startStunStars() {
+      this.stopStunStars();
+      for (let index = 0; index < 5; index += 1) {
+        const star = this.add.star(this.boss.x, this.boss.y - 114, 5, 5, 13, 0xffdd55, 0.95)
+          .setStrokeStyle(2, 0xffffff, 0.75)
+          .setBlendMode(Phaser.BlendModes.ADD)
+          .setDepth(11);
+        star.setData("offset", (index / 5) * Math.PI * 2);
+        this.tweens.add({
+          targets: star,
+          scaleX: 1.25,
+          scaleY: 1.25,
+          alpha: 0.45,
+          duration: 420 + index * 40,
+          yoyo: true,
+          repeat: -1,
+          ease: "Sine.easeInOut",
+        });
+        this.stunStars.push(star);
+      }
+    }
+
+    updateStunStars(time) {
+      if (!this.stunStars.length) return;
+      this.stunStarAngle = time * 0.004;
+      this.stunStars.forEach((star) => {
+        if (!star.active) return;
+        const angle = this.stunStarAngle + star.getData("offset");
+        star.setPosition(
+          this.boss.x + Math.cos(angle) * 58,
+          this.boss.y - 116 + Math.sin(angle) * 16,
+        );
+        star.setRotation(-angle);
+      });
+    }
+
+    stopStunStars() {
+      this.stunStars.forEach((star) => {
+        if (!star?.active) return;
+        this.tweens.killTweensOf(star);
+        star.destroy();
+      });
+      this.stunStars = [];
     }
 
     hitPlayer(minion) {
@@ -494,6 +548,7 @@ function createSceneClass(Phaser, callbacks) {
     clearWave() {
       this.clearWaveEvents();
       this.clearHazardEffects();
+      if (this.mode !== "repair") this.stopStunStars();
       if (this.minions) {
         this.minions.children.each((minion) => {
           if (minion?.active) this.tweens.killTweensOf(minion);
@@ -581,6 +636,7 @@ export function slimeArenaDebugState() {
     guardRemaining: Math.max(0, activeScene.guardUntil - activeScene.time.now),
     patternStep: activeScene.patternStep,
     hazardEffects: activeScene.hazardEffects.length,
+    stunStars: activeScene.stunStars.length,
   };
 }
 

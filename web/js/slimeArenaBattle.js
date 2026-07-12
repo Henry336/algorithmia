@@ -174,8 +174,8 @@ function showCommandWindow({ repaired, phase }) {
   setHidden(repairPanel, true);
   attackBtn.textContent = "Attack 5";
   statusEl.textContent = repaired
-    ? "The Null shield is breached. A direct strike will damage the core."
-    : "The 100 HP Null shield is still compiled. Repair is the clean breach.";
+    ? "Mira Vale: Quick, the slime's shield is down. Attack it while it's weakened!"
+    : "Mira Vale: The slime has its shield up. Repair it first if you want to do real damage.";
   setPointerLocked(true);
   selectCommand(0);
 }
@@ -207,7 +207,7 @@ function openRepair() {
   hintBtn.disabled = false;
   setHidden(repairHintEl, true);
   repairResultsEl.innerHTML = "";
-  repairFeedbackEl.textContent = "Sorting Slime is stunned. Your progress is saved when it wakes.";
+  repairFeedbackEl.textContent = "Sorting Slime is stunned. Patch the logic while it is dazed.";
   repairFeedbackEl.classList.remove("error", "success");
   repairDeadline = Date.now() + 60000;
   clearRepairTimer();

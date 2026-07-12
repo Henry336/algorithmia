@@ -13,7 +13,7 @@ export const SLIME_ARENA = Object.freeze({
   guardDurationMs: 5000,
   playerSpeed: 245,
   phaseSpawnDelayMs: Object.freeze({
-    1: Object.freeze({ broken: 620, repaired: 760 }),
+    1: Object.freeze({ broken: 980, repaired: 1120 }),
     2: Object.freeze({ broken: 720, repaired: 980 }),
     3: Object.freeze({ broken: 760, repaired: 1120 }),
   }),
