@@ -36,6 +36,7 @@ Significant player-facing and developer-facing changes are recorded here. Detail
 
 ### Combat
 
+- Fixed campaign-launched Sorting Slime battles ignoring movement input while the exploration Phaser instance remained alive, and removed the admin fallback that had hidden this failure from browser verification.
 - Gave Sorting Slime a dedicated Phaser animation controller with a breathing idle, jump-and-slam entrance, wave attack wind-up, shield recoil, core-damage reaction, repair stun, phase recompile, player-bump lunge, and defeat collapse. Animation states are exposed through the arena debug hook and covered by the browser smoke.
 - Reduced phase-1 Sorting Slime column frequency while keeping column travel speed unchanged.
 - Slowed phase-1 Sorting Slime columns by about 30% after playtesting showed speed was still too punishing for the first boss.

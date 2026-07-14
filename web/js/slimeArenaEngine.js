@@ -20,6 +20,59 @@ const SLIME_IMAGE = "assets/characters/sorting-slime/A_translucent_lime-green_ge
 let game = null;
 let activeScene = null;
 let canvasResizeObserver = null;
+const heldDirections = new Set();
+const directionByCode = new Map([
+  ["ArrowUp", "up"],
+  ["KeyW", "up"],
+  ["ArrowDown", "down"],
+  ["KeyS", "down"],
+  ["ArrowLeft", "left"],
+  ["KeyA", "left"],
+  ["ArrowRight", "right"],
+  ["KeyD", "right"],
+]);
+let movementInputInstalled = false;
+
+function installMovementInput() {
+  if (movementInputInstalled) return;
+  movementInputInstalled = true;
+  // Campaign exploration and this arena can briefly coexist. Listen at the
+  // window level so the foreground arena still receives movement keys.
+  window.addEventListener("keydown", onMovementKeyDown, true);
+  window.addEventListener("keyup", onMovementKeyUp, true);
+  window.addEventListener("blur", clearHeldDirections);
+}
+
+function removeMovementInput() {
+  if (!movementInputInstalled) return;
+  movementInputInstalled = false;
+  window.removeEventListener("keydown", onMovementKeyDown, true);
+  window.removeEventListener("keyup", onMovementKeyUp, true);
+  window.removeEventListener("blur", clearHeldDirections);
+  clearHeldDirections();
+}
+
+function onMovementKeyDown(event) {
+  const direction = directionByCode.get(event.code);
+  if (!direction || activeScene?.mode !== "dodge" || isEditableTarget(event.target)) return;
+  heldDirections.add(direction);
+  event.preventDefault();
+}
+
+function onMovementKeyUp(event) {
+  const direction = directionByCode.get(event.code);
+  if (direction) heldDirections.delete(direction);
+}
+
+function clearHeldDirections() {
+  heldDirections.clear();
+}
+
+function isEditableTarget(target) {
+  return target instanceof HTMLInputElement
+    || target instanceof HTMLTextAreaElement
+    || target?.isContentEditable;
+}
 
 function createSceneClass(Phaser, callbacks) {
   return class SortingSlimeScene extends Phaser.Scene {
@@ -167,10 +220,10 @@ function createSceneClass(Phaser, callbacks) {
       const speed = SLIME_ARENA.playerSpeed;
       let vx = 0;
       let vy = 0;
-      if (this.cursors.left.isDown || this.keys.left.isDown) vx -= speed;
-      if (this.cursors.right.isDown || this.keys.right.isDown) vx += speed;
-      if (this.cursors.up.isDown || this.keys.up.isDown) vy -= speed;
-      if (this.cursors.down.isDown || this.keys.down.isDown) vy += speed;
+      if (heldDirections.has("left") || this.cursors.left.isDown || this.keys.left.isDown) vx -= speed;
+      if (heldDirections.has("right") || this.cursors.right.isDown || this.keys.right.isDown) vx += speed;
+      if (heldDirections.has("up") || this.cursors.up.isDown || this.keys.up.isDown) vy -= speed;
+      if (heldDirections.has("down") || this.cursors.down.isDown || this.keys.down.isDown) vy += speed;
       if (vx && vy) {
         vx *= 0.707;
         vy *= 0.707;
@@ -254,6 +307,7 @@ function createSceneClass(Phaser, callbacks) {
     openCommandWindow() {
       if (this.mode !== "dodge") return;
       this.mode = "command";
+      clearHeldDirections();
       this.player.setVelocity(0, 0);
       this.clearWaveEvents();
       this.clearHazardEffects();
@@ -549,6 +603,7 @@ export function startSlimeArena(host, callbacks) {
   stopSlimeArena();
   const Phaser = window.Phaser;
   if (!Phaser) throw new Error("Phaser runtime is not available.");
+  installMovementInput();
   const SceneClass = createSceneClass(Phaser, callbacks);
   game = new Phaser.Game({
     type: Phaser.AUTO,
@@ -623,11 +678,20 @@ export function slimeArenaDebugState() {
     patternStep: activeScene.patternStep,
     hazardEffects: activeScene.hazardEffects.length,
     stunStars: activeScene.stunStars.length,
+    player: activeScene.player ? {
+      x: Math.round(activeScene.player.x),
+      y: Math.round(activeScene.player.y),
+      velocityX: Math.round(activeScene.player.body?.velocity.x || 0),
+      velocityY: Math.round(activeScene.player.body?.velocity.y || 0),
+    } : null,
+    keyboardEnabled: activeScene.input.keyboard.enabled,
+    heldDirections: [...heldDirections],
     animation: activeScene.slimeAnimator?.debugState() ?? null,
   };
 }
 
 export function stopSlimeArena() {
+  removeMovementInput();
   canvasResizeObserver?.disconnect();
   canvasResizeObserver = null;
   if (game) game.destroy(true);

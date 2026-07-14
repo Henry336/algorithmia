@@ -366,6 +366,7 @@ class CampaignAtlasScene extends Phaser.Scene {
     hidePrompt();
     const start = () => {
       if (launchConfig.onEncounter) {
+        this.input.keyboard.enabled = false;
         launchConfig.onEncounter({
           chapter: this.chapter,
           interaction,
@@ -373,6 +374,7 @@ class CampaignAtlasScene extends Phaser.Scene {
         });
       } else {
         this.pausedForEncounter = false;
+        this.input.keyboard.enabled = true;
       }
     };
     if (interaction.approach?.length) sayLines(interaction.approach, start);
@@ -382,6 +384,7 @@ class CampaignAtlasScene extends Phaser.Scene {
   resumeAfterEncounter() {
     if (!this.scene?.isActive()) return;
     this.pausedForEncounter = false;
+    this.input.keyboard.enabled = true;
     this.refreshEntities();
     this.worldArt.refreshGates();
     this.refreshHud();

@@ -54,6 +54,27 @@ async function openArena(page) {
   await page.locator("#slime-arena-host canvas").waitFor({ state: "visible", timeout: 10000 });
 }
 
+async function waitForArenaMode(page, expectedMode, timeoutMs = 10000) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const state = await page.evaluate(async () => (await import("./js/slimeArenaEngine.js")).slimeArenaDebugState());
+    if (state?.mode === expectedMode) return state;
+    await page.waitForTimeout(100);
+  }
+  throw new Error(`Slime arena did not enter ${expectedMode} mode within ${timeoutMs}ms.`);
+}
+
+async function assertArenaMovement(page, label, key = "ArrowRight") {
+  const before = await waitForArenaMode(page, "dodge");
+  await page.keyboard.down(key);
+  await page.waitForTimeout(220);
+  const whileHeld = await page.evaluate(async () => (await import("./js/slimeArenaEngine.js")).slimeArenaDebugState());
+  await page.keyboard.up(key);
+  if (!whileHeld.heldDirections.includes("right") || whileHeld.player.x <= before.player.x + 20) {
+    throw new Error(`${label} did not transfer keyboard movement to the Slime arena: ${JSON.stringify({ before, whileHeld })}`);
+  }
+}
+
 async function reachSlime(page) {
   await page.keyboard.down("ArrowRight");
   for (let step = 0; step < 16; step += 1) {
@@ -65,8 +86,7 @@ async function reachSlime(page) {
   }
   await page.keyboard.up("ArrowRight");
   if (await page.locator("#slime-command-panel").evaluate((element) => element.classList.contains("hidden"))) {
-    await page.evaluate(async () => (await import("./js/slimeArenaEngine.js")).slimeArenaAdminOpenCommandWindow());
-    await page.locator("#slime-command-panel").waitFor({ state: "visible", timeout: 2000 });
+    throw new Error("Keyboard movement did not carry Patchrunner to Sorting Slime.");
   }
 }
 
@@ -90,6 +110,7 @@ async function main() {
 
     await openArena(page);
     await page.waitForTimeout(2600);
+    await assertArenaMovement(page, "Direct encounter route");
     await page.screenshot({ path: path.resolve("build", "slime-arena-desktop.png"), fullPage: true });
 
     await reachSlime(page);
@@ -286,6 +307,7 @@ async function main() {
       await campaign.waitForTimeout(45);
     }
     await campaign.locator("#screen-battle.phaser-slime-active #slime-arena-host canvas").waitFor({ state: "visible", timeout: 10000 });
+    await assertArenaMovement(campaign, "Campaign handoff", "KeyD");
 
     const mobile = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true });
     mobile.on("pageerror", (error) => errors.push(`mobile: ${String(error)}`));
