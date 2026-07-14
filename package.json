@@ -8,12 +8,13 @@
     "dev": "node scripts/serve-web.mjs",
     "test": "npm run check",
     "check": "node scripts/check-js.mjs",
-    "verify:web": "npm run build && npm run check && npm run smoke:title && npm run smoke:slime && npm run smoke:workshop && npm run smoke:ldtk && npm run smoke:graphreach",
+    "verify:web": "npm run build && npm run check && npm run smoke:title && npm run smoke:slime && npm run smoke:workshop && npm run smoke:atlas",
     "smoke:title": "node tests/title_browser_smoke.cjs",
     "smoke:slime": "node tests/slime_arena_browser_smoke.cjs",
     "smoke:workshop": "node tests/workshop_browser_smoke.cjs",
     "smoke:ldtk": "node tests/ldtk_chapter_browser_smoke.cjs",
-    "smoke:graphreach": "node tests/graphreach_browser_smoke.cjs"
+    "smoke:graphreach": "node tests/graphreach_browser_smoke.cjs",
+    "smoke:atlas": "node tests/campaign_atlas_browser_smoke.cjs"
   },
   "dependencies": {
     "phaser": "3.90.0"

@@ -2,7 +2,7 @@
 
 ## Current Status
 
-Phaser now powers the real-time Sorting Slime boss encounter while the existing DOM remains responsible for menus, dialogue, Python editing, save data, and campaign transitions.
+Phaser now powers all six campaign exploration spaces and the real-time Sorting Slime boss encounter. The DOM remains responsible for menus, dialogue, Python editing, readable battle panels, save controls, Arcade, and Workshop.
 
 Implemented in the first migration slice:
 
@@ -25,9 +25,19 @@ Implemented in the first migration slice:
 - Immediate campaign collision handoff from the Queueworks slime into the Phaser encounter.
 - Desktop and mobile browser smoke coverage.
 
+Implemented in the campaign-atlas slice:
+
+- Six full-screen 1920x1280 connected worlds with distinct terrain, palettes, routes, and escalating Null Rot.
+- Shared region, corridor, blocker, gate, and foreground-occluder geometry.
+- Four-point foot collision, camera tracking, backtracking, patrol movement, and touch controls.
+- Animated water, grass, trees, fire, route motes, machinery, and Null corruption.
+- Data-authored NPCs, lore, secret dialogue, collectibles, spatial puzzles, enemies, mini-bosses, bosses, and exits.
+- Campaign encounter handoff that returns Patchrunner to the exact world and only saves progress after victory.
+- Browser flood-fill coverage for every required destination plus blocker, gate, puzzle, secret-room, desktop, and mobile audits.
+
 ## Migration Boundary
 
-Only the main Sorting Slime encounter uses Phaser right now. Rune Snarl and the later encounters continue using their existing battle implementations. This lets encounters migrate one at a time without blocking the playable campaign.
+Campaign exploration and Sorting Slime use Phaser. Bogolord keeps its dedicated timed battle, while smaller enemies and the remaining bosses use the existing queue and limited-Python battle surfaces. `campaignAtlasEncounters.js` is the boundary, so an encounter can gain a real-time arena later without rewriting its world placement or progression reward.
 
 ## Python Runtime
 
@@ -37,8 +47,8 @@ This is not yet full Python. Pyodide remains the intended upgrade before encount
 
 ## Next Encounter Work
 
-1. Playtest and tune Sorting Slime movement speed, spawn frequency, damage, and phase-specific patterns.
-2. Add touch controls if portrait/mobile play becomes part of the immediate target.
-3. Extract a shared Phaser boss base only after a second encounter proves which helpers are truly reusable.
-4. Migrate Heap Warden as the first non-sorting Phaser boss.
-5. Move Bogolord only after the shared arena, phase, repair, and interruption contracts are stable.
+1. Playtest the six atlas worlds for pacing, environmental readability, and route discovery.
+2. Upgrade the limited browser Python runtime before authoring dictionary, set, recursion, heap, or graph-heavy repairs.
+3. Build the second real-time movement boss, then extract only the arena helpers that encounter proves reusable.
+4. Migrate Heap Warden before Bogolord so the shared phase, interruption, and repair contracts grow from two concrete encounters.
+5. Import reviewed Workshop or LDtk drafts through a deliberate atlas-data conversion step instead of creating a second campaign renderer.

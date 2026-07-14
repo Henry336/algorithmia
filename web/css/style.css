@@ -1129,6 +1129,366 @@ body.admin-mode .title-build {
   box-shadow: 0 12px 28px #00000055;
 }
 
+/* ---------- Shared campaign atlas ---------- */
+
+:root {
+  --campaign-accent: #7fd8c9;
+  --campaign-warm: #d8a04a;
+  --campaign-rot: #54256d;
+}
+
+.campaign-atlas-screen {
+  display: none;
+  align-items: stretch;
+  justify-content: stretch;
+  background: #05070b;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.campaign-atlas-screen.active {
+  display: block;
+}
+
+.campaign-atlas-stage {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #05070b;
+}
+
+.campaign-atlas-host,
+.campaign-atlas-host canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.campaign-atlas-host {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  outline: none;
+  image-rendering: pixelated;
+}
+
+.campaign-atlas-host canvas {
+  display: block;
+  image-rendering: pixelated;
+}
+
+.campaign-atlas-vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, #020407cf 0, transparent 18%, transparent 76%, #020407d8 100%),
+    linear-gradient(90deg, #0204078f 0, transparent 13%, transparent 87%, #0204078f 100%),
+    repeating-linear-gradient(0deg, transparent 0 3px, #a4e2d80b 4px, transparent 5px);
+  animation: campaignScan 10s steps(16, end) infinite;
+}
+
+.campaign-atlas-hud {
+  position: absolute;
+  inset: 0 0 auto;
+  min-height: 76px;
+  padding: 14px 18px 13px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  z-index: 12;
+  pointer-events: none;
+  background: linear-gradient(180deg, #05080df2 0%, #071017c9 72%, transparent 100%);
+}
+
+.campaign-atlas-heading {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, auto);
+  align-items: baseline;
+  column-gap: 12px;
+  row-gap: 3px;
+  text-shadow: 0 2px 0 #000, 0 0 10px #000;
+}
+
+.campaign-atlas-chapter {
+  color: var(--campaign-warm);
+  font-size: 0.62rem;
+  letter-spacing: 0;
+}
+
+.campaign-atlas-heading strong {
+  color: #f2f5f3;
+  font-size: clamp(0.82rem, 1.35vw, 1.06rem);
+  font-weight: normal;
+}
+
+.campaign-atlas-region {
+  grid-column: 1 / -1;
+  color: var(--campaign-accent);
+  font-size: 0.68rem;
+  opacity: 0.9;
+}
+
+.campaign-atlas-status {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  pointer-events: auto;
+}
+
+.campaign-atlas-rot {
+  display: grid;
+  grid-template-columns: auto 118px 34px;
+  align-items: center;
+  gap: 8px;
+  color: #b9c3c0;
+  font-size: 0.58rem;
+}
+
+.campaign-atlas-rot-track {
+  position: relative;
+  width: 118px;
+  height: 8px;
+  padding: 2px;
+  background: #05070b;
+  border: 1px solid #5b6570;
+}
+
+.campaign-atlas-rot-track i {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: repeating-linear-gradient(90deg, var(--campaign-rot) 0 5px, #b45fd0 5px 8px);
+  box-shadow: 0 0 9px var(--campaign-rot);
+  transition: width 380ms steps(10, end);
+}
+
+.campaign-atlas-rot strong {
+  color: #d997e7;
+  font-weight: normal;
+}
+
+.campaign-atlas-hud .hud-menu-btn {
+  color: #e2e8e5;
+  border-color: #66808a;
+  background: #071016d9;
+  min-height: 28px;
+}
+
+.campaign-atlas-hud .hud-menu-btn:hover,
+.campaign-atlas-hud .hud-menu-btn:focus-visible {
+  color: #fff;
+  border-color: var(--campaign-accent);
+  box-shadow: 0 0 10px #7fd8c94a;
+  outline: none;
+}
+
+.campaign-atlas-objective {
+  position: absolute;
+  z-index: 8;
+  left: 18px;
+  bottom: 26px;
+  width: min(420px, calc(100vw - 36px));
+  padding: 9px 12px 10px;
+  background: #071017df;
+  border-left: 3px solid var(--campaign-warm);
+  box-shadow: 0 7px 18px #0000008a;
+  pointer-events: none;
+}
+
+.campaign-atlas-objective span {
+  display: block;
+  color: var(--campaign-warm);
+  font-size: 0.52rem;
+  margin-bottom: 4px;
+}
+
+.campaign-atlas-objective strong {
+  display: block;
+  color: #edf2f0;
+  font-size: 0.68rem;
+  font-weight: normal;
+  line-height: 1.45;
+}
+
+.campaign-atlas-prompt,
+.campaign-atlas-toast {
+  position: absolute;
+  z-index: 9;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 1px solid #6c8388;
+  background: #071017ed;
+  color: #eef4f1;
+  text-align: center;
+  box-shadow: 0 8px 22px #00000099, inset 0 0 18px #7fd8c90f;
+  pointer-events: none;
+}
+
+.campaign-atlas-prompt {
+  bottom: 66px;
+  min-width: min(360px, 82vw);
+  padding: 8px 14px;
+  font-size: 0.66rem;
+  color: var(--campaign-accent);
+  animation: campaignPrompt 1.2s steps(4, end) infinite;
+}
+
+.campaign-atlas-toast {
+  top: 94px;
+  padding: 8px 18px;
+  color: var(--campaign-warm);
+  font-size: 0.62rem;
+  animation: campaignToastIn 240ms steps(4, end) both;
+}
+
+.campaign-atlas-prompt.hidden,
+.campaign-atlas-toast.hidden {
+  display: none;
+}
+
+.campaign-atlas-controls {
+  position: absolute;
+  z-index: 10;
+  left: 50%;
+  bottom: 8px;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100vw - 36px);
+  color: #8fa9a7;
+  font-size: 0.54rem;
+  text-align: center;
+  text-shadow: 0 2px 0 #000;
+  pointer-events: none;
+}
+
+.campaign-atlas-controls span {
+  color: var(--campaign-warm);
+  padding-inline: 7px;
+}
+
+.campaign-atlas-dpad {
+  position: absolute;
+  right: 12px;
+  bottom: 14px;
+  z-index: 14;
+  margin: 0;
+}
+
+.campaign-atlas-dpad button {
+  background: #071017df;
+  border-color: #627881;
+  color: var(--campaign-accent);
+  touch-action: none;
+}
+
+.campaign-boss-portrait {
+  width: 154px;
+  height: 154px;
+}
+
+.dispatcher-battle-portrait {
+  width: 156px;
+  height: 156px;
+  filter: drop-shadow(0 10px 6px #000000b8) drop-shadow(0 0 13px #e5ae5478);
+}
+
+@keyframes campaignScan {
+  0%, 100% { opacity: 0.56; transform: translateY(0); }
+  50% { opacity: 0.82; transform: translateY(5px); }
+}
+
+@keyframes campaignPrompt {
+  0%, 100% { border-color: #6c8388; }
+  50% { border-color: var(--campaign-accent); }
+}
+
+@keyframes campaignToastIn {
+  from { opacity: 0; transform: translate(-50%, -7px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+@media (max-width: 760px), (max-height: 650px) {
+  .campaign-atlas-hud {
+    min-height: 58px;
+    padding: 8px 9px;
+  }
+
+  .campaign-atlas-heading {
+    column-gap: 7px;
+  }
+
+  .campaign-atlas-heading strong {
+    font-size: 0.72rem;
+  }
+
+  .campaign-atlas-region,
+  .campaign-atlas-chapter {
+    font-size: 0.5rem;
+  }
+
+  .campaign-atlas-rot {
+    grid-template-columns: auto 66px;
+    gap: 5px;
+    font-size: 0.47rem;
+  }
+
+  .campaign-atlas-rot-track {
+    width: 66px;
+  }
+
+  .campaign-atlas-rot strong {
+    display: none;
+  }
+
+  .campaign-atlas-objective {
+    left: 8px;
+    bottom: 8px;
+    width: min(320px, calc(100vw - 116px));
+    padding: 6px 8px;
+  }
+
+  .campaign-atlas-objective span {
+    margin-bottom: 2px;
+    font-size: 0.43rem;
+  }
+
+  .campaign-atlas-objective strong {
+    font-size: 0.52rem;
+  }
+
+  .campaign-atlas-controls {
+    display: none;
+  }
+
+  .campaign-atlas-prompt {
+    bottom: 82px;
+    font-size: 0.53rem;
+  }
+
+  .campaign-atlas-toast {
+    top: 66px;
+    font-size: 0.5rem;
+  }
+
+  .campaign-atlas-dpad {
+    display: grid;
+    grid-template-columns: repeat(3, 34px);
+    grid-template-rows: repeat(2, 34px);
+    gap: 3px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .campaign-atlas-vignette,
+  .campaign-atlas-prompt,
+  .campaign-atlas-toast {
+    animation: none;
+  }
+}
+
 /* ---------- Graphreach Phaser exploration ---------- */
 
 .graphreach-space-shell {
@@ -3571,4 +3931,17 @@ body.admin-mode .admin-only {
 
 .screen-transition.active {
   opacity: 1;
+}
+
+@media (max-width: 760px), (max-height: 650px) {
+  #screen-campaign-atlas .campaign-atlas-dpad {
+    display: grid;
+    grid-template-columns: repeat(3, 34px);
+    grid-template-rows: repeat(2, 34px);
+    gap: 3px;
+  }
+
+  #screen-campaign-atlas .campaign-atlas-objective {
+    width: min(320px, calc(100vw - 128px));
+  }
 }

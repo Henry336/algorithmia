@@ -8,4 +8,5 @@ dist/
 build/
 node_modules/
 web/vendor/
+output/
 *.egg-info/

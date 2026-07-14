@@ -59,6 +59,7 @@ let finishing = false;
 let commandIndex = 0;
 let activePhase = 1;
 let hintIndex = 0;
+let returnScreen = screenRoom;
 
 function playCommandSelectSound() {
   playSound("commandSelect");
@@ -322,7 +323,7 @@ function finishBattle() {
     window.setTimeout(() => {
       stopSlimeArena();
       screenBattle.classList.remove("active", "phaser-slime-active");
-      screenRoom.classList.add("active");
+      if (returnScreen) returnScreen.classList.add("active");
       shell.classList.add("hidden");
       setPointerLocked(false);
       hideOverlays();
@@ -396,9 +397,10 @@ adminWinBtn.addEventListener("click", () => {
 document.addEventListener("keydown", onCommandKeyDown);
 editor.addEventListener("keydown", onEditorKeyDown);
 
-export function startSortingSlimeArenaBattle({ onWin }) {
+export function startSortingSlimeArenaBattle({ onWin, returnScreen: returnScreenId = "screen-room" }) {
   stopAllAudio();
   onWinCallback = onWin;
+  returnScreen = document.getElementById(returnScreenId) || screenRoom;
   finishing = false;
   clearRepairTimer();
   hideOverlays();
@@ -417,7 +419,7 @@ export function startSortingSlimeArenaBattle({ onWin }) {
 
   transition.classList.add("active");
   window.setTimeout(() => {
-    screenRoom.classList.remove("active");
+    if (returnScreen) returnScreen.classList.remove("active");
     screenBattle.classList.add("active");
     host.innerHTML = "";
     startSlimeArena(host, callbacks);

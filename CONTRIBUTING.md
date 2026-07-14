@@ -40,6 +40,7 @@ npm run build          # copy the pinned Phaser runtime into web/vendor
 npm run dev            # serve web/ at http://localhost:4173
 npm run check          # JavaScript syntax checks
 npm run smoke:slime    # self-starting browser smoke for campaign/Arcade/Repair
+npm run smoke:atlas    # all six campaign worlds, routes, puzzles, and responsive layout
 npm run verify:web     # build, syntax check, and browser smoke in one command
 python -m unittest discover -s tests
 ```
@@ -60,21 +61,23 @@ Do not combine a package rename, broad formatting pass, and gameplay feature in 
 
 ## Browser Architecture Rules
 
-- Phaser owns real-time arena simulation: movement, collision, hazards, timing, and phase state.
+- Phaser owns campaign exploration and real-time arena simulation: movement, collision, hazards, timing, and phase state.
 - DOM modules own menus, dialogue, editors, semantic buttons, and readable text.
 - Encounter controllers coordinate Phaser, DOM, persistent state, and Python results.
 - `state.js` is the browser save boundary. Add defaults for every persisted field.
 - Player-written code must run outside the main UI thread with a timeout.
 - Correct code should change the battlefield; it should not merely display a passing testcase screen.
 
-Only Sorting Slime currently uses the Phaser arena. Do not assume later bosses have migrated because they share battle styling.
+All six campaign chapters use the shared Phaser atlas. Sorting Slime is still the only fully real-time movement boss; other encounters use dedicated or DOM battle surfaces through the atlas encounter bridge.
 
 ## Room and Progression Rules
 
-- Required interactions must be reachable from the room start.
+- Campaign spaces live in `campaignAtlasData.js`; do not add new campaign routes to the legacy `room.js` or `chapter*.js` modules.
+- Required interactions must be reachable from the chapter spawn.
 - Opened gates must lead to a reachable exit.
 - Optional rooms may be difficult to find; required routes may not be impossible to traverse.
-- Use the existing room-map tests when adding obstacles, gates, bosses, or secret entrances.
+- Draw terrain and test collision from the same region/corridor/blocker geometry so visual boundaries cannot drift from movement boundaries.
+- Use `npm run smoke:atlas` when adding obstacles, gates, bosses, patrols, or secret entrances.
 - Campaign encounters and Arcade encounters must not accidentally share progression rewards.
 
 ## Python Repair Rules

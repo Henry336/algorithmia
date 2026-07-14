@@ -1,62 +1,41 @@
-import { initTitle } from "./title.js";
-import { initRoom } from "./room.js";
-import { initChapter1Room } from "./chapter1.js";
-import { initChapter2Room } from "./chapter2.js";
-import { initChapter3Room } from "./chapter3.js";
-import { initGraphreachExploration } from "./graphreachExploration.js";
-import { initChapter5Room } from "./chapter5.js";
 import { isAdminMode } from "./admin.js";
+import { startCampaignChapter, stopCampaignAtlas } from "./campaignAtlas.js";
+import { startCampaignEncounter } from "./campaignAtlasEncounters.js";
 import { startSortingSlimeArenaBattle } from "./slimeArenaBattle.js";
+import { initTitle } from "./title.js";
 import { initWorkshop } from "./workshopEditor.js";
 
-function enterChapter0() {
-  document.getElementById("screen-room").classList.add("active");
-  initRoom({ onExitToChapter1: enterChapter1 });
+function hideActiveScreens() {
+  document.querySelectorAll(".screen.active").forEach((screen) => screen.classList.remove("active"));
 }
 
-function enterChapter1() {
-  document.getElementById("screen-room").classList.remove("active");
-  document.getElementById("screen-room-ch1").classList.add("active");
-  initChapter1Room({ onExitToChapter2: enterChapter2 });
+function enterChapter(chapterIndex) {
+  hideActiveScreens();
+  document.getElementById("screen-campaign-atlas").classList.add("active");
+  startCampaignChapter(chapterIndex, {
+    onExitChapter: (nextChapter) => enterChapter(nextChapter),
+    onEncounter: ({ interaction, onComplete }) => startCampaignEncounter({ interaction, onComplete }),
+  });
 }
 
-function enterChapter2() {
-  document.getElementById("screen-room-ch1").classList.remove("active");
-  document.getElementById("screen-room-ch2").classList.add("active");
-  initChapter2Room({ onExitToChapter3: enterChapter3 });
-}
-
-function enterChapter3() {
-  document.getElementById("screen-room-ch2").classList.remove("active");
-  document.getElementById("screen-room-ch3").classList.add("active");
-  initChapter3Room({ onExitToChapter4: enterChapter4 });
-}
-
-function enterChapter4() {
-  document.getElementById("screen-room-ch3").classList.remove("active");
-  document.getElementById("screen-room-ch4").classList.add("active");
-  initGraphreachExploration({ onExitToChapter5: enterChapter5 });
-}
-
-function enterChapter5() {
-  document.getElementById("screen-room-ch4").classList.remove("active");
-  document.getElementById("screen-room-ch5").classList.add("active");
-  initChapter5Room({});
-}
+const enterChapter0 = () => enterChapter(0);
+const enterChapter1 = () => enterChapter(1);
+const enterChapter2 = () => enterChapter(2);
+const enterChapter3 = () => enterChapter(3);
+const enterChapter4 = () => enterChapter(4);
+const enterChapter5 = () => enterChapter(5);
 
 function enterArcadeEncounter(encounter) {
   if (encounter !== "sorting-slime") return;
-  document.getElementById("screen-arcade-select").classList.remove("active");
   startSortingSlimeArenaBattle({
-    onWin: () => {
-      document.getElementById("screen-room").classList.remove("active");
-      document.getElementById("screen-arcade-select").classList.add("active");
-    },
+    returnScreen: "screen-arcade-select",
+    onWin: () => document.getElementById("screen-arcade-select").classList.add("active"),
   });
 }
 
 function enterWorkshop() {
-  document.querySelectorAll(".screen.active").forEach((screen) => screen.classList.remove("active"));
+  stopCampaignAtlas();
+  hideActiveScreens();
   document.getElementById("screen-workshop").classList.add("active");
   initWorkshop({
     onExit: () => {
@@ -77,29 +56,22 @@ initTitle({
   onEnterWorkshop: enterWorkshop,
 });
 
-const launchEncounter = new URLSearchParams(window.location.search).get("encounter");
-if (isAdminMode() && launchEncounter === "sorting-slime") {
-  document.querySelectorAll(".screen.active").forEach((screen) => screen.classList.remove("active"));
-  startSortingSlimeArenaBattle({
-    onWin: () => {
-      document.body.dataset.slimeSmokeWin = "true";
-    },
-  });
-}
+document.querySelectorAll('[data-action="quit-to-title"]').forEach((button) => {
+  button.addEventListener("click", () => stopCampaignAtlas());
+});
 
 const launchParams = new URLSearchParams(window.location.search);
+const launchEncounter = launchParams.get("encounter");
 const launchChapter = launchParams.get("chapter");
-if (isAdminMode() && launchChapter === "4") {
-  document.querySelectorAll(".screen.active").forEach((screen) => screen.classList.remove("active"));
-  document.getElementById("screen-room-ch4").classList.add("active");
-  initGraphreachExploration({ onExitToChapter5: enterChapter5 });
-}
-if (isAdminMode() && launchChapter === "5") {
-  document.querySelectorAll(".screen.active").forEach((screen) => screen.classList.remove("active"));
-  document.getElementById("screen-room-ch5").classList.add("active");
-  initChapter5Room({});
+
+if (isAdminMode() && launchEncounter === "sorting-slime") {
+  hideActiveScreens();
+  startSortingSlimeArenaBattle({
+    returnScreen: "screen-title",
+    onWin: () => { document.body.dataset.slimeSmokeWin = "true"; },
+  });
+} else if (isAdminMode() && launchChapter !== null && Number.isInteger(Number(launchChapter))) {
+  enterChapter(Number(launchChapter));
 }
 
-if (launchParams.get("workshop") === "1") {
-  enterWorkshop();
-}
+if (launchParams.get("workshop") === "1") enterWorkshop();

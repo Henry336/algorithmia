@@ -130,6 +130,7 @@ export function initTitle({ onEnterChapter0, onEnterChapter1, onEnterChapter2, o
       document.getElementById("screen-room-ch3").classList.remove("active");
       document.getElementById("screen-room-ch4").classList.remove("active");
       document.getElementById("screen-room-ch5").classList.remove("active");
+      document.getElementById("screen-campaign-atlas").classList.remove("active");
       show(screens.title);
       continueBtn.disabled = !hasSave();
     });

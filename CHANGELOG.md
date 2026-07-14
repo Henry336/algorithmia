@@ -4,6 +4,19 @@ Significant player-facing and developer-facing changes are recorded here. Detail
 
 ## Unreleased
 
+### Campaign Overhaul
+
+- Replaced the six separate rectangular chapter implementations with one full-screen Phaser campaign atlas built from shared region, corridor, blocker, gate, and foreground-occluder geometry.
+- Reauthored Chapters 0-5 as distinct connected spaces: Queueworks Verge wetlands, Dispatch Meridian's suspended infrastructure, Heaplight Caldera's volcanic foundry, the floating Array Plains, fractured Graphreach, and the Citadel of Boundaries.
+- Added camera-led continuous exploration, precise four-point foot collision, backtracking, moving patrols, responsive touch controls, and foreground arches and tunnels that correctly hide Patchrunner as he passes underneath.
+- Added chapter-specific animated water, grass, trees, flames, machinery, route motes, Source rings, and increasingly invasive Null Rot.
+- Added new NPCs, optional lore, empty decorative branches, hidden fourth-wall dialogue, relay and dial puzzles, persistent collectibles, mini-bosses, enemies, bosses, and chapter progression requirements.
+- Added a concealed Graphreach secret route that opens near the entrance only after all three Archive diamonds are recovered.
+- Integrated the supplied Patchrunner, Mira Vale, Sorting Slime, Bogolord, and Recursive Husk art alongside the approved high-detail Dispatcher asset; all field characters now idle, patrol, pulse, or flicker as appropriate.
+- Connected every campaign encounter through one return-aware bridge, preserving dedicated Sorting Slime and Bogolord battles while giving minor enemies and later bosses varied Python tasks and progression-safe rewards.
+- Added a browser campaign smoke that renders all six worlds at desktop size, flood-fills every authored destination, audits blockers and gates, exercises puzzles and concealed routes, checks animation and viewport usage, and verifies mobile framing.
+- Added owner and architecture documentation for editing world geometry, art, collision, interactions, encounters, and route tests without extending the retired chapter renderers.
+
 ### Interface
 
 - Rebuilt the title screen around an original full-bleed pixel-art mural of Algorithmia's world, replaced the smooth text heading with a custom-rendered block-pixel logo, removed the floating character lineup, and kept its navigation deliberately pointer-first.

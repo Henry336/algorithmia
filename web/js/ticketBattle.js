@@ -55,7 +55,14 @@ export function startTicketBattle(battleConfig) {
   activeScreen = document.getElementById(config.returnScreen);
   titleEl.textContent = config.title;
   enemySpriteHost.innerHTML = "";
-  if (config.enemySprite) {
+  if (config.enemyImage) {
+    const img = document.createElement("img");
+    img.className = config.enemyImageClass || "code-battle-image-sprite";
+    img.alt = config.title || "";
+    img.draggable = false;
+    img.src = config.enemyImage;
+    enemySpriteHost.appendChild(img);
+  } else if (config.enemySprite) {
     applyPixelArt(enemySpriteHost, config.enemySprite.matrix, config.enemySprite.palette, config.enemyPixelSize || 5);
   }
   initBattleHud(screenBattle, {

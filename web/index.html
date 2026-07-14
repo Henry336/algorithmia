@@ -60,22 +60,59 @@
     <div id="workshop-root" class="workshop-root"></div>
   </section>
 
+  <!-- SHARED CAMPAIGN ATLAS -->
+  <section id="screen-campaign-atlas" class="screen campaign-atlas-screen">
+    <header class="campaign-atlas-hud">
+      <div class="campaign-atlas-heading">
+        <span id="campaign-atlas-chapter" class="campaign-atlas-chapter">CHAPTER 0</span>
+        <strong id="campaign-atlas-title">Queueworks Verge</strong>
+        <span id="campaign-atlas-region" class="campaign-atlas-region">Awakening Verge</span>
+      </div>
+      <div class="campaign-atlas-status">
+        <div class="campaign-atlas-rot" aria-label="Null Rot pressure">
+          <span>NULL ROT</span>
+          <div class="campaign-atlas-rot-track"><i id="campaign-atlas-rot-fill"></i></div>
+          <strong id="campaign-atlas-rot-value">05%</strong>
+        </div>
+        <button class="hud-menu-btn" data-action="quit-to-title">Menu</button>
+      </div>
+    </header>
+    <div class="campaign-atlas-stage">
+      <div id="campaign-atlas-host" class="campaign-atlas-host" tabindex="0" aria-label="Playable Algorithmia campaign space"></div>
+      <div class="campaign-atlas-vignette" aria-hidden="true"></div>
+      <div class="campaign-atlas-objective">
+        <span>ACTIVE ROUTE</span>
+        <strong id="campaign-atlas-objective">Follow the surviving signal.</strong>
+      </div>
+      <div id="campaign-atlas-prompt" class="campaign-atlas-prompt hidden" role="status"></div>
+      <div id="campaign-atlas-toast" class="campaign-atlas-toast hidden" role="status"></div>
+    </div>
+    <footer class="campaign-atlas-controls">Move: Arrow keys / WASD <span>&middot;</span> Interact: Space / Enter <span>&middot;</span> Backtracking is always allowed</footer>
+    <div id="dpad-campaign-atlas" class="dpad campaign-atlas-dpad" aria-hidden="false">
+      <button data-dir="up" aria-label="Move up">&#9650;</button>
+      <button data-dir="left" aria-label="Move left">&#9664;</button>
+      <button data-dir="interact" aria-label="Interact">&#9679;</button>
+      <button data-dir="right" aria-label="Move right">&#9654;</button>
+      <button data-dir="down" aria-label="Move down">&#9660;</button>
+    </div>
+  </section>
+
   <!-- CHAPTER SELECT -->
   <section id="screen-chapter-select" class="screen">
     <div class="panel-frame">
-      <h2>Prototype Levels</h2>
+      <h2>Campaign Chapters</h2>
       <div class="chapter-list">
         <button class="chapter-card" data-chapter="0">
           <span class="chapter-num">Level 0</span>
-          <span class="chapter-name">Queueworks Intake</span>
+          <span class="chapter-name">Queueworks Verge</span>
         </button>
         <button class="chapter-card locked" data-chapter="1" disabled>
           <span class="chapter-num">Level 1</span>
-          <span class="chapter-name">The Dispatcher's Line</span>
+          <span class="chapter-name">Dispatch Meridian</span>
         </button>
         <button class="chapter-card locked" data-chapter="2" disabled>
           <span class="chapter-num">Level 2</span>
-          <span class="chapter-name">Heaplight Foundry</span>
+          <span class="chapter-name">Heaplight Caldera</span>
         </button>
         <button class="chapter-card locked" data-chapter="3" disabled>
           <span class="chapter-num">Level 3</span>
@@ -87,7 +124,7 @@
         </button>
         <button class="chapter-card locked" data-chapter="5" disabled>
           <span class="chapter-num">Level 5</span>
-          <span class="chapter-name">LDtk Import Test</span>
+          <span class="chapter-name">Citadel of Boundaries</span>
         </button>
       </div>
       <button class="back-button" data-action="back-to-title">Back</button>

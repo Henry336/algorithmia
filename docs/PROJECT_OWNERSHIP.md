@@ -51,7 +51,7 @@ Use a separate branch for larger changes with `git switch -c your-name/short-cha
 ## Fast Testing Routes
 
 - `http://localhost:4173/?admin=1` unlocks level select and admin win controls.
-- `http://localhost:4173/?admin=1&chapter=5` opens the LDtk import test directly.
+- `http://localhost:4173/?admin=1&chapter=0` through `chapter=5` opens any campaign atlas world directly.
 - `http://localhost:4173/?admin=0` turns admin mode off.
 - `http://localhost:4173/?admin=1&encounter=sorting-slime` opens the Phaser boss directly.
 - `http://localhost:4173/?workshop=1` opens the Workshop editor directly.
@@ -82,10 +82,10 @@ location.reload();
 | Title and Arcade selection | `web/js/title.js` and `web/index.html` |
 | Workshop level editor data and validation | `web/js/workshopData.js` and `web/js/workshopValidation.js` |
 | Workshop editor UI | `web/js/workshopEditor.js` and `web/css/style.css` |
-| Campaign entry room | `web/js/room.js` |
-| Later chapter maps and story events | `web/js/chapter1.js` through `chapter4.js` |
-| LDtk import test map | `web/data/ldtk/chapter5_layout.ldtk` |
-| LDtk import test renderer | `web/js/chapter5.js` |
+| Campaign world geometry, content, and progression | `web/js/campaignAtlasData.js` |
+| Campaign terrain, scenery, sprites, and animation | `web/js/campaignAtlasArt.js` |
+| Campaign movement, collision, camera, and interactions | `web/js/campaignAtlas.js` |
+| Campaign encounter selection and rewards | `web/js/campaignAtlasEncounters.js` |
 | Save fields | `web/js/state.js` |
 | Shared HP and Focus rules | `web/js/combatState.js` |
 | Player-written browser Python support | `web/js/pythonRepairRuntime.js` |
@@ -113,24 +113,16 @@ Keep these boundaries when adding features. A new hazard belongs in the patterns
 
 The live deployment can create, save, import, and export drafts in the browser. It cannot write official campaign data into GitHub until the project adds a backend with authentication. For now, use Export JSON, review the level pack, then commit it as source data when the campaign loader is ready.
 
-## LDtk Test Import
+## Campaign Atlas File Roles
 
-Chapter 5 is a practical LDtk import test. The game fetches `web/data/ldtk/chapter5_layout.ldtk`, renders the `Collisions` IntGrid, and turns LDtk entities into simple game interactions.
+1. `campaignAtlasData.js` is the authored world: regions, corridors, blockers, gates, puzzles, dialogue, enemies, and progression flags.
+2. `campaignAtlasArt.js` turns that same geometry into pixel terrain, animated scenery, occlusion layers, and field characters.
+3. `campaignAtlas.js` runs Phaser exploration, four-point foot collision, camera movement, interactions, saves, and the admin debug hook.
+4. `campaignAtlasEncounters.js` chooses the correct battle and writes rewards only after a real win.
 
-Supported in the test importer:
+Start a world edit in the data file and run `npm run smoke:atlas`. The browser test flood-fills every required destination and also checks blockers, gates, patrol waypoints, puzzles, concealed spaces, desktop framing, and mobile framing.
 
-- collision walls;
-- doors between neighboring GridVania rooms;
-- items and simple inventory;
-- keyed doors;
-- buttons that open secret walls in the current room.
-
-Not supported yet:
-
-- external tileset art rendering;
-- Player entity placement, because the uploaded test map did not include a Player instance;
-- campaign-quality dialogue, enemies, or battles from LDtk fields;
-- automatic promotion into official chapter data.
+The old LDtk importer and pre-atlas chapter modules remain in Git as historical experiments. They are not normal campaign routes and should not receive new campaign content.
 
 ## Before You Commit
 
@@ -188,9 +180,9 @@ Run `npm run dev -- --port 4174`, then open `http://localhost:4174`.
 
 Run `npx playwright install chromium`.
 
-### A required room object cannot be reached
+### A required campaign object cannot be reached
 
-Run the Python suite. `tests/test_web_room_maps.py` checks required paths and interactions. Secret routes may be hidden; required routes may not be impossible.
+Run `npm run smoke:atlas`. It reports the unreachable probe or misplaced patrol point. Repair the region/corridor overlap or move the object onto walkable terrain; do not remove the probe to silence the failure.
 
 ### A repair works in Python but fails in the browser
 

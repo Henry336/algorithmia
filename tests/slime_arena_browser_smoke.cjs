@@ -272,18 +272,19 @@ async function main() {
 
     const campaign = await browser.newPage({ viewport: { width: 1280, height: 800 } });
     campaign.on("pageerror", (error) => errors.push(`campaign: ${String(error)}`));
-    await campaign.goto(`${baseUrl}/?admin=0`, { waitUntil: "domcontentloaded" });
-    await campaign.locator('[data-action="new-game"]').click();
-    await campaign.locator("#dialogue-box:not(.hidden)").waitFor({ timeout: 3000 });
-    for (let attempt = 0; attempt < 6; attempt += 1) {
+    await campaign.goto(`${baseUrl}/?admin=1&chapter=0`, { waitUntil: "domcontentloaded" });
+    await campaign.waitForFunction(() => window.__campaignAtlasDebug?.ready);
+    await campaign.evaluate(async () => {
+      const state = await import("./js/state.js");
+      state.setState({ runeSnarlCleared: true, queueworksValvesAligned: true });
+      window.__campaignAtlasDebug.refresh();
+      window.__campaignAtlasDebug.interact("sorting-slime");
+    });
+    for (let attempt = 0; attempt < 8; attempt += 1) {
       if (await campaign.locator("#dialogue-box").evaluate((element) => element.classList.contains("hidden"))) break;
       await campaign.locator("#dialogue-box").click();
-      await campaign.waitForTimeout(40);
+      await campaign.waitForTimeout(45);
     }
-    await campaign.keyboard.press("ArrowUp");
-    await campaign.keyboard.press("ArrowUp");
-    await campaign.keyboard.press("ArrowUp");
-    await campaign.keyboard.press("ArrowUp");
     await campaign.locator("#screen-battle.phaser-slime-active #slime-arena-host canvas").waitFor({ state: "visible", timeout: 10000 });
 
     const mobile = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true });

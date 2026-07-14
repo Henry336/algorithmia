@@ -6,12 +6,14 @@ The browser game under `web/` is the primary product. The older `algorithimia/` 
 
 ## Current State
 
-- Campaign levels 0-3 use connected DOM room routes; Graphreach now has a Phaser exploration space built over authored environment art.
-- Chapter 5 is an LDtk import test that renders a sample LDtk GridVania map as an explorable room route.
+- Campaign Chapters 0-5 now run through one full-screen Phaser exploration atlas with continuous movement, camera tracking, precise foot collision, foreground occlusion, backtracking, and responsive touch controls.
+- Every chapter has a distinct connected environment: Queueworks wetlands, the suspended Dispatch Meridian, Heaplight's volcanic foundry, the floating Array Plains, fractured Graphreach, and the Citadel of Boundaries.
+- The atlas includes animated terrain details, escalating Null Rot, moving enemies, NPCs, spatial relay puzzles, optional lore branches, hidden dialogue, collectibles, mini-bosses, bosses, and chapter exits.
+- All authored interactions and patrol points are collision-checked, and every chapter is flood-filled from its spawn during browser verification so disconnected content fails the build.
 - Arcade Mode is available from the title screen.
 - Workshop Mode is available from the title screen for visual room, entity, dialogue, and encounter drafting.
 - Sorting Slime is the first Phaser-powered real-time boss encounter.
-- Later encounters currently use the earlier DOM battle systems and will migrate to Phaser incrementally.
+- Bogolord keeps its bespoke timed multi-phase battle. Other atlas encounters reuse the current queue and Python battle surfaces while their real-time arenas are developed.
 - Python is the default repair dialect.
 - Saves use browser `localStorage`.
 - Vercel builds and deploys the static `web/` output.
@@ -39,9 +41,7 @@ Useful routes:
 - `/` - title screen, campaign, Arcade Mode
 - `/?workshop=1` - open the Workshop editor directly
 - `/?admin=1` - unlock every level and show encounter skip controls
-- `/?admin=1&chapter=4` - launch the playable Graphreach exploration space directly
-- `/?admin=1&chapter=4&graphdebug=1` - show Graphreach walkable corridors and plateaus
-- `/?admin=1&chapter=5` - launch the LDtk Chapter 5 import test directly
+- `/?admin=1&chapter=0` through `/?admin=1&chapter=5` - launch any campaign atlas chapter directly
 - `/?admin=0` - disable persisted admin mode
 - `/?admin=1&encounter=sorting-slime` - launch the Phaser Sorting Slime battle directly
 
@@ -81,6 +81,18 @@ Workshop editor smoke:
 npm run smoke:workshop
 ```
 
+All six campaign spaces, collision geometry, routes, puzzles, secrets, animation counts, desktop framing, and mobile framing:
+
+```bash
+npm run smoke:atlas
+```
+
+Complete browser verification:
+
+```bash
+npm run verify:web
+```
+
 The smoke command starts a temporary local server when one is not already running. Install a Playwright browser once if prompted:
 
 ```bash
@@ -102,20 +114,20 @@ web/                         Player-facing browser game
   index.html                 Screens and shared battle/editor markup
   css/style.css              Current visual system and responsive layouts
   js/main.js                 Screen and route entry point
-  js/room.js                 Queueworks campaign room
-  js/chapter1.js ...         Later campaign routes
+  js/campaignAtlasData.js    Six chapter layouts, collisions, content, puzzles, and lore
+  js/campaignAtlasArt.js     Procedural pixel terrain, scenery, entities, and animation
+  js/campaignAtlas.js        Shared Phaser movement, camera, interaction, and debug scene
+  js/campaignAtlasEncounters.js  Campaign-to-battle routing and Python encounter content
   js/audio.js                Shared browser-safe sound effects and music helper
   js/slimeArenaEngine.js     Phaser movement, hazards, collisions, and phases
   js/slimeArenaBattle.js     Sorting Slime DOM/Phaser/Python coordination
   js/slimeArenaConfig.js     Sorting Slime balance numbers and labels
   js/slimeArenaPatterns.js   Sorting Slime hazard formations
   js/slimeRepairTasks.js     Sorting Slime prompts, hints, starters, and cases
-  js/graphreachExploration.js  Phaser scene, movement, interactions, and ambience
-  js/graphreachSpaceData.js    Editable Graphreach paths, plateaus, and landmarks
   js/workshopData.js         Workshop level format, defaults, and editor libraries
   js/workshopValidation.js   Reachability and level-pack validation
   js/workshopEditor.js       Visual level editor UI and local draft persistence
-  js/chapter5.js             LDtk import test renderer and room interaction bridge
+  js/room.js / chapter*.js   Legacy pre-atlas campaign implementations kept as references
   js/pythonRepairRuntime.js  Current limited browser Python subset
   assets/                    Character and audio assets
 
@@ -130,11 +142,12 @@ docs/                        Architecture, continuity, migration, and safety not
 - [Contributing](CONTRIBUTING.md) - setup, workflow, conventions, and change checklist
 - [Project ownership](docs/PROJECT_OWNERSHIP.md) - accounts, common edits, publishing, recovery, and troubleshooting
 - [Architecture](docs/ARCHITECTURE.md) - runtime boundaries and module ownership
+- [Campaign atlas](docs/CAMPAIGN_ATLAS.md) - editing worlds, collisions, puzzles, entities, and route tests
 - [Project continuity](docs/ALGORITHMIA_CONTINUITY.md) - active gameplay and canon constraints
 - [Phaser migration](docs/PHASER_MIGRATION.md) - what has migrated and what has not
 - [Safe execution](docs/SAFE_EXECUTION.md) - code-execution limits and security boundaries
 - [Audio direction](docs/AUDIO_DIRECTION.md) - reusable music structure, motif, and loop notes
-- [Graphreach exploration](docs/GRAPHREACH_EXPLORATION.md) - how to edit the map, collisions, interactions, and ambient effects
+- [Graphreach exploration](docs/GRAPHREACH_EXPLORATION.md) - historical notes and its atlas migration
 - [Changelog](CHANGELOG.md) - release-level history
 - [Story so far](ALGORITHMIA_STORY_SO_FAR.md) - working canon and narrative decisions
 - [Chronological story overview](ALGORITHMIA_CHRONOLOGICAL_STORY_OVERVIEW.md) - story events in timeline order
