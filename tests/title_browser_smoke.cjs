@@ -57,6 +57,12 @@ async function main() {
       throw new Error("The generated Algorithmia menu mural is missing or unexpectedly small.");
     }
 
+    const menuTheme = await page.request.get(`${baseUrl}/assets/audio/music/algorithmia-menu-theme.wav`);
+    const menuThemeBytes = await menuTheme.body();
+    if (!menuTheme.ok() || menuThemeBytes.length < 10_000_000 || menuThemeBytes.subarray(0, 4).toString("ascii") !== "RIFF") {
+      throw new Error("The Algorithmia menu theme is missing or is not a valid production WAV.");
+    }
+
     const logo = await page.locator("#title-logo-canvas").evaluate((canvas) => {
       const context = canvas.getContext("2d");
       const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;

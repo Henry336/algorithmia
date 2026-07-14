@@ -1,6 +1,6 @@
 import { getState, setState, hasSave, resetState } from "./state.js";
 import { isAdminMode, syncAdminModeFromUrl } from "./admin.js";
-import { getAudioPreferences, playSound, setMusicMuted, setSoundMuted } from "./audio.js";
+import { getAudioPreferences, playMusic, playSound, setMusicMuted, setSoundMuted } from "./audio.js";
 import { renderPixelLogo } from "./pixelLogo.js";
 
 const screens = {
@@ -11,6 +11,10 @@ const screens = {
   workshop: document.getElementById("screen-workshop"),
 };
 
+export function playMenuTheme() {
+  playMusic("menuTheme");
+}
+
 export function initTitle({ onEnterChapter0, onEnterChapter1, onEnterChapter2, onEnterChapter3, onEnterChapter4, onEnterChapter5, onEnterArcadeEncounter, onEnterWorkshop }) {
   syncAdminModeFromUrl();
   const continueBtn = document.querySelector('[data-action="continue"]');
@@ -19,6 +23,7 @@ export function initTitle({ onEnterChapter0, onEnterChapter1, onEnterChapter2, o
   document.getElementById("title-build").textContent = isAdminMode() ? `build ${buildStamp()} - ADMIN MODE` : `build ${buildStamp()}`;
   renderPixelLogo(document.getElementById("title-logo-canvas"));
   initOptionControls();
+  playMenuTheme();
 
   function resumeFurthest() {
     const { queueworksGateOpen, dispatcherDefeated, heapWardenDefeated, bogoDefeated, nullFerrymanDefeated } = getState();
@@ -132,6 +137,7 @@ export function initTitle({ onEnterChapter0, onEnterChapter1, onEnterChapter2, o
       document.getElementById("screen-room-ch5").classList.remove("active");
       document.getElementById("screen-campaign-atlas").classList.remove("active");
       show(screens.title);
+      playMenuTheme();
       continueBtn.disabled = !hasSave();
     });
   });

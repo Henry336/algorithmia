@@ -2,7 +2,8 @@ import { isAdminMode } from "./admin.js";
 import { startCampaignChapter, stopCampaignAtlas } from "./campaignAtlas.js";
 import { startCampaignEncounter } from "./campaignAtlasEncounters.js";
 import { startSortingSlimeArenaBattle } from "./slimeArenaBattle.js";
-import { initTitle } from "./title.js";
+import { stopMusic } from "./audio.js";
+import { initTitle, playMenuTheme } from "./title.js";
 import { initWorkshop } from "./workshopEditor.js";
 
 function hideActiveScreens() {
@@ -10,6 +11,7 @@ function hideActiveScreens() {
 }
 
 function enterChapter(chapterIndex) {
+  stopMusic("menuTheme");
   hideActiveScreens();
   document.getElementById("screen-campaign-atlas").classList.add("active");
   startCampaignChapter(chapterIndex, {
@@ -27,13 +29,18 @@ const enterChapter5 = () => enterChapter(5);
 
 function enterArcadeEncounter(encounter) {
   if (encounter !== "sorting-slime") return;
+  stopMusic("menuTheme");
   startSortingSlimeArenaBattle({
     returnScreen: "screen-arcade-select",
-    onWin: () => document.getElementById("screen-arcade-select").classList.add("active"),
+    onWin: () => {
+      document.getElementById("screen-arcade-select").classList.add("active");
+      playMenuTheme();
+    },
   });
 }
 
 function enterWorkshop() {
+  stopMusic("menuTheme");
   stopCampaignAtlas();
   hideActiveScreens();
   document.getElementById("screen-workshop").classList.add("active");
@@ -41,6 +48,7 @@ function enterWorkshop() {
     onExit: () => {
       document.getElementById("screen-workshop").classList.remove("active");
       document.getElementById("screen-title").classList.add("active");
+      playMenuTheme();
     },
   });
 }
@@ -68,7 +76,10 @@ if (isAdminMode() && launchEncounter === "sorting-slime") {
   hideActiveScreens();
   startSortingSlimeArenaBattle({
     returnScreen: "screen-title",
-    onWin: () => { document.body.dataset.slimeSmokeWin = "true"; },
+    onWin: () => {
+      document.body.dataset.slimeSmokeWin = "true";
+      playMenuTheme();
+    },
   });
 } else if (isAdminMode() && launchChapter !== null && Number.isInteger(Number(launchChapter))) {
   enterChapter(Number(launchChapter));
