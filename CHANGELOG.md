@@ -6,7 +6,7 @@ Significant player-facing and developer-facing changes are recorded here. Detail
 
 ### Interface
 
-- Rebuilt the title screen around an original full-bleed pixel-art mural of Algorithmia's world, replaced the smooth text heading with a custom-rendered block-pixel logo, removed the floating character lineup, and added mouse, arrow-key, and WASD menu navigation.
+- Rebuilt the title screen around an original full-bleed pixel-art mural of Algorithmia's world, replaced the smooth text heading with a custom-rendered block-pixel logo, removed the floating character lineup, and kept its navigation deliberately pointer-first.
 - Added independent persistent Music and Sound Effects toggles to Options and wired them directly into the shared audio engine.
 
 ### Developer Experience

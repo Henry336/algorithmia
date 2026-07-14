@@ -18,7 +18,6 @@ export function initTitle({ onEnterChapter0, onEnterChapter1, onEnterChapter2, o
 
   document.getElementById("title-build").textContent = isAdminMode() ? `build ${buildStamp()} - ADMIN MODE` : `build ${buildStamp()}`;
   renderPixelLogo(document.getElementById("title-logo-canvas"));
-  initTitleNavigation();
   initOptionControls();
 
   function resumeFurthest() {
@@ -165,52 +164,11 @@ export function initTitle({ onEnterChapter0, onEnterChapter1, onEnterChapter2, o
     updateLabels();
   }
 
-  function initTitleNavigation() {
-    const menu = document.getElementById("title-menu");
-    const buttons = [...menu.querySelectorAll(".title-option")];
-    let selectedIndex = Math.max(0, buttons.findIndex((button) => !button.disabled));
-
-    function select(index, { sound = false } = {}) {
-      let nextIndex = index;
-      for (let attempts = 0; attempts < buttons.length; attempts += 1) {
-        nextIndex = (nextIndex + buttons.length) % buttons.length;
-        if (!buttons[nextIndex].disabled) break;
-        nextIndex += index >= selectedIndex ? 1 : -1;
-      }
-      selectedIndex = nextIndex;
-      buttons.forEach((button, buttonIndex) => button.classList.toggle("selected", buttonIndex === selectedIndex));
-      buttons[selectedIndex].focus({ preventScroll: true });
-      if (sound) playSound("commandSelect", { volume: 0.28 });
-    }
-
-    buttons.forEach((button, index) => {
-      button.addEventListener("pointerenter", () => {
-        if (button.disabled) return;
-        selectedIndex = index;
-        buttons.forEach((candidate, candidateIndex) => candidate.classList.toggle("selected", candidateIndex === index));
-      });
-    });
-
-    menu.addEventListener("keydown", (event) => {
-      if (["ArrowDown", "KeyS"].includes(event.code)) {
-        event.preventDefault();
-        select(selectedIndex + 1, { sound: true });
-      } else if (["ArrowUp", "KeyW"].includes(event.code)) {
-        event.preventDefault();
-        select(selectedIndex - 1, { sound: true });
-      }
-    });
-
-    select(selectedIndex);
-  }
 }
 
 function show(screen) {
   Object.values(screens).forEach((s) => s.classList.remove("active"));
   screen.classList.add("active");
-  if (screen === screens.title) {
-    requestAnimationFrame(() => document.querySelector(".title-option.selected:not(:disabled)")?.focus({ preventScroll: true }));
-  }
 }
 
 function hideAll() {

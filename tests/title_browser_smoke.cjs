@@ -71,9 +71,13 @@ async function main() {
     }
 
     await page.keyboard.press("ArrowDown");
-    const selectedAction = await page.locator(".title-option.selected").getAttribute("data-action");
-    if (selectedAction !== "arcade") {
-      throw new Error(`Keyboard navigation did not skip disabled Continue: ${selectedAction}`);
+    await page.keyboard.press("KeyS");
+    if (await page.locator(".title-option.selected").count()) {
+      throw new Error("The pointer-first title menu unexpectedly created a keyboard selection.");
+    }
+    const pointerCursor = await page.locator('[data-action="new-game"]').evaluate((button) => getComputedStyle(button).cursor);
+    if (pointerCursor !== "pointer") {
+      throw new Error(`Title options should expose a visible pointer cursor, got ${pointerCursor}.`);
     }
     await page.waitForTimeout(1200);
     await page.screenshot({ path: path.resolve("build", "title-screen-desktop.png"), fullPage: true });

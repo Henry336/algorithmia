@@ -223,8 +223,7 @@ html, body {
 }
 
 .title-option:hover,
-.title-option:focus-visible,
-.title-option.selected {
+.title-option:focus-visible {
   background: #13262ddf;
   border-color: var(--accent);
   color: #ffffff;
@@ -234,8 +233,7 @@ html, body {
 }
 
 .title-option:hover::before,
-.title-option:focus-visible::before,
-.title-option.selected::before {
+.title-option:focus-visible::before {
   opacity: 1;
 }
 
