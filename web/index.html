@@ -188,8 +188,12 @@
       <span id="hud-chapter-ch4">Level 4 &middot; Graphreach</span>
       <button class="hud-menu-btn" data-action="quit-to-title">Menu</button>
     </div>
-    <div id="room-viewport-ch4"></div>
-    <div class="controls-hint">Move: Arrow keys / WASD &nbsp;&middot;&nbsp; Interact: Space / Enter</div>
+    <div class="graphreach-space-shell">
+      <div id="graphreach-phaser-host" class="graphreach-phaser-host" tabindex="0" aria-label="Playable Graphreach exploration space"></div>
+      <div class="graphreach-space-name" aria-hidden="true">GRAPHREACH &middot; BROKEN CROSSING</div>
+      <div id="graphreach-interact-prompt" class="graphreach-interact-prompt hidden" role="status"></div>
+    </div>
+    <div class="controls-hint">Move: Arrow keys / WASD &nbsp;&middot;&nbsp; Interact: Space / Enter &nbsp;&middot;&nbsp; Explore the connected paths</div>
     <div id="dpad-ch4" class="dpad" aria-hidden="false">
       <button data-dir="up">&#9650;</button>
       <button data-dir="left">&#9664;</button>

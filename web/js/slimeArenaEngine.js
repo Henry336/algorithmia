@@ -1,5 +1,6 @@
 import { phaseForBossHp, SLIME_ARENA } from "./slimeArenaConfig.js";
 import { patternForPhase } from "./slimeArenaPatterns.js";
+import { SlimeCharacterAnimator } from "./slimeCharacterAnimator.js";
 
 const {
   width: WIDTH,
@@ -57,6 +58,11 @@ function createSceneClass(Phaser, callbacks) {
       this.boss = this.physics.add.staticSprite(WIDTH + 120, HEIGHT / 2, "sorting-slime");
       this.boss.setDisplaySize(198, 198).setDepth(7);
       this.boss.body.setSize(88, 98).setOffset(34, 28);
+      this.slimeAnimator = new SlimeCharacterAnimator(this, Phaser, this.boss, {
+        homeX: BOSS_X,
+        homeY: HEIGHT / 2,
+      });
+      this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.slimeAnimator.destroy());
 
       this.bossShield = this.add.circle(BOSS_X, HEIGHT / 2, 100, 0x7b2cff, 0.12)
         .setStrokeStyle(8, 0xc66cff, 0.9)
@@ -94,16 +100,6 @@ function createSceneClass(Phaser, callbacks) {
         Phaser.Input.Keyboard.KeyCodes.ENTER,
         Phaser.Input.Keyboard.KeyCodes.TAB,
       ]);
-
-      this.tweens.add({
-        targets: this.boss,
-        scaleY: this.boss.scaleY * 0.92,
-        scaleX: this.boss.scaleX * 1.06,
-        duration: 720,
-        yoyo: true,
-        repeat: -1,
-        ease: "Sine.easeInOut",
-      });
 
       this.tweens.add({
         targets: [this.bossShield, this.bossShieldInner],
@@ -149,24 +145,11 @@ function createSceneClass(Phaser, callbacks) {
     }
 
     playEntrance() {
-      this.boss.setPosition(BOSS_X, FLOOR_TOP - 180);
-      this.tweens.add({
-        targets: this.boss,
-        y: HEIGHT / 2,
-        duration: 760,
-        ease: "Bounce.easeOut",
-        onComplete: () => {
+      this.slimeAnimator.playEntrance({
+        onImpact: () => {
           this.bossShield.setVisible(true).setAlpha(1).setScale(1);
           this.bossShieldInner.setVisible(true).setAlpha(1).setScale(1);
           this.cameras.main.shake(420, 0.02);
-          const impact = this.add.circle(BOSS_X, HEIGHT / 2 + 52, 18, 0xa94dff, 0.65).setDepth(5);
-          this.tweens.add({ targets: impact, scaleX: 10, scaleY: 3.2, alpha: 0, duration: 680, ease: "Quad.easeOut", onComplete: () => impact.destroy() });
-          for (let index = 0; index < 18; index += 1) {
-            const shard = this.add.rectangle(BOSS_X, HEIGHT / 2 + 52, 5, 5, index % 2 ? 0xc66cff : 0x8eea70, 0.9).setDepth(8);
-            const angle = Phaser.Math.FloatBetween(Math.PI, Math.PI * 2);
-            const distance = Phaser.Math.Between(70, 240);
-            this.tweens.add({ targets: shard, x: BOSS_X + Math.cos(angle) * distance, y: HEIGHT / 2 + 52 + Math.sin(angle) * distance * 0.45, alpha: 0, duration: Phaser.Math.Between(430, 760), onComplete: () => shard.destroy() });
-          }
           callbacks.onStatus("Sorting Slime crashes into the execution space. NULL SHIELD: 100.");
           this.time.delayedCall(700, () => this.startWave({ resetPlayer: false }));
         },
@@ -256,8 +239,16 @@ function createSceneClass(Phaser, callbacks) {
       callbacks.onStatus(status);
       const spawnPattern = patternForPhase(this.phase);
       const delay = SLIME_ARENA.phaseSpawnDelayMs[this.phase][this.repaired ? "repaired" : "broken"];
+      this.slimeAnimator.playAttack();
       spawnPattern(this, Phaser);
-      this.waveEvents.push(this.time.addEvent({ delay, loop: true, callback: () => spawnPattern(this, Phaser) }));
+      this.waveEvents.push(this.time.addEvent({
+        delay,
+        loop: true,
+        callback: () => {
+          this.slimeAnimator.playAttack();
+          spawnPattern(this, Phaser);
+        },
+      }));
     }
 
     openCommandWindow() {
@@ -280,14 +271,13 @@ function createSceneClass(Phaser, callbacks) {
         this.nullShieldHp = Math.max(0, this.nullShieldHp - damage);
         callbacks.onBossShield(this.nullShieldHp, NULL_SHIELD_MAX, true);
         callbacks.onAttack(damage, false, true);
-        this.bumpPlayerAway();
+        this.slimeAnimator.playShieldHit();
+        this.bumpPlayerAway({ delay: 320 });
         return;
       }
       const oldPhase = this.phase;
       this.bossHp = Math.max(0, this.bossHp - damage);
       this.cameras.main.shake(180, 0.014);
-      this.boss.setTintFill(0xffffff);
-      this.time.delayedCall(120, () => this.boss.clearTint());
       const nextPhase = phaseForBossHp(this.bossHp);
       callbacks.onBossHp(this.bossHp, BOSS_MAX_HP, nextPhase);
       callbacks.onAttack(damage, true, false);
@@ -295,8 +285,13 @@ function createSceneClass(Phaser, callbacks) {
         this.win();
         return;
       }
-      if (nextPhase !== oldPhase) this.installPhaseShield(nextPhase);
-      this.bumpPlayerAway();
+      if (nextPhase !== oldPhase) {
+        this.installPhaseShield(nextPhase);
+        this.bumpPlayerAway({ delay: 260, animateBoss: false });
+      } else {
+        this.slimeAnimator.playHurt();
+        this.bumpPlayerAway({ delay: 360 });
+      }
     }
 
     guard() {
@@ -316,7 +311,7 @@ function createSceneClass(Phaser, callbacks) {
       this.mode = "repair";
       this.physics.pause();
       this.input.keyboard.enabled = false;
-      this.boss.setTint(0x8eeaff);
+      this.slimeAnimator.setStunned(true);
       this.startStunStars();
       callbacks.onRepairOpened();
     }
@@ -331,7 +326,7 @@ function createSceneClass(Phaser, callbacks) {
         callbacks.onBossShield(0, NULL_SHIELD_MAX, false);
         this.popBossShield();
       }
-      this.boss.clearTint();
+      this.slimeAnimator.setStunned(false);
       this.input.keyboard.enabled = true;
       this.physics.resume();
       this.mode = "transition";
@@ -410,18 +405,16 @@ function createSceneClass(Phaser, callbacks) {
       callbacks.onGuardExpired();
     }
 
-    bumpPlayerAway({ delay = 180 } = {}) {
+    bumpPlayerAway({ delay = 180, animateBoss = true } = {}) {
       this.mode = "transition";
       const startX = this.player.x;
       const targetX = Math.max(PLAYER_START_X, startX - Phaser.Math.Between(5, 7) * 64);
       const targetY = Phaser.Math.Clamp(this.player.y + Phaser.Math.Between(-70, 70), FLOOR_TOP, FLOOR_BOTTOM);
-      this.tweens.add({
-        targets: this.boss,
-        x: BOSS_X - 34,
-        duration: 110,
-        yoyo: true,
-        ease: "Quad.easeOut",
-      });
+      if (animateBoss) {
+        this.time.delayedCall(Math.max(0, delay - 110), () => {
+          if (this.mode === "transition") this.slimeAnimator.playBump();
+        });
+      }
       this.time.delayedCall(delay, () => {
         const trail = this.add.line(0, 0, startX, this.player.y, targetX, targetY, 0x8eeaff, 0.55).setOrigin(0).setDepth(6);
         this.cameras.main.shake(150, 0.012);
@@ -456,6 +449,7 @@ function createSceneClass(Phaser, callbacks) {
       this.tweens.add({ targets: [this.bossShield, this.bossShieldInner], scaleX: 1, scaleY: 1, alpha: 1, duration: 460, ease: "Back.easeOut" });
       callbacks.onBossShield(this.nullShieldHp, NULL_SHIELD_MAX, true);
       callbacks.onStatus(`PHASE ${nextPhase}: Null Rot recompiles a fresh 100 HP shield.`);
+      this.slimeAnimator.playRecompile(nextPhase);
     }
 
     popBossShield() {
@@ -493,6 +487,7 @@ function createSceneClass(Phaser, callbacks) {
       this.bossShield.setVisible(true).setAlpha(1).setScale(1);
       this.bossShieldInner.setVisible(true).setAlpha(1).setScale(1);
       this.playerShield.setVisible(false);
+      this.slimeAnimator.reset();
       callbacks.onBossHp(this.bossHp, BOSS_MAX_HP, 1);
       callbacks.onBossShield(this.nullShieldHp, NULL_SHIELD_MAX, true);
       this.startWave();
@@ -519,16 +514,7 @@ function createSceneClass(Phaser, callbacks) {
       this.clearWave();
       this.physics.pause();
       callbacks.onStatus("The ordered bars lock into place. The slime can no longer hold the intake shut.");
-      this.tweens.add({
-        targets: this.boss,
-        scaleX: 0.3,
-        scaleY: 1.8,
-        alpha: 0,
-        angle: 8,
-        duration: 740,
-        ease: "Back.easeIn",
-        onComplete: () => callbacks.onWin(),
-      });
+      this.slimeAnimator.playDefeat({ onComplete: () => callbacks.onWin() });
     }
 
     clearWaveEvents() {
@@ -637,6 +623,7 @@ export function slimeArenaDebugState() {
     patternStep: activeScene.patternStep,
     hazardEffects: activeScene.hazardEffects.length,
     stunStars: activeScene.stunStars.length,
+    animation: activeScene.slimeAnimator?.debugState() ?? null,
   };
 }
 

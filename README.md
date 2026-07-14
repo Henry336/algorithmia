@@ -6,7 +6,7 @@ The browser game under `web/` is the primary product. The older `algorithimia/` 
 
 ## Current State
 
-- Campaign levels 0-4 are playable as connected room routes.
+- Campaign levels 0-3 use connected DOM room routes; Graphreach now has a Phaser exploration space built over authored environment art.
 - Chapter 5 is an LDtk import test that renders a sample LDtk GridVania map as an explorable room route.
 - Arcade Mode is available from the title screen.
 - Workshop Mode is available from the title screen for visual room, entity, dialogue, and encounter drafting.
@@ -39,6 +39,8 @@ Useful routes:
 - `/` - title screen, campaign, Arcade Mode
 - `/?workshop=1` - open the Workshop editor directly
 - `/?admin=1` - unlock every level and show encounter skip controls
+- `/?admin=1&chapter=4` - launch the playable Graphreach exploration space directly
+- `/?admin=1&chapter=4&graphdebug=1` - show Graphreach walkable corridors and plateaus
 - `/?admin=1&chapter=5` - launch the LDtk Chapter 5 import test directly
 - `/?admin=0` - disable persisted admin mode
 - `/?admin=1&encounter=sorting-slime` - launch the Phaser Sorting Slime battle directly
@@ -108,6 +110,8 @@ web/                         Player-facing browser game
   js/slimeArenaConfig.js     Sorting Slime balance numbers and labels
   js/slimeArenaPatterns.js   Sorting Slime hazard formations
   js/slimeRepairTasks.js     Sorting Slime prompts, hints, starters, and cases
+  js/graphreachExploration.js  Phaser scene, movement, interactions, and ambience
+  js/graphreachSpaceData.js    Editable Graphreach paths, plateaus, and landmarks
   js/workshopData.js         Workshop level format, defaults, and editor libraries
   js/workshopValidation.js   Reachability and level-pack validation
   js/workshopEditor.js       Visual level editor UI and local draft persistence
@@ -130,6 +134,7 @@ docs/                        Architecture, continuity, migration, and safety not
 - [Phaser migration](docs/PHASER_MIGRATION.md) - what has migrated and what has not
 - [Safe execution](docs/SAFE_EXECUTION.md) - code-execution limits and security boundaries
 - [Audio direction](docs/AUDIO_DIRECTION.md) - reusable music structure, motif, and loop notes
+- [Graphreach exploration](docs/GRAPHREACH_EXPLORATION.md) - how to edit the map, collisions, interactions, and ambient effects
 - [Changelog](CHANGELOG.md) - release-level history
 - [Story so far](ALGORITHMIA_STORY_SO_FAR.md) - working canon and narrative decisions
 - [Chronological story overview](ALGORITHMIA_CHRONOLOGICAL_STORY_OVERVIEW.md) - story events in timeline order

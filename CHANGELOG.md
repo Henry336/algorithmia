@@ -6,6 +6,7 @@ Significant player-facing and developer-facing changes are recorded here. Detail
 
 ### Developer Experience
 
+- Replaced the Chapter 4 rectangular grid presentation with a Phaser exploration scene over the new Graphreach environment map, including continuous movement, camera tracking, authored collision corridors, interactable landmarks, mobile controls, ambient water/grass/Null effects, a collision debug overlay, and browser reachability coverage.
 - Added Chapter 5 as an LDtk import test that fetches a deployed `.ldtk` file, renders its collision grid and entities, supports simple items, keyed doors, buttons, secret walls, room transitions, and has a dedicated browser smoke.
 - Added Workshop Mode as a visual level editor with map painting, entity placement, dialogue editing, battle preset editing, local browser draft saves, JSON import/export, and reachability validation.
 - Added a Workshop browser smoke that verifies direct launch, painting, entity editing, battle metadata, local persistence, reload, and JSON export.
@@ -16,6 +17,7 @@ Significant player-facing and developer-facing changes are recorded here. Detail
 
 ### Combat
 
+- Gave Sorting Slime a dedicated Phaser animation controller with a breathing idle, jump-and-slam entrance, wave attack wind-up, shield recoil, core-damage reaction, repair stun, phase recompile, player-bump lunge, and defeat collapse. Animation states are exposed through the arena debug hook and covered by the browser smoke.
 - Reduced phase-1 Sorting Slime column frequency while keeping column travel speed unchanged.
 - Slowed phase-1 Sorting Slime columns by about 30% after playtesting showed speed was still too punishing for the first boss.
 - Added Mira Vale guidance that tells beginners to repair the shielded slime before attacking and to strike once repairs weaken it.

@@ -1039,6 +1039,128 @@ body.admin-mode .title-build {
   box-shadow: 0 12px 28px #00000055;
 }
 
+/* ---------- Graphreach Phaser exploration ---------- */
+
+.graphreach-space-shell {
+  position: relative;
+  width: min(96vw, 1180px);
+  height: min(calc(100vh - 108px), 820px);
+  min-height: 520px;
+  overflow: hidden;
+  border: 3px solid #58636c;
+  background: #090c11;
+  box-shadow: 0 16px 42px #00000088, 0 0 0 2px #222b30;
+  isolation: isolate;
+}
+
+.graphreach-space-shell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  opacity: 0.13;
+  background: repeating-linear-gradient(0deg, transparent 0 3px, #9bd4ca14 4px, transparent 5px);
+  animation: graphreachScan 8s linear infinite;
+}
+
+.graphreach-phaser-host,
+.graphreach-phaser-host canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.graphreach-phaser-host {
+  position: relative;
+  z-index: 1;
+  outline: none;
+  background: #080b0f;
+}
+
+.graphreach-phaser-host canvas {
+  display: block;
+  image-rendering: pixelated;
+}
+
+.graphreach-phaser-host:focus-visible {
+  box-shadow: inset 0 0 0 3px #d8a04a;
+}
+
+.graphreach-space-name,
+.graphreach-interact-prompt {
+  position: absolute;
+  z-index: 6;
+  border: 1px solid #71806b;
+  background: #0b1015e8;
+  color: #d4ded8;
+  box-shadow: 4px 4px 0 #00000066;
+  pointer-events: none;
+}
+
+.graphreach-space-name {
+  left: 14px;
+  top: 14px;
+  padding: 7px 10px;
+  border-left: 4px solid #70c9c2;
+  color: #a9d7d1;
+  font-size: 0.64rem;
+}
+
+.graphreach-interact-prompt {
+  left: 50%;
+  bottom: 18px;
+  max-width: calc(100% - 30px);
+  padding: 9px 13px;
+  border-color: #c49a4a;
+  color: #f2d48c;
+  font-size: 0.7rem;
+  text-align: center;
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+  transition: opacity 120ms linear, transform 120ms steps(2, end);
+}
+
+.graphreach-interact-prompt.hidden {
+  display: block !important;
+  opacity: 0;
+  transform: translateX(-50%) translateY(8px);
+}
+
+@keyframes graphreachScan {
+  from { background-position: 0 0; }
+  to { background-position: 0 25px; }
+}
+
+@media (max-width: 760px), (max-height: 720px) {
+  .graphreach-space-shell {
+    width: 100vw;
+    height: calc(100vh - 116px);
+    min-height: 300px;
+    border-width: 2px;
+  }
+
+  .graphreach-space-name {
+    left: 8px;
+    top: 8px;
+    font-size: 0.54rem;
+  }
+
+  .graphreach-interact-prompt {
+    bottom: 10px;
+    font-size: 0.58rem;
+  }
+
+  #screen-room-ch4 .controls-hint {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .graphreach-space-shell::after {
+    animation: none;
+  }
+}
+
 .tile {
   position: absolute;
   box-sizing: border-box;

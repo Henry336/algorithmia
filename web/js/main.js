@@ -3,7 +3,7 @@ import { initRoom } from "./room.js";
 import { initChapter1Room } from "./chapter1.js";
 import { initChapter2Room } from "./chapter2.js";
 import { initChapter3Room } from "./chapter3.js";
-import { initChapter4Room } from "./chapter4.js";
+import { initGraphreachExploration } from "./graphreachExploration.js";
 import { initChapter5Room } from "./chapter5.js";
 import { isAdminMode } from "./admin.js";
 import { startSortingSlimeArenaBattle } from "./slimeArenaBattle.js";
@@ -35,7 +35,7 @@ function enterChapter3() {
 function enterChapter4() {
   document.getElementById("screen-room-ch3").classList.remove("active");
   document.getElementById("screen-room-ch4").classList.add("active");
-  initChapter4Room({ onExitToChapter5: enterChapter5 });
+  initGraphreachExploration({ onExitToChapter5: enterChapter5 });
 }
 
 function enterChapter5() {
@@ -89,6 +89,11 @@ if (isAdminMode() && launchEncounter === "sorting-slime") {
 
 const launchParams = new URLSearchParams(window.location.search);
 const launchChapter = launchParams.get("chapter");
+if (isAdminMode() && launchChapter === "4") {
+  document.querySelectorAll(".screen.active").forEach((screen) => screen.classList.remove("active"));
+  document.getElementById("screen-room-ch4").classList.add("active");
+  initGraphreachExploration({ onExitToChapter5: enterChapter5 });
+}
 if (isAdminMode() && launchChapter === "5") {
   document.querySelectorAll(".screen.active").forEach((screen) => screen.classList.remove("active"));
   document.getElementById("screen-room-ch5").classList.add("active");

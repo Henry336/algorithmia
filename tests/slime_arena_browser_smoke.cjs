@@ -103,6 +103,9 @@ async function main() {
     if (initialCombatState.nullShieldHp !== 100 || initialCombatState.repaired) {
       throw new Error(`Unexpected initial shield state: ${JSON.stringify(initialCombatState)}`);
     }
+    if (initialCombatState.animation?.counts.entrance < 1 || initialCombatState.animation?.counts.attack < 1) {
+      throw new Error(`Slime entrance or attack animation did not run: ${JSON.stringify(initialCombatState.animation)}`);
+    }
     const initialStatus = await page.locator("#slime-arena-status").textContent();
     if (!initialStatus.includes("Mira Vale: The slime has its shield up")) {
       throw new Error(`Mira's opening repair guidance did not appear: ${JSON.stringify(initialStatus)}`);
@@ -131,6 +134,9 @@ async function main() {
     await page.locator("#slime-repair-panel:not(.hidden)").waitFor();
     const repairOpenState = await page.evaluate(async () => (await import("./js/slimeArenaEngine.js")).slimeArenaDebugState());
     if (repairOpenState.stunStars < 5) throw new Error(`Stun stars did not appear over the slime: ${JSON.stringify(repairOpenState)}`);
+    if (repairOpenState.animation?.state !== "stunned" || repairOpenState.animation?.counts.stunned < 1) {
+      throw new Error(`Slime stun animation did not run during repair: ${JSON.stringify(repairOpenState.animation)}`);
+    }
     const cursorDuringRepair = await page.locator("#slime-arena-shell").evaluate((element) => getComputedStyle(element).cursor);
     if (cursorDuringRepair === "none") throw new Error("Pointer should return for the repair editor.");
     await page.screenshot({ path: path.resolve("build", "slime-repair-desktop.png"), fullPage: true });
@@ -222,6 +228,9 @@ async function main() {
     if (mergeState.phase !== 2 || mergeState.nullShieldHp !== 100 || mergeState.repaired) {
       throw new Error(`Phase 2 did not compile a fresh shield: ${JSON.stringify(mergeState)}`);
     }
+    if (mergeState.animation?.counts.recompile < 1) {
+      throw new Error(`Phase 2 recompile animation did not run: ${JSON.stringify(mergeState.animation)}`);
+    }
     await page.screenshot({ path: path.resolve("build", "slime-phase-2.png"), fullPage: true });
     await page.evaluate(async () => (await import("./js/slimeArenaEngine.js")).slimeArenaAdminOpenCommandWindow());
     const phase2CommandState = await page.evaluate(async () => (await import("./js/slimeArenaEngine.js")).slimeArenaDebugState());
@@ -235,12 +244,20 @@ async function main() {
     if (spiralState.phase !== 3 || spiralState.nullShieldHp !== 100 || spiralState.repaired) {
       throw new Error(`Phase 3 did not compile a fresh shield: ${JSON.stringify(spiralState)}`);
     }
+    if (spiralState.animation?.counts.recompile < 2) {
+      throw new Error(`Phase 3 recompile animation did not run: ${JSON.stringify(spiralState.animation)}`);
+    }
     await page.screenshot({ path: path.resolve("build", "slime-phase-3.png"), fullPage: true });
 
     await page.evaluate(async () => {
       const arena = await import("./js/slimeArenaEngine.js");
       arena.slimeArenaAdminWin();
     });
+    await page.waitForTimeout(180);
+    const defeatAnimationState = await page.evaluate(async () => (await import("./js/slimeArenaEngine.js")).slimeArenaDebugState());
+    if (defeatAnimationState.animation?.state !== "defeat" || defeatAnimationState.animation?.counts.defeat < 1) {
+      throw new Error(`Slime defeat animation did not run: ${JSON.stringify(defeatAnimationState.animation)}`);
+    }
     await page.waitForFunction(() => document.body.dataset.slimeSmokeWin === "true", null, { timeout: 5000 });
 
     const arcade = await browser.newPage({ viewport: { width: 1280, height: 800 } });
