@@ -75,9 +75,18 @@ async function main() {
     if (await page.locator(".title-option.selected").count()) {
       throw new Error("The pointer-first title menu unexpectedly created a keyboard selection.");
     }
-    const pointerCursor = await page.locator('[data-action="new-game"]').evaluate((button) => getComputedStyle(button).cursor);
-    if (pointerCursor !== "pointer") {
-      throw new Error(`Title options should expose a visible pointer cursor, got ${pointerCursor}.`);
+    const cursorStyles = await page.evaluate(() => ({
+      scene: getComputedStyle(document.querySelector(".title-scene")).cursor,
+      option: getComputedStyle(document.querySelector('[data-action="new-game"]')).cursor,
+    }));
+    if (!cursorStyles.scene.includes("pixel-menu-cursor.svg") || !cursorStyles.option.includes("pixel-menu-hand.svg")) {
+      throw new Error(`Pixel cursors were not applied: ${JSON.stringify(cursorStyles)}`);
+    }
+    for (const cursorAsset of ["pixel-menu-cursor.svg", "pixel-menu-hand.svg"]) {
+      const cursorResponse = await page.request.get(`${baseUrl}/assets/ui/${cursorAsset}`);
+      if (!cursorResponse.ok() || (await cursorResponse.body()).length < 200) {
+        throw new Error(`Pixel cursor asset failed to load: ${cursorAsset}`);
+      }
     }
     await page.waitForTimeout(1200);
     await page.screenshot({ path: path.resolve("build", "title-screen-desktop.png"), fullPage: true });
