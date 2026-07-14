@@ -13,23 +13,23 @@
   <!-- TITLE SCREEN -->
   <section id="screen-title" class="screen active">
     <div class="title-scene">
-      <div class="title-stars" aria-hidden="true"></div>
-      <div class="title-party" aria-hidden="true">
-        <div class="title-sprite" id="title-sprite-mira"></div>
-        <div class="title-sprite title-sprite-main" id="title-sprite-player"></div>
-        <div class="title-sprite" id="title-sprite-shard"></div>
-      </div>
-      <h1 class="title-logo">ALGORITHMIA</h1>
-      <p class="title-tagline">A Python-first programming RPG prototype of broken systems and honest repairs.</p>
-      <nav class="title-menu" id="title-menu">
-        <button class="title-option" data-action="new-game">New Game</button>
-        <button class="title-option" data-action="continue">Continue</button>
-        <button class="title-option" data-action="arcade">Arcade</button>
-        <button class="title-option" data-action="workshop">Workshop</button>
-        <button class="title-option" data-action="chapter-select">Level Select</button>
-        <button class="title-option" data-action="options">Options</button>
-      </nav>
-      <p class="title-build" id="title-build"></p>
+      <div class="title-atmosphere" aria-hidden="true"></div>
+      <main class="title-content">
+        <h1 class="title-logo">
+          <span class="sr-only">Algorithmia</span>
+          <canvas id="title-logo-canvas" aria-hidden="true"></canvas>
+        </h1>
+        <p class="title-tagline">Repair what the world forgot.</p>
+        <nav class="title-menu" id="title-menu" aria-label="Main menu">
+          <button class="title-option" data-action="new-game">New Game</button>
+          <button class="title-option" data-action="continue">Continue</button>
+          <button class="title-option" data-action="arcade">Arcade</button>
+          <button class="title-option" data-action="workshop">Workshop</button>
+          <button class="title-option" data-action="chapter-select">Level Select</button>
+          <button class="title-option" data-action="options">Options</button>
+        </nav>
+        <p class="title-build" id="title-build"></p>
+      </main>
     </div>
   </section>
 
@@ -96,8 +96,25 @@
 
   <!-- OPTIONS -->
   <section id="screen-options" class="screen">
-    <div class="panel-frame">
+    <div class="panel-frame options-panel">
+      <span class="options-kicker">SYSTEM / PREFERENCES</span>
       <h2>Options</h2>
+      <label class="option-row option-toggle-row" for="opt-music">
+        <span>Music</span>
+        <span class="option-toggle-control">
+          <input id="opt-music" type="checkbox" checked>
+          <span class="option-switch" aria-hidden="true"></span>
+          <span id="opt-music-state" class="option-state">On</span>
+        </span>
+      </label>
+      <label class="option-row option-toggle-row" for="opt-sound">
+        <span>Sound effects</span>
+        <span class="option-toggle-control">
+          <input id="opt-sound" type="checkbox" checked>
+          <span class="option-switch" aria-hidden="true"></span>
+          <span id="opt-sound-state" class="option-state">On</span>
+        </span>
+      </label>
       <label class="option-row">
         <span>Text speed</span>
         <select id="opt-text-speed">
@@ -110,7 +127,9 @@
         <span>Reset save data</span>
         <button id="opt-reset" class="danger-button">Reset</button>
       </label>
-      <button class="back-button" data-action="back-to-title">Back</button>
+      <div class="options-actions">
+        <button class="back-button" data-action="back-to-title">Back</button>
+      </div>
     </div>
   </section>
 

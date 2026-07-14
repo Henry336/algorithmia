@@ -5,6 +5,9 @@ const AUDIO_ASSETS = {
   slimeBossPhase3: { src: "assets/audio/music/slime-boss-phase-3.wav", volume: 0.38, loop: true },
 };
 
+const AUDIO_PREFERENCES_KEY = "algorithmia-audio-v1";
+const audioPreferences = loadAudioPreferences();
+
 const audioCache = new Map();
 const musicBufferCache = new Map();
 let currentMusicKey = null;
@@ -14,6 +17,26 @@ let audioContext = null;
 let musicSource = null;
 let musicGain = null;
 let musicRequestId = 0;
+
+function loadAudioPreferences() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(AUDIO_PREFERENCES_KEY) || "{}");
+    return {
+      musicMuted: Boolean(saved.musicMuted),
+      soundMuted: Boolean(saved.soundMuted),
+    };
+  } catch {
+    return { musicMuted: false, soundMuted: false };
+  }
+}
+
+function saveAudioPreferences() {
+  try {
+    localStorage.setItem(AUDIO_PREFERENCES_KEY, JSON.stringify(audioPreferences));
+  } catch {
+    // Audio still works when browser storage is unavailable.
+  }
+}
 
 function getAudio(key) {
   const config = AUDIO_ASSETS[key];
@@ -93,6 +116,7 @@ function stopCurrentMusicSource({ resetKey = true } = {}) {
 }
 
 export function playSound(key, options = {}) {
+  if (audioPreferences.soundMuted) return;
   const audio = getAudio(key);
   audio.volume = options.volume ?? AUDIO_ASSETS[key].volume;
   audio.currentTime = 0;
@@ -101,6 +125,12 @@ export function playSound(key, options = {}) {
 
 export function playMusic(key, options = {}) {
   lastMusicOptions = options;
+  if (audioPreferences.musicMuted) {
+    musicRequestId += 1;
+    stopCurrentMusicSource({ resetKey: false });
+    currentMusicKey = key;
+    return;
+  }
   if (currentMusicKey === key && musicSource && !options.restart) return;
 
   const context = getAudioContext();
@@ -159,4 +189,34 @@ export function stopAllAudio() {
     audio.currentTime = 0;
   });
   currentMusicKey = null;
+}
+
+export function getAudioPreferences() {
+  return { ...audioPreferences };
+}
+
+export function setMusicMuted(muted) {
+  audioPreferences.musicMuted = Boolean(muted);
+  saveAudioPreferences();
+  if (audioPreferences.musicMuted) {
+    musicRequestId += 1;
+    stopCurrentMusicSource({ resetKey: false });
+    audioCache.forEach((audio, key) => {
+      if (!AUDIO_ASSETS[key]?.loop) return;
+      audio.pause();
+    });
+    return;
+  }
+  if (currentMusicKey) playMusic(currentMusicKey, { ...lastMusicOptions, restart: true });
+}
+
+export function setSoundMuted(muted) {
+  audioPreferences.soundMuted = Boolean(muted);
+  saveAudioPreferences();
+  if (!audioPreferences.soundMuted) return;
+  audioCache.forEach((audio, key) => {
+    if (AUDIO_ASSETS[key]?.loop) return;
+    audio.pause();
+    audio.currentTime = 0;
+  });
 }

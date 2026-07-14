@@ -1,8 +1,7 @@
 import { getState, setState, hasSave, resetState } from "./state.js";
-import { applyPixelArt } from "./pixelart.js";
-import { ARCHIVE_SHARD } from "./sprites.js";
-import { renderMiraPortrait, renderPatchrunnerPortrait } from "./playerSprite.js";
 import { isAdminMode, syncAdminModeFromUrl } from "./admin.js";
+import { getAudioPreferences, playSound, setMusicMuted, setSoundMuted } from "./audio.js";
+import { renderPixelLogo } from "./pixelLogo.js";
 
 const screens = {
   title: document.getElementById("screen-title"),
@@ -18,7 +17,9 @@ export function initTitle({ onEnterChapter0, onEnterChapter1, onEnterChapter2, o
   continueBtn.disabled = !hasSave();
 
   document.getElementById("title-build").textContent = isAdminMode() ? `build ${buildStamp()} - ADMIN MODE` : `build ${buildStamp()}`;
-  renderTitleSprites();
+  renderPixelLogo(document.getElementById("title-logo-canvas"));
+  initTitleNavigation();
+  initOptionControls();
 
   function resumeFurthest() {
     const { queueworksGateOpen, dispatcherDefeated, heapWardenDefeated, bogoDefeated, nullFerrymanDefeated } = getState();
@@ -65,6 +66,7 @@ export function initTitle({ onEnterChapter0, onEnterChapter1, onEnterChapter2, o
   document.getElementById("title-menu").addEventListener("click", (e) => {
     const action = e.target.dataset.action;
     if (!action) return;
+    playSound("commandSelect", { volume: 0.35 });
     if (action === "new-game") {
       resetState();
       hideAll();
@@ -84,7 +86,10 @@ export function initTitle({ onEnterChapter0, onEnterChapter1, onEnterChapter2, o
   });
 
   document.querySelectorAll('[data-action="back-to-title"]').forEach((btn) => {
-    btn.addEventListener("click", () => show(screens.title));
+    btn.addEventListener("click", () => {
+      playSound("commandSelect", { volume: 0.35 });
+      show(screens.title);
+    });
   });
 
   document.querySelectorAll(".chapter-card[data-chapter]").forEach((btn) => {
@@ -109,6 +114,7 @@ export function initTitle({ onEnterChapter0, onEnterChapter1, onEnterChapter2, o
 
   document.getElementById("opt-text-speed").addEventListener("change", (e) => {
     setState({ textSpeed: e.target.value });
+    playSound("commandSelect", { volume: 0.3 });
   });
 
   document.getElementById("opt-reset").addEventListener("click", () => {
@@ -129,20 +135,82 @@ export function initTitle({ onEnterChapter0, onEnterChapter1, onEnterChapter2, o
       continueBtn.disabled = !hasSave();
     });
   });
-}
 
-function renderTitleSprites() {
-  renderMiraPortrait(document.getElementById("title-sprite-mira"), "south");
-  renderPatchrunnerPortrait(document.getElementById("title-sprite-player"), "south");
-  const shardHost = document.getElementById("title-sprite-shard");
-  if (shardHost && !shardHost.childElementCount) {
-    applyPixelArt(shardHost, ARCHIVE_SHARD.matrix, ARCHIVE_SHARD.palette, 5);
+  function initOptionControls() {
+    const musicToggle = document.getElementById("opt-music");
+    const soundToggle = document.getElementById("opt-sound");
+    const textSpeed = document.getElementById("opt-text-speed");
+    const musicState = document.getElementById("opt-music-state");
+    const soundState = document.getElementById("opt-sound-state");
+    const preferences = getAudioPreferences();
+    musicToggle.checked = !preferences.musicMuted;
+    soundToggle.checked = !preferences.soundMuted;
+    textSpeed.value = getState().textSpeed;
+
+    function updateLabels() {
+      musicState.textContent = musicToggle.checked ? "On" : "Off";
+      soundState.textContent = soundToggle.checked ? "On" : "Off";
+    }
+
+    musicToggle.addEventListener("change", () => {
+      setMusicMuted(!musicToggle.checked);
+      updateLabels();
+      playSound("commandSelect", { volume: 0.3 });
+    });
+    soundToggle.addEventListener("change", () => {
+      setSoundMuted(!soundToggle.checked);
+      updateLabels();
+      if (soundToggle.checked) playSound("commandSelect", { volume: 0.3 });
+    });
+    updateLabels();
+  }
+
+  function initTitleNavigation() {
+    const menu = document.getElementById("title-menu");
+    const buttons = [...menu.querySelectorAll(".title-option")];
+    let selectedIndex = Math.max(0, buttons.findIndex((button) => !button.disabled));
+
+    function select(index, { sound = false } = {}) {
+      let nextIndex = index;
+      for (let attempts = 0; attempts < buttons.length; attempts += 1) {
+        nextIndex = (nextIndex + buttons.length) % buttons.length;
+        if (!buttons[nextIndex].disabled) break;
+        nextIndex += index >= selectedIndex ? 1 : -1;
+      }
+      selectedIndex = nextIndex;
+      buttons.forEach((button, buttonIndex) => button.classList.toggle("selected", buttonIndex === selectedIndex));
+      buttons[selectedIndex].focus({ preventScroll: true });
+      if (sound) playSound("commandSelect", { volume: 0.28 });
+    }
+
+    buttons.forEach((button, index) => {
+      button.addEventListener("pointerenter", () => {
+        if (button.disabled) return;
+        selectedIndex = index;
+        buttons.forEach((candidate, candidateIndex) => candidate.classList.toggle("selected", candidateIndex === index));
+      });
+    });
+
+    menu.addEventListener("keydown", (event) => {
+      if (["ArrowDown", "KeyS"].includes(event.code)) {
+        event.preventDefault();
+        select(selectedIndex + 1, { sound: true });
+      } else if (["ArrowUp", "KeyW"].includes(event.code)) {
+        event.preventDefault();
+        select(selectedIndex - 1, { sound: true });
+      }
+    });
+
+    select(selectedIndex);
   }
 }
 
 function show(screen) {
   Object.values(screens).forEach((s) => s.classList.remove("active"));
   screen.classList.add("active");
+  if (screen === screens.title) {
+    requestAnimationFrame(() => document.querySelector(".title-option.selected:not(:disabled)")?.focus({ preventScroll: true }));
+  }
 }
 
 function hideAll() {
